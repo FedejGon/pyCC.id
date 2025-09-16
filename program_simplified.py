@@ -437,17 +437,27 @@ parameters_NN = {
     'extrapolation': None,
     'weight_loss_param': 1e1,
     # 'param_penalty_weight': 0.0,
-    'constraints': constraints
+    'constraints': constraints,
+    'eq_weights': [1.0, 0.0]
 }
 
 
-models, evals, obtained_coefs = pycc.train(
-    df=df,
-    equation=equation1,
-    method='NN',
-    params=parameters_NN
-)
+#models, evals, obtained_coefs = pycc.train(
+#    df=df,
+#    equation=equation1,
+#    method='NN',
+#    params=parameters_NN
+#)
 
+
+
+
+#equation1='x_ddot + f1(x_dot) + f2(x) - F_ext = 0'
+equations = [
+    equation1,
+    "f1(x_dot)=1"
+]
+models, evals, obtained_coefs = pycc.train(df, equations,method='NN', params=parameters_NN)
 
 
 

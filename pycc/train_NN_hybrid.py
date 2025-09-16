@@ -209,16 +209,8 @@ def compute_constraint_loss(models, constraints, func_list, tensors):
 # --- 8) Training function ---
 def train_NN_hybrid(df, equation_str, params=None):
     """
-    df: DataFrame with columns corresponding to variables
-    equation_str: equation string, e.g. 'x_ddot + f1(x_dot) + f2(x) - F_ext = 0'
-    params: dict with optional keys:
-        - neurons
-        - lr
-        - epochs
-        - error_threshold
-        - extrapolation
-        - weight_loss_param
-        - constraints: list of constraints
+    Backwards-compatible trainer that accepts one equation (str) or multiple (list/tuple).
+    Added: per-equation weights via params['eq_weights'] (default 1.0 for each equation).
     """
     if params is None:
         params = {}
@@ -232,30 +224,77 @@ def train_NN_hybrid(df, equation_str, params=None):
     weight_loss_param = params.get('weight_loss_param', 1.0)
     constraints = params.get('constraints', [])
 
-    func_list = parse_functions(equation_str)
-    param_names = extract_parameters(equation_str)
+    # Accept single equation or list of equations (backward compatible)
+    if isinstance(equation_str, (list, tuple)):
+        equations = list(equation_str)
+    else:
+        equations = [equation_str]
 
-    models = {f_name: NNModel(neurons) for f_name, _ in func_list}
+    # Handle eq_weights from params
+    eq_weights = params.get('eq_weights', None)
+    if eq_weights is None:
+        weights = [1.0] * len(equations)
+    elif np.isscalar(eq_weights):
+        weights = [float(eq_weights)] * len(equations)
+    else:
+        # assume list/tuple-like
+        if len(eq_weights) != len(equations):
+            raise ValueError(f"eq_weights length {len(eq_weights)} does not match number of equations {len(equations)}")
+        weights = [float(w) for w in eq_weights]
+
+    # Parse functions and parameters from all equations, preserving order and ensuring consistency
+    func_map = {}   # f_name -> var_name (ensure consistent)
+    func_order = [] # list of (f_name, var_name) in appearance order
+    for eq in equations:
+        flist = parse_functions(eq)
+        for f_name, var_name in flist:
+            if f_name in func_map:
+                if func_map[f_name] != var_name:
+                    raise ValueError(f"Function {f_name} used with different arguments: "
+                                     f"{func_map[f_name]} vs {var_name}")
+            else:
+                func_map[f_name] = var_name
+                func_order.append((f_name, var_name))
+
+    # collect unique scalar parameter names across all equations
+    param_names_set = set()
+    for eq in equations:
+        for p in extract_parameters(eq):
+            param_names_set.add(p)
+    param_names = sorted(param_names_set)
+
+    # create models and scalar params
+    models = {f_name: NNModel(neurons) for f_name, _ in func_order}
     scalar_params = {name: nn.Parameter(torch.tensor(1.0, dtype=torch.float32)) for name in param_names}
 
+    # optimizer over all parameters (scalar params + all NN params)
     full_params = list(scalar_params.values()) + [p for model in models.values() for p in model.parameters()]
     optimizer = optim.Adam(full_params, lr=lr)
 
+    # Prepare tensors from df (same as before)
     variables = list(df.columns)
     tensors = prepare_tensors(df, variables)
 
-    eq = sympy_expression(equation_str)
-    lhs_expr, rhs_expr = eq.lhs, eq.rhs
+    # Parse every equation into sympy Eq objects
+    eq_objs = [sympy_expression(eq) for eq in equations]
+    lhs_exprs = [eqo.lhs for eqo in eq_objs]
+    rhs_exprs = [eqo.rhs for eqo in eq_objs]
 
     criterion = nn.MSELoss()
 
     for epoch in range(epochs):
         optimizer.zero_grad()
-        lhs_val = evaluate_expr(lhs_expr, tensors, models, scalar_params)
-        rhs_val = evaluate_expr(rhs_expr, tensors, models, scalar_params)
-        loss = criterion(lhs_val, rhs_val)
 
-        constraint_loss = compute_constraint_loss(models, constraints, func_list, tensors)
+        # Compute total loss as weighted sum over all equations' MSE(lhs, rhs)
+        total_data_loss = 0.0
+        for lhs_expr, rhs_expr, w in zip(lhs_exprs, rhs_exprs, weights):
+            lhs_val = evaluate_expr(lhs_expr, tensors, models, scalar_params)
+            rhs_val = evaluate_expr(rhs_expr, tensors, models, scalar_params)
+            # compute MSE and multiply by eq weight
+            total_data_loss = total_data_loss + w * criterion(lhs_val, rhs_val)
+
+        # constraint loss (same helper, uses func_order and tensors)
+        constraint_loss = compute_constraint_loss(models, constraints, func_order, tensors)
 
         # L2 penalty for scalar params
         param_penalty = 0.0
@@ -264,33 +303,33 @@ def train_NN_hybrid(df, equation_str, params=None):
                 param_penalty += (p ** 2).mean()
             param_penalty *= weight_loss_param
 
-        total_loss = loss + constraint_loss + param_penalty
+        total_loss = total_data_loss + constraint_loss + param_penalty
         total_loss.backward()
         optimizer.step()
 
-        if epoch % 100 == 0 or loss.item() < error_threshold:
+        # printing — same behavior as before but using total_data_loss
+        if epoch % 100 == 0 or total_data_loss.item() < error_threshold:
             if scalar_params and constraints:
-                print(f"Epoch {epoch}, Loss: {loss.item():.2e}, Constraint: {constraint_loss:.2e}, Params: ", end="")
+                print(f"Epoch {epoch}, Loss: {total_data_loss.item():.2e}, Constraint: {constraint_loss:.2e}, Params: ", end="")
                 for k in scalar_params:
                     print(f"{k}: {scalar_params[k].item():.2e}", end="  ")
                 print()
             elif scalar_params:
-                print(f"Epoch {epoch}, Loss: {loss.item():.2e}, Params: ", end="")
+                print(f"Epoch {epoch}, Loss: {total_data_loss.item():.2e}, Params: ", end="")
                 for k in scalar_params:
                     print(f"{k}: {scalar_params[k].item():.2e}", end="  ")
                 print()
             elif constraints:
-                print(f"Epoch {epoch}, Loss: {loss.item():.2e}, Constraint: {constraint_loss:.2e}")            
+                print(f"Epoch {epoch}, Loss: {total_data_loss.item():.2e}, Constraint: {constraint_loss:.2e}")
             else:
-                print(f"Epoch {epoch}, Loss: {loss.item():.2e}")
-        if loss.item() < error_threshold:
+                print(f"Epoch {epoch}, Loss: {total_data_loss.item():.2e}")
+        if total_data_loss.item() < error_threshold:
             print(f"Early stopping at epoch {epoch}")
             break
 
-
-    # Evaluate models for plotting
+    # Evaluate learned functions on their variable ranges for plotting (same as before)
     results = []
-    for f_name, var in func_list:
+    for f_name, var in func_order:
         model = models[f_name]
         model.eval()
         x_vals = tensors[var].detach().numpy().flatten()
@@ -301,3 +340,5 @@ def train_NN_hybrid(df, equation_str, params=None):
         results.extend([x_plot.flatten(), y_plot])
 
     return models, results, scalar_params
+
+

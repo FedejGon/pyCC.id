@@ -1,4 +1,4 @@
-# pycc/__init__.py
+# src/__init__.py
 
 # External libraries
 import numpy as np

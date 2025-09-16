@@ -1,0 +1,14 @@
+Metadata-Version: 2.4
+Name: pycc.id
+Version: 0.0.1
+Summary: Library to system identification using CC
+Author: Federico J. Gonzalez
+Requires-Python: >=3.7
+License-File: LICENSE
+Requires-Dist: torch
+Requires-Dist: numpy
+Dynamic: author
+Dynamic: license-file
+Dynamic: requires-dist
+Dynamic: requires-python
+Dynamic: summary

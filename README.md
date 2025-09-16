@@ -1,4 +1,4 @@
-# pyCC
+# pysi_cc
 Library to find interpretable models for nonlinear system identification based on the concept of characteristic curves (CCs)
 
 
@@ -6,7 +6,7 @@ Library to find interpretable models for nonlinear system identification based o
 ## Usage
 
 ```python
-import pycc
+import pysi_cc as pycc
 
 model1, model2 = pycc.train_nn_models(t, x, x_dot, x_ddot, F_ext)
 F_pred = pycc.predict(model1, model2, x, x_dot)

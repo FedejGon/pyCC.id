@@ -3,8 +3,9 @@
 #1) compatibility with gpu cuda and gpu intel
 
 
+#import pycc
+import pysi_cc as pycc
 
-import pycc
 import numpy as np
 import pandas as pd
 

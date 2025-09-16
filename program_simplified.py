@@ -347,6 +347,7 @@ x_ddot_data = np.array([S1_stick_slip(t, y)[1] for t, y in zip(sol.t, sol.y.T)])
 
 
 
+x_dot_data=x_dot_data*19
 
 #model1, model2 = pycc.train(
 #    t_simul, x_data, x_dot_data, x_ddot_data, F_ext_val,
@@ -365,7 +366,46 @@ df = pd.DataFrame({
 
 #equation='x_ddot + f1(x_dot) + f2(x) = F_ext'
 
-equation='x_ddot + f1(x_dot) + f2(x) - F_ext = 0'
+equation1='x_ddot + f1(x_dot) + f2(x) - F_ext = 0'
+params_poly={
+  'scaling': True
+}
+
+models, evals , scalar_coefs = pycc.train(
+    df=df,
+    equation=equation1,
+    method='Poly',
+    params=params_poly
+)
+
+if len(evals) == 2:
+    x_f1_cc, f1_cc = evals
+elif len(evals) == 4:
+    x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
+
+# then your plotting code:
+x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
+plt.figure()
+plt.plot(x_f1_cc, f1_cc, label='f1 learned')
+plt.plot(x_dot_data,F1_th, '--', label="f1 theory")
+plt.xlabel('x_dot')
+plt.ylabel('f1(x_dot)')
+plt.legend()
+plt.figure()
+plt.plot(x_f2_cc, f2_cc, label='f2 learned')
+plt.plot(x_data, F2_th, '--', label="f2 theory")
+plt.xlabel('x')
+plt.ylabel('f2(x)')
+plt.legend()
+plt.show()
+
+
+
+
+
+
+
+
 #equation='x_ddot + f1(x_dot) + a1*x + a2*x**3 - F_ext = 0'
 #equation='x_ddot + a1*x_dot + a2*x + a3*x**3 - F_ext = 0'
 
@@ -377,6 +417,12 @@ constraints = [
 ]
 
 
+constraints = [
+    {'constraint': 'f1(0)=0'},
+#    {'constraint': 'f2(0)=0'},
+]
+
+
 parameters_NN = {
     'neurons': 100,
     'lr': 1e-4,
@@ -385,16 +431,24 @@ parameters_NN = {
     'extrapolation': None,
     'weight_loss_param': 1e1,
     # 'param_penalty_weight': 0.0,
-    #'constraints': constraints
+    'constraints': constraints
 }
 
 
 models, evals, obtained_coefs = pycc.train(
     df=df,
-    equation='x_ddot + f1(x_dot) + f2(x) - F_ext = 0',
+    equation=equation1,
     method='NN',
     params=parameters_NN
 )
+
+
+
+
+
+
+
+
 
 
 

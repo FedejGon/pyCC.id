@@ -367,22 +367,31 @@ df = pd.DataFrame({
 #equation='x_ddot + f1(x_dot) + f2(x) = F_ext'
 
 equation1='x_ddot + f1(x_dot) + f2(x) - F_ext = 0'
+equation2='f1(x_dot)=1'
+equations=[equation1,equation2]
 params_poly={
   'scaling': True,
   'constraints': [
-        {'constraint': 'f1(0)=0'},
+        #{'constraint': 'f1(0)=0'},
         {'constraint': 'f2(0)=0'},
-        {'constraint': 'f1 odd'},
+        #{'constraint': 'f1 odd'},
         {'constraint': 'f2 odd'}
-    ]
+    ],
+  'eq_weights':[1.0,0.1]
 }
 
 models, evals , scalar_coefs = pycc.train(
     df=df,
-    equation=equation1,
+    equation=equations,
     method='Poly',
     params=params_poly
 )
+
+
+
+
+
+
 
 if len(evals) == 2:
     x_f1_cc, f1_cc = evals

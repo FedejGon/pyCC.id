@@ -20,6 +20,31 @@ def extract_parameters(equation_str):
     return sorted(set(re.findall(r'\ba\d+\b', equation_str)))
 
 
+def apply_constraints_poly(constraints, f_name, coeffs):
+    """
+    Enforce simple constraints directly on polynomial coefficients.
+    - "f1 odd": only odd powers allowed (zero out even terms)
+    - "f1 even": only even powers allowed (zero out odd terms)
+    - "f1(0)=0": force constant term to zero
+    """
+    if constraints is None:
+        return coeffs
+
+    coeffs = coeffs.copy()
+    for cons in constraints:
+        rule = cons.get("constraint", "")
+        if not rule.startswith(f_name):
+            continue
+
+        if rule.endswith("odd"):
+            coeffs[::2] = 0.0  # even indices = even powers
+        elif rule.endswith("even"):
+            coeffs[1::2] = 0.0  # odd indices = odd powers
+        elif rule.endswith("(0)=0"):
+            coeffs[0] = 0.0  # constant term
+    return coeffs
+
+
 def train_polynomial(df, equation_str, params=None):
     """
     General polynomial identification returning:
@@ -30,11 +55,16 @@ def train_polynomial(df, equation_str, params=None):
     params:
       - N_order (default 10)
       - scaling (default True)
+      - constraints: list of constraint dicts, e.g.
+          {"constraint": "f1 odd"}
+          {"constraint": "f2(0)=0"}
     """
     if params is None:
         params = {}
+        
     N_order = int(params.get('N_order', 10))
     scaling = bool(params.get('scaling', True))
+    constraints = params.get("constraints", [])
 
     # parse functions and params
     func_list = parse_functions(equation_str)       # list of (f_name, var_name)
@@ -50,7 +80,7 @@ def train_polynomial(df, equation_str, params=None):
     rhs = sp.sympify(rhs_str)
     expr = sp.expand(lhs - rhs)
 
-    # Build known_expr = expr with all f_i -> 0 and a_i -> 0, evaluate on dataframe to form b = -known_vals
+    # Build known_expr = expr with all f_i -> 0 and a_i -> 0
     known_expr = expr
     for f_name, var_name in func_list:
         known_expr = known_expr.subs(sp.Function(f_name)(sp.Symbol(var_name)), 0)
@@ -62,20 +92,17 @@ def train_polynomial(df, equation_str, params=None):
     if len(known_syms) == 0:
         known_vals = float(sp.N(known_expr)) * np.ones(len(df))
     else:
-        # lambdify and evaluate in the order of known_syms
         lamb = sp.lambdify(tuple(known_syms), known_expr, 'numpy')
         inputs = [df[str(s)].values for s in known_syms]
         known_vals = np.asarray(lamb(*inputs), dtype=float).reshape(-1)
     b = -known_vals   # A @ coeffs = b
 
-    # Build design matrix: blocks for each f_i (polynomial basis) and for each a_i (constant)
+    # Build design matrix: blocks for each f_i and a_i
     N = len(df)
     A_blocks = []
     scaling_params = {}
 
-    # For each f_i determine its symbolic multiplier in expr and create scaled polynomial block
     for f_name, var_name in func_list:
-        # create symbol Fi and substitute to read multiplier
         Fi = sp.Symbol(f_name + '_sym')
         subs = {}
         for fn, vn in func_list:
@@ -84,9 +111,9 @@ def train_polynomial(df, equation_str, params=None):
         for a_name in param_names:
             subs[sp.Symbol(a_name)] = 0
         coeff_expr = sp.expand(expr.subs(subs)).coeff(Fi)
-        coeff_val = float(coeff_expr)  # numeric multiplier (sign preserved)
+        coeff_val = float(coeff_expr)
 
-        # prepare data and scaling
+        # scaling
         x = df[var_name].values.astype(float)
         if scaling:
             A0 = float((np.max(x) + np.min(x)) / 2.0)
@@ -97,10 +124,9 @@ def train_polynomial(df, equation_str, params=None):
             A0, A1 = 0.0, 1.0
         scaling_params[var_name] = (A0, A1)
 
-        Z = np.vstack([((x - A0) / A1) ** i for i in range(N_order + 1)]).T  # (N, N_order+1)
+        Z = np.vstack([((x - A0) / A1) ** i for i in range(N_order + 1)]).T
         A_blocks.append(coeff_val * Z)
 
-    # scalar parameters a_i: find their multipliers and add columns
     a_info = []
     for a_name in param_names:
         Ai = sp.Symbol(a_name + '_sym')
@@ -108,10 +134,7 @@ def train_polynomial(df, equation_str, params=None):
         for fn, vn in func_list:
             subs[sp.Function(fn)(sp.Symbol(vn))] = 0
         for other in param_names:
-            if other == a_name:
-                subs[sp.Symbol(other)] = Ai
-            else:
-                subs[sp.Symbol(other)] = 0
+            subs[sp.Symbol(other)] = Ai if other == a_name else 0
         coeff_expr = sp.expand(expr.subs(subs)).coeff(Ai)
         coeff_val = float(coeff_expr)
         A_blocks.append(coeff_val * np.ones((N, 1)))
@@ -120,7 +143,7 @@ def train_polynomial(df, equation_str, params=None):
     if len(A_blocks) == 0:
         raise ValueError("No unknown f_i or a_i found in equation.")
 
-    A = np.hstack(A_blocks)   # (N, total_unknowns)
+    A = np.hstack(A_blocks)
 
     # Solve least squares
     coeffs, *_ = np.linalg.lstsq(A, b, rcond=None)
@@ -129,14 +152,16 @@ def train_polynomial(df, equation_str, params=None):
     coefs_funcs = {}
     idx = 0
     for f_name, var_name in func_list:
-        coefs_funcs[f_name] = coeffs[idx: idx + N_order + 1].astype(float)
+        raw_coeffs = coeffs[idx: idx + N_order + 1].astype(float)
+        # apply constraints here
+        coefs_funcs[f_name] = apply_constraints_poly(constraints, f_name, raw_coeffs)
         idx += N_order + 1
     scalar_coefs = {}
     for (a_name, _) in a_info:
         scalar_coefs[a_name] = float(coeffs[idx])
         idx += 1
 
-    # Build models dict with scaling info
+    # Build models
     models = {}
     for f_name, var_name in func_list:
         models[f_name] = {
@@ -146,7 +171,7 @@ def train_polynomial(df, equation_str, params=None):
             'var': var_name
         }
 
-    # Build evals list analogous to NN: for each f_i produce x_plot, y_plot (200 pts)
+    # Build evals for plotting
     evals = []
     for f_name, var_name in func_list:
         model = models[f_name]
@@ -163,7 +188,7 @@ def train_polynomial(df, equation_str, params=None):
         y_plot = Z @ c
         evals.extend([x_plot, y_plot])
 
-    # Print learned scalar parameters (similar to NN prints)
+    # Print learned scalar parameters
     for name, val in scalar_coefs.items():
         print(f"Learned {name}: {val:.6e}")
 

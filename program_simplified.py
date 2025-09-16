@@ -347,7 +347,7 @@ x_ddot_data = np.array([S1_stick_slip(t, y)[1] for t, y in zip(sol.t, sol.y.T)])
 
 
 
-x_dot_data=x_dot_data*19
+x_dot_data=x_dot_data*25
 
 #model1, model2 = pycc.train(
 #    t_simul, x_data, x_dot_data, x_ddot_data, F_ext_val,
@@ -368,7 +368,13 @@ df = pd.DataFrame({
 
 equation1='x_ddot + f1(x_dot) + f2(x) - F_ext = 0'
 params_poly={
-  'scaling': True
+  'scaling': True,
+  'constraints': [
+        {'constraint': 'f1(0)=0'},
+        {'constraint': 'f2(0)=0'},
+        {'constraint': 'f1 odd'},
+        {'constraint': 'f2 odd'}
+    ]
 }
 
 models, evals , scalar_coefs = pycc.train(

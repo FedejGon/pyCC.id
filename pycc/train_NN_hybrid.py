@@ -207,72 +207,69 @@ def compute_constraint_loss(models, constraints, func_list, tensors):
 
 
 # --- 8) Training function ---
-def train_hybrid(df, equation_str,constraints=None, neurons=100, lr=1e-3, epochs=1000, error_threshold=1e-6,extrapolation=None,weight_loss_param=1e0):
-    if constraints is None:
-        constraints = []
-    
+def train_NN_hybrid(df, equation_str, params=None):
+    """
+    df: DataFrame with columns corresponding to variables
+    equation_str: equation string, e.g. 'x_ddot + f1(x_dot) + f2(x) - F_ext = 0'
+    params: dict with optional keys:
+        - neurons
+        - lr
+        - epochs
+        - error_threshold
+        - extrapolation
+        - weight_loss_param
+        - constraints: list of constraints
+    """
+    if params is None:
+        params = {}
+
+    # Extract hyperparameters with defaults
+    neurons = params.get('neurons', 100)
+    lr = params.get('lr', 1e-3)
+    epochs = params.get('epochs', 1000)
+    error_threshold = params.get('error_threshold', 1e-6)
+    extrapolation = params.get('extrapolation', None)
+    weight_loss_param = params.get('weight_loss_param', 1.0)
+    constraints = params.get('constraints', [])
+
     func_list = parse_functions(equation_str)
     param_names = extract_parameters(equation_str)
 
     models = {f_name: NNModel(neurons) for f_name, _ in func_list}
-    scalar_params = {
-        name: nn.Parameter(torch.tensor(1.0, dtype=torch.float32))
-        for name in param_names
-    }
+    scalar_params = {name: nn.Parameter(torch.tensor(1.0, dtype=torch.float32)) for name in param_names}
 
     full_params = list(scalar_params.values()) + [p for model in models.values() for p in model.parameters()]
     optimizer = optim.Adam(full_params, lr=lr)
 
-
-
-    # Extract variables from df for tensors
     variables = list(df.columns)
     tensors = prepare_tensors(df, variables)
 
-    # Parse sympy equation
     eq = sympy_expression(equation_str)
-    lhs_expr = eq.lhs
-    rhs_expr = eq.rhs
+    lhs_expr, rhs_expr = eq.lhs, eq.rhs
 
     criterion = nn.MSELoss()
 
     for epoch in range(epochs):
-        # Zero grads
-        #for opt in optimizer.values():
         optimizer.zero_grad()
-
-        # Evaluate both sides
         lhs_val = evaluate_expr(lhs_expr, tensors, models, scalar_params)
         rhs_val = evaluate_expr(rhs_expr, tensors, models, scalar_params)
-
         loss = criterion(lhs_val, rhs_val)
-        
-        
-        #constraint_loss = compute_constraint_loss(models, constraints)
-        #total_loss = loss + constraint_loss
+
         constraint_loss = compute_constraint_loss(models, constraints, func_list, tensors)
-        #total_loss = loss + constraint_loss
-        
-        
-        # Compute parameter penalty for a1, a1,... (L2 regularization)
+
+        # L2 penalty for scalar params
         param_penalty = 0.0
         if weight_loss_param > 0:
             for p in scalar_params.values():
                 param_penalty += (p ** 2).mean()
-            param_penalty *= weight_loss_param 
-       
-        total_loss = loss + constraint_loss + param_penalty
-        
-        total_loss.backward()
+            param_penalty *= weight_loss_param
 
-        #for opt in optimizers.values():
-        #    opt.step()
+        total_loss = loss + constraint_loss + param_penalty
+        total_loss.backward()
         optimizer.step()
-   
+
         if epoch % 100 == 0 or loss.item() < error_threshold:
             if scalar_params and constraints:
-                #param_vals = {k: v.item() for k, v in scalar_params.items()}
-                #print(f"Epoch {epoch}, Loss: {loss.item():.2e}, Params: {param_vals:.2e}")
                 print(f"Epoch {epoch}, Loss: {loss.item():.2e}, Constraint: {constraint_loss:.2e}, Params: ", end="")
                 for k in scalar_params:
                     print(f"{k}: {scalar_params[k].item():.2e}", end="  ")
@@ -291,21 +288,16 @@ def train_hybrid(df, equation_str,constraints=None, neurons=100, lr=1e-3, epochs
             break
 
 
-    # Evaluate models on input ranges for plotting
+    # Evaluate models for plotting
     results = []
     for f_name, var in func_list:
         model = models[f_name]
         model.eval()
-
         x_vals = tensors[var].detach().numpy().flatten()
-        x_min, x_max = np.min(x_vals), np.max(x_vals)
-        x_plot = np.linspace(x_min, x_max, 200).reshape(-1, 1).astype(np.float32)
+        x_plot = np.linspace(np.min(x_vals), np.max(x_vals), 200).reshape(-1, 1).astype(np.float32)
         x_plot_tensor = torch.tensor(x_plot)
-
         with torch.no_grad():
             y_plot = model(x_plot_tensor).numpy().flatten()
-
         results.extend([x_plot.flatten(), y_plot])
 
     return models, results, scalar_params
-

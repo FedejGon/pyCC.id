@@ -9,8 +9,8 @@ np.random.seed(0)
 torch.manual_seed(10) 
 
 
-from .train import train
-from .train_hybrid import train_hybrid
+from .train_manager import train
+from .train_NN_hybrid import train_NN_hybrid
 
 from .eval_cc import eval_cc
 

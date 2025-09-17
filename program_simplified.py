@@ -72,6 +72,7 @@ print(f"Omega={Omega}, F0={F0}, $x_0$={x0}, $v_0$={v0}")
 
 
 SNR_dB=[np.inf] #   20
+#SNR_dB=20
 
 y0 = [x0, v0]  # [x(0), x'(0)]
 #y0_val = [x0, v0]
@@ -117,7 +118,7 @@ def Ff_coul(x_dot):
  #   return mu_N * np.sign(x_dot)
     return mu_N * smooth_sign(x_dot)
 def F1(x_dot):
-    return delta * x_dot #+ Ff_coul(x_dot) #cval* x_dot + Ff_coul(x_dot) # + 0.0005 * x_dot**2 #+ Ff_coul(x_dot) #r(x_dot) Ff_coul Ff_dr
+    return delta * x_dot + Ff_coul(x_dot) #cval* x_dot + Ff_coul(x_dot) # + 0.0005 * x_dot**2 #+ Ff_coul(x_dot) #r(x_dot) Ff_coul Ff_dr
 def F2(x):
     return alpha*x+beta*x**3 #kval*x
 def F_ext(t):
@@ -250,7 +251,7 @@ else:
     print(f"Running with SNR = {SNR_dB:.2f} dB")
     # Add noise based on current SNR_dB
 
-    SNR_dB = -5.0 #4  # desired signal-to-noise ratio in decibels
+    SNR_dB = 2.0 #4  # desired signal-to-noise ratio in decibels
     Fext_signal_power = np.mean(F_ext(time_data)**2)
     noise_power = Fext_signal_power / (10**(SNR_dB / 10))
     noise_std = np.sqrt(noise_power)
@@ -347,7 +348,7 @@ x_ddot_data = np.array([S1_stick_slip(t, y)[1] for t, y in zip(sol.t, sol.y.T)])
 
 
 
-x_dot_data=x_dot_data*25
+x_dot_data=x_dot_data*1
 
 #model1, model2 = pycc.train(
 #    t_simul, x_data, x_dot_data, x_ddot_data, F_ext_val,
@@ -366,39 +367,56 @@ df = pd.DataFrame({
 
 #equation='x_ddot + f1(x_dot) + f2(x) = F_ext'
 
-equation1='x_ddot + f1(x_dot) + f2(x) - F_ext = 0'
+equation1='x_ddot + f1(x_dot) + f2(x) - F_ext * exp(2*a1) = 0'
 equation2='f1(x_dot)=1'
-equations=[equation1,equation2]
-params_poly={
-  'scaling': True,
-  'constraints': [
-        #{'constraint': 'f1(0)=0'},
-        {'constraint': 'f2(0)=0'},
-        #{'constraint': 'f1 odd'},
-        {'constraint': 'f2 odd'}
-    ],
-  'eq_weights':[1.0,0.1]
+equations = [equation1,equation2]
+
+########################################
+          #### method NN  ####
+########################################
+#equation='x_ddot + f1(x_dot) + a1*x + a2*x**3 - F_ext = 0'
+#equation='x_ddot + a1*x_dot + a2*x + a3*x**3 - F_ext = 0'
+constraints = [
+    {'constraint': 'f1(0)=0', 'penalty': 1e-2},
+   #{'constraint': 'f2(0)=0', 'penalty': 1e-2},
+    {'constraint': 'f1 odd', 'penalty': 1e-1, 'eval': 'array','Nval_array':100}, # penaly is optional
+    {'constraint': 'f2 odd', 'penalty': 1e-1, 'eval': 'array','Nval_array':100}, # eval=data/array array is default
+]
+#constraints = [
+#    {'constraint': 'f1(0)=0'},
+#    {'constraint': 'f2(0)=0'},
+#]
+parameters_NN = {
+    'neurons': 100,
+    'lr': 1e-4,
+    'epochs': 20000,
+    'error_threshold': 1e-6,
+    'extrapolation': None,
+    'weight_loss_param': 1e1,
+    # 'param_penalty_weight': 0.0,
+    'constraints': constraints,
+    'eq_weights': [1.0, 0.0]
 }
+#models, evals, obtained_coefs = pycc.train(
+#    df=df,
+#    equation=equation1,
+#    method='NN',
+#    params=parameters_NN
+#)
+#equation1='x_ddot + f1(x_dot) + f2(x) - F_ext = 0'
 
-models, evals , scalar_coefs = pycc.train(
-    df=df,
-    equation=equations,
-    method='Poly',
-    params=params_poly
-)
-
-
-
-
+models, evals, obtained_coefs = pycc.train(df, equations,method='NN', params=parameters_NN)
 
 
-
-if len(evals) == 2:
+# The key is to loop through the evals list in steps of 2
+num_functions = len(evals) // 2
+if num_functions == 1:
     x_f1_cc, f1_cc = evals
-elif len(evals) == 4:
+elif num_functions == 2:
     x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
+elif num_functions == 3:
+    x_f1_cc, f1_cc, x_f2_cc, f2_cc, x_f3_cc, f3_cc = evals
 
-# then your plotting code:
 x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
 plt.figure()
 plt.plot(x_f1_cc, f1_cc, label='f1 learned')
@@ -411,75 +429,15 @@ plt.plot(x_f2_cc, f2_cc, label='f2 learned')
 plt.plot(x_data, F2_th, '--', label="f2 theory")
 plt.xlabel('x')
 plt.ylabel('f2(x)')
-plt.legend()
+plt.legend() 
+#plt.figure()
+#plt.plot(x_f3_cc, f3_cc, label='f3 learned')
+##plt.plot(x_data, F2_th, '--', label="f2 theory")
+#plt.xlabel('x_dot')
+#plt.ylabel('f3(x_dot)')
+#plt.legend() 
 plt.show()
-
-
-
-
-
-
-
-
-#equation='x_ddot + f1(x_dot) + a1*x + a2*x**3 - F_ext = 0'
-#equation='x_ddot + a1*x_dot + a2*x + a3*x**3 - F_ext = 0'
-
-constraints = [
-    {'constraint': 'f1(0)=0', 'penalty': 1e-2},
-   #{'constraint': 'f2(0)=0', 'penalty': 1e-2},
-    {'constraint': 'f1 odd', 'penalty': 1e-1, 'eval': 'array','Nval_array':100}, # penaly is optional
-    {'constraint': 'f2 odd', 'penalty': 1e-1, 'eval': 'array','Nval_array':100}, # eval=data/array array is default
-]
-
-
-constraints = [
-    {'constraint': 'f1(0)=0'},
-#    {'constraint': 'f2(0)=0'},
-]
-
-
-parameters_NN = {
-    'neurons': 100,
-    'lr': 1e-4,
-    'epochs': 20000,
-    'error_threshold': 1e-6,
-    'extrapolation': None,
-    'weight_loss_param': 1e1,
-    # 'param_penalty_weight': 0.0,
-    'constraints': constraints,
-    'eq_weights': [1.0, 0.0]
-}
-
-
-#models, evals, obtained_coefs = pycc.train(
-#    df=df,
-#    equation=equation1,
-#    method='NN',
-#    params=parameters_NN
-#)
-
-
-
-
-#equation1='x_ddot + f1(x_dot) + f2(x) - F_ext = 0'
-equations = [
-    equation1,
-    "f1(x_dot)=1"
-]
-models, evals, obtained_coefs = pycc.train(df, equations,method='NN', params=parameters_NN)
-
-
-
-
-
-
-
-
-
-
-if len(evals) == 2:
-    x_f1_cc, f1_cc = evals
-
+        
 #    plt.figure()
 #    plt.plot(x_f1_cc, f1_cc, label='f1 learned')
 #    plt.plot(x_dot_data, F1_th, '--', label='f1 theory')
@@ -488,8 +446,6 @@ if len(evals) == 2:
 #    plt.legend()
 #    plt.show()
 
-elif len(evals) == 4:
-    x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
 
 #    plt.figure()
 #    plt.plot(x_f1_cc, f1_cc, label='f1 learned')
@@ -515,46 +471,144 @@ if obtained_coefs:
 
 #models, evals = pycc.train(df, equation, neurons=50, lr=1e-2, epochs=2000)
 
-# Plot learned functions
+## Plot learned functions
+#x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
+#plt.figure()
+#plt.plot(x_f1_cc, f1_cc, label='f1 learned')
+#plt.plot(x_dot_data,F1_th, '--', label="f1 theory")
+#plt.xlabel('x_dot')
+#plt.ylabel('f1(x_dot)')
+#plt.legend()
+#plt.figure()
+#plt.plot(x_f2_cc, f2_cc, label='f2 learned')
+#plt.plot(x_data, F2_th, '--', label="f2 theory")
+#plt.xlabel('x')
+#plt.ylabel('f2(x)')
+#plt.legend() 
+#plt.show()
+
+
+
+########################################
+          #### method SymbReg  ####
+########################################
+params_SymbReg = {
+  'pysr': {
+    'niterations': 80,
+    'unary_operators': ['tanh'],
+    'binary_operators': ['+','-','*'],
+    'maxsize': 25,
+    'verbosity': 0
+  },
+  'N_fit_points': 200
+}
+
+models, evals , scalar_coefs = pycc.train(
+    df=df,
+    equation=equation1,
+    method='SymbReg',
+    params=params_SymbReg
+)
+
+
+if len(evals) == 2:
+    x_f1_cc, f1_cc = evals
+elif len(evals) == 4:
+    x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
+
+# then your plotting code:
 x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
 plt.figure()
-plt.plot(x_f1_cc, f1_cc, label='f1 learned')
+plt.plot(x_f1_cc, f1_cc, label='f1 SR')
 plt.plot(x_dot_data,F1_th, '--', label="f1 theory")
 plt.xlabel('x_dot')
 plt.ylabel('f1(x_dot)')
 plt.legend()
 plt.figure()
-plt.plot(x_f2_cc, f2_cc, label='f2 learned')
+plt.plot(x_f2_cc, f2_cc, label='f2 SR')
 plt.plot(x_data, F2_th, '--', label="f2 theory")
 plt.xlabel('x')
 plt.ylabel('f2(x)')
-plt.legend() 
+plt.legend()
 plt.show()
 
 
 
+########################################
+          #### method Poly  ####
+########################################
+print("computing Poly")
 
 
-x_dot_cc, f1_cc, x_cc, f2_cc  = pycc.print_cc(df, equation, models)
+equation2='f1(x_dot)=1'
+equations=[equation1,equation2]
+params_poly={
+  'scaling': True,
+  #'constraints': [
+  #      #{'constraint': 'f1(0)=0'},
+  #      {'constraint': 'f2(0)=0'},
+  #      #{'constraint': 'f1 odd'},
+  #      {'constraint': 'f2 odd'}
+  #  ],
+  'eq_weights':[1.0,0.0]
+}
+
+models, evals , scalar_coefs = pycc.train(
+    df=df,
+    equation=equations,
+    method='Poly',
+    params=params_poly
+)
 
 
 
+
+
+
+
+if len(evals) == 2:
+    x_f1_cc, f1_cc = evals
+elif len(evals) == 4:
+    x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
+
+# then your plotting code:
+x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
 plt.figure()
-plt.plot(x_dot_cc, f1_cc, label="f1 learned")
+plt.plot(x_f1_cc, f1_cc, label='f1 Poly')
 plt.plot(x_dot_data,F1_th, '--', label="f1 theory")
-plt.xlabel("x_dot")
-plt.ylabel("f1")
+plt.xlabel('x_dot')
+plt.ylabel('f1(x_dot)')
 plt.legend()
-plt.grid(True)
+plt.figure()
+plt.plot(x_f2_cc, f2_cc, label='f2 Poly')
+plt.plot(x_data, F2_th, '--', label="f2 theory")
+plt.xlabel('x')
+plt.ylabel('f2(x)')
+plt.legend()
 plt.show()
 
-plt.figure()
-plt.plot(x_cc, f2_cc, label="f2 learned")
-plt.plot(x_data, F2_th, '--', label="f2 theory")
-plt.xlabel("x")
-plt.ylabel("f2")
-plt.legend()
-plt.grid(True)
-plt.show()
+
+
+
+################################################
+################ plotting to do #####################
+
+#x_dot_cc, f1_cc, x_cc, f2_cc  = pycc.print_cc(df, equation, models)
+#plt.figure()
+#plt.plot(x_dot_cc, f1_cc, label="f1 learned")
+#plt.plot(x_dot_data,F1_th, '--', label="f1 theory")
+#plt.xlabel("x_dot")
+#plt.ylabel("f1")
+#plt.legend()
+#plt.grid(True)
+#plt.show()
+#plt.figure()
+#plt.plot(x_cc, f2_cc, label="f2 learned")
+#plt.plot(x_data, F2_th, '--', label="f2 theory")
+#plt.xlabel("x")
+#plt.ylabel("f2")
+#plt.legend()
+#plt.grid(True)
+#plt.show()
 
 

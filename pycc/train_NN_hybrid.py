@@ -68,6 +68,40 @@ def prepare_tensors(df, variables):
 
 
 # --- 6) Evaluate sympy expression with models ---
+# Create a dictionary to map sympy functions to torch functions
+torch_math = {
+    'exp': torch.exp,
+    'cos': torch.cos,
+    'sin': torch.sin,
+    'log': torch.log,
+    'log10': torch.log10,
+    'sqrt': torch.sqrt,
+    'abs': torch.abs,
+    'tanh': torch.tanh,
+    'tan': torch.tan,
+    'cosh': torch.cosh,
+    'sinh': torch.sinh,
+    'acos': torch.acos,
+    'asin': torch.asin,
+    'atan': torch.atan,
+    'atanh': torch.atanh,
+    'acosh': torch.acosh,
+    'asinh': torch.asinh,
+    'sigmoid': torch.sigmoid,
+    'erf': torch.erf,
+    'erfc': torch.erfc,
+    'erfinv': torch.erfinv,
+    'expm1': torch.expm1,
+    'log1p': torch.log1p,
+    'ceil': torch.ceil,
+    'floor': torch.floor,
+    'trunc': torch.trunc,
+    'round': torch.round,
+    'sign': torch.sign,  
+    'sech': lambda x: 1 / torch.cosh(x), 
+    'csch': lambda x: 1 / torch.sinh(x), 
+    'coth': lambda x: torch.cosh(x) / torch.sinh(x), 
+}
 def evaluate_expr(expr, tensors, models, scalar_params):
     if expr.is_Number:
         return torch.tensor(float(expr), dtype=torch.float32)
@@ -83,9 +117,16 @@ def evaluate_expr(expr, tensors, models, scalar_params):
         func_name = expr.func.__name__
         arg = expr.args[0]
         arg_tensor = evaluate_expr(arg, tensors, models, scalar_params)
-        if func_name not in models:
-            raise ValueError(f"Model {func_name} not found")
-        return models[func_name](arg_tensor)
+        
+        # Check if it's a learned function (f1, f2, etc.)
+        if func_name in models:
+            return models[func_name](arg_tensor)
+        # Check if it's a standard mathematical function
+        elif func_name in torch_math:
+            return torch_math[func_name](arg_tensor)
+        else:
+            raise ValueError(f"Model or known function '{func_name}' not found")
+
     elif expr.is_Add or expr.is_Mul or expr.is_Pow:
         args = [evaluate_expr(arg, tensors, models, scalar_params) for arg in expr.args]
         if expr.is_Add:
@@ -100,7 +141,6 @@ def evaluate_expr(expr, tensors, models, scalar_params):
             return base ** exp
     else:
         raise NotImplementedError(f"Expr type {expr} not implemented")
-
 
 
 

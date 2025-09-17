@@ -367,9 +367,70 @@ df = pd.DataFrame({
 
 #equation='x_ddot + f1(x_dot) + f2(x) = F_ext'
 
-equation1='x_ddot + f1(x_dot) + f2(x) - F_ext * exp(2*a1) = 0'
-equation2='f1(x_dot)=1'
+equation1='x_ddot + f1(x_dot) + f2(x) - F_ext  = 0'
+equation2='f1(x_dot)=0'
 equations = [equation1,equation2]
+
+
+
+########################################
+          #### method Poly  ####
+########################################
+print("computing Poly")
+params_poly={
+  'scaling': True,
+  'constraints': [
+        #{'constraint': 'f1(0)=0'},#,'penalty':1e2},
+        #{'constraint': 'f2(0)=0'},
+        #{'constraint': 'f1 odd'},
+        #{'constraint': 'f2 odd'}
+    ],
+  'eq_weights':[1.0,0.0]
+}
+models, evals , scalar_coefs = pycc.train(
+    df=df,
+    equations=equations,
+    method='Poly', #method='Poly_linear',
+    params=params_poly
+)
+if len(evals) == 2:
+    x_f1_cc, f1_cc = evals
+elif len(evals) == 4:
+    x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
+
+# The key is to loop through the evals list in steps of 2
+num_functions = len(evals) // 2
+if num_functions == 1:
+    x_f1_cc, f1_cc = evals
+elif num_functions == 2:
+    x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
+elif num_functions == 3:
+    x_f1_cc, f1_cc, x_f2_cc, f2_cc, x_f3_cc, f3_cc = evals
+
+#x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
+plt.figure()
+plt.plot(x_f1_cc, f1_cc, label='f1 learned')
+plt.plot(x_dot_data,F1_th, '--', label="f1 theory")
+plt.xlabel('x_dot')
+plt.ylabel('f1(x_dot)')
+plt.legend()
+plt.figure()
+plt.plot(x_f2_cc, f2_cc, label='f2 learned')
+plt.plot(x_data, F2_th, '--', label="f2 theory")
+plt.xlabel('x')
+plt.ylabel('f2(x)')
+plt.legend() 
+#plt.figure()
+#plt.plot(x_f3_cc, f3_cc, label='f3 learned')
+##plt.plot(x_data, F2_th, '--', label="f2 theory")
+#plt.xlabel('x_dot')
+#plt.ylabel('f3(x_dot)')
+#plt.legend() 
+plt.show()
+
+
+
+
 
 ########################################
           #### method NN  ####
@@ -417,7 +478,7 @@ elif num_functions == 2:
 elif num_functions == 3:
     x_f1_cc, f1_cc, x_f2_cc, f2_cc, x_f3_cc, f3_cc = evals
 
-x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
+#x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
 plt.figure()
 plt.plot(x_f1_cc, f1_cc, label='f1 learned')
 plt.plot(x_dot_data,F1_th, '--', label="f1 theory")
@@ -533,59 +594,6 @@ plt.legend()
 plt.show()
 
 
-
-########################################
-          #### method Poly  ####
-########################################
-print("computing Poly")
-
-
-equation2='f1(x_dot)=1'
-equations=[equation1,equation2]
-params_poly={
-  'scaling': True,
-  #'constraints': [
-  #      #{'constraint': 'f1(0)=0'},
-  #      {'constraint': 'f2(0)=0'},
-  #      #{'constraint': 'f1 odd'},
-  #      {'constraint': 'f2 odd'}
-  #  ],
-  'eq_weights':[1.0,0.0]
-}
-
-models, evals , scalar_coefs = pycc.train(
-    df=df,
-    equation=equations,
-    method='Poly',
-    params=params_poly
-)
-
-
-
-
-
-
-
-if len(evals) == 2:
-    x_f1_cc, f1_cc = evals
-elif len(evals) == 4:
-    x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
-
-# then your plotting code:
-x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
-plt.figure()
-plt.plot(x_f1_cc, f1_cc, label='f1 Poly')
-plt.plot(x_dot_data,F1_th, '--', label="f1 theory")
-plt.xlabel('x_dot')
-plt.ylabel('f1(x_dot)')
-plt.legend()
-plt.figure()
-plt.plot(x_f2_cc, f2_cc, label='f2 Poly')
-plt.plot(x_data, F2_th, '--', label="f2 theory")
-plt.xlabel('x')
-plt.ylabel('f2(x)')
-plt.legend()
-plt.show()
 
 
 

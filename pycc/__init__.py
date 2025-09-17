@@ -12,6 +12,7 @@ torch.manual_seed(10)
 from .train_manager import train
 from .train_NN_hybrid import train_NN_hybrid
 from .train_polynomial import train_polynomial
+from .train_polynomial_linear import train_polynomial_linear
 from .train_SymbReg import train_SymbReg
 
 from .eval_cc import eval_cc

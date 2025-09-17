@@ -1,0 +1,8 @@
+# Ignore the outputs folder
+outputs/
+
+# Ignore pycc info folder
+pycc.id*info
+
+# Ignore distribution folder
+dist/

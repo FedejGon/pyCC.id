@@ -72,7 +72,7 @@ print(f"Omega={Omega}, F0={F0}, $x_0$={x0}, $v_0$={v0}")
 
 
 SNR_dB=[np.inf] #   20
-#SNR_dB=20
+SNR_dB=10
 
 y0 = [x0, v0]  # [x(0), x'(0)]
 #y0_val = [x0, v0]
@@ -251,7 +251,7 @@ else:
     print(f"Running with SNR = {SNR_dB:.2f} dB")
     # Add noise based on current SNR_dB
 
-    SNR_dB = 2.0 #4  # desired signal-to-noise ratio in decibels
+    #SNR_dB = 2.0 #4  # desired signal-to-noise ratio in decibels
     Fext_signal_power = np.mean(F_ext(time_data)**2)
     noise_power = Fext_signal_power / (10**(SNR_dB / 10))
     noise_std = np.sqrt(noise_power)
@@ -367,8 +367,8 @@ df = pd.DataFrame({
 
 #equation='x_ddot + f1(x_dot) + f2(x) = F_ext'
 
-equation1='x_ddot + f1(x_dot) + f2(x) - F_ext  = 0'
-equation2='f1(x_dot)=0'
+equation1='x_ddot + f1(x_dot) + f2(x)- F_ext  = 0'
+equation2='f2(x)=0'
 equations = [equation1,equation2]
 
 
@@ -381,9 +381,9 @@ params_poly={
   'scaling': True,
   'constraints': [
         #{'constraint': 'f1(0)=0'},#,'penalty':1e2},
-        #{'constraint': 'f2(0)=0'},
+        {'constraint': 'f2(0)=0'},
         #{'constraint': 'f1 odd'},
-        #{'constraint': 'f2 odd'}
+        {'constraint': 'f2 odd'}
     ],
   'eq_weights':[1.0,0.0]
 }
@@ -427,6 +427,58 @@ plt.legend()
 #plt.ylabel('f3(x_dot)')
 #plt.legend() 
 plt.show()
+
+
+
+########################################
+          #### method SymbReg  ####
+########################################
+params_SymbReg = {
+  'pysr': {
+    'niterations': 100,
+    'unary_operators': ['tanh'],
+    'binary_operators': ['+','-','*'],
+    'maxsize': 12,
+    'populations':10,
+   'model_selection': 'best', # 'best' , 'accuracy' , 'score'
+    'verbosity': 0
+  },
+  'N_fit_points': 200,
+  'max_iterations': 15,
+}
+
+
+
+models, evals , scalar_coefs = pycc.train(
+    df=df,
+    equations=equations,
+    method='SymbReg',
+    params=params_SymbReg
+)
+
+
+if len(evals) == 2:
+    x_f1_cc, f1_cc = evals
+elif len(evals) == 4:
+    x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
+
+# then your plotting code:
+x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
+plt.figure()
+plt.plot(x_f1_cc, f1_cc, label='f1 SR')
+plt.plot(x_dot_data,F1_th, '--', label="f1 theory")
+plt.xlabel('x_dot')
+plt.ylabel('f1(x_dot)')
+plt.legend()
+plt.figure()
+plt.plot(x_f2_cc, f2_cc, label='f2 SR')
+plt.plot(x_data, F2_th, '--', label="f2 theory")
+plt.xlabel('x')
+plt.ylabel('f2(x)')
+plt.legend()
+plt.show()
+
+
 
 
 
@@ -547,53 +599,6 @@ if obtained_coefs:
 #plt.ylabel('f2(x)')
 #plt.legend() 
 #plt.show()
-
-
-
-########################################
-          #### method SymbReg  ####
-########################################
-params_SymbReg = {
-  'pysr': {
-    'niterations': 80,
-    'unary_operators': ['tanh'],
-    'binary_operators': ['+','-','*'],
-    'maxsize': 25,
-    'verbosity': 0
-  },
-  'N_fit_points': 200
-}
-
-models, evals , scalar_coefs = pycc.train(
-    df=df,
-    equation=equation1,
-    method='SymbReg',
-    params=params_SymbReg
-)
-
-
-if len(evals) == 2:
-    x_f1_cc, f1_cc = evals
-elif len(evals) == 4:
-    x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
-
-# then your plotting code:
-x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
-plt.figure()
-plt.plot(x_f1_cc, f1_cc, label='f1 SR')
-plt.plot(x_dot_data,F1_th, '--', label="f1 theory")
-plt.xlabel('x_dot')
-plt.ylabel('f1(x_dot)')
-plt.legend()
-plt.figure()
-plt.plot(x_f2_cc, f2_cc, label='f2 SR')
-plt.plot(x_data, F2_th, '--', label="f2 theory")
-plt.xlabel('x')
-plt.ylabel('f2(x)')
-plt.legend()
-plt.show()
-
-
 
 
 

@@ -13,58 +13,20 @@ def extract_parameters(equation_str):
     return sorted(set(re.findall(r'\ba\d+\b', equation_str)))
 
 def build_constraint_mask(constraints, f_name, n_coeffs):
-    """
-    Build a boolean mask for active polynomial coefficients,
-    enforcing odd/even symmetry and f(0)=0 constraints.
-    """
-    # start with all True
     mask = np.ones(n_coeffs, dtype=bool)
-
     if not constraints:
         return mask
-
     for cons in constraints:
         rule = cons.get("constraint", "").strip().replace('\t', ' ')
         if not rule or not rule.startswith(f_name):
             continue
-
-        # --- Odd symmetry ---
         if re.search(r'\bodd\b', rule):
-            # only keep odd powers (1, 3, 5, ...)
-            mask[:] = False
-            mask[1::2] = True
-            # ensure constant term is 0
-            mask[0] = False
-
-        # --- Even symmetry ---
+            mask[::2] = False   # zero even powers (including constant) for odd functions
         elif re.search(r'\beven\b', rule):
-            # only keep even powers (0, 2, 4, ...)
-            mask[:] = False
-            mask[0::2] = True
-
-        # --- f(0)=0 constraint ---
-        if re.search(r'\(0\)\s*=\s*0', rule):
+            mask[1::2] = False  # zero odd powers for even functions
+        elif re.search(r'\(0\)\s*=\s*0', rule):
             mask[0] = False
-
     return mask
-
-
-#def build_constraint_mask(constraints, f_name, n_coeffs):
-#    mask = np.ones(n_coeffs, dtype=bool)
-#    if not constraints:
-#        return mask
-#    for cons in constraints:
-#        rule = cons.get("constraint", "").strip().replace('\t', ' ')
-#        if not rule or not rule.startswith(f_name):
-#            continue
-#        if re.search(r'\bodd\b', rule):
-#            mask[::2] = False   # zero even powers (including constant) for odd functions
-#        elif re.search(r'\beven\b', rule):
-#            mask[1::2] = False  # zero odd powers for even functions
-#        elif re.search(r'\(0\)\s*=\s*0', rule):
-#            mask[0] = False
-#    return mask
-
 
 def train_polynomial(df, equation, params=None):
     if params is None:

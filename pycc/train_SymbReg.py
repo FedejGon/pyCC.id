@@ -32,7 +32,8 @@ except Exception as e:
 
 # ------------------ Utilities copied/adapted from train_polynomial ------------------
 def parse_functions(equation_str):
-    pattern = r'(f\d+)\(([a-zA-Z_]+)\)'
+    #pattern = r'(f\d+)\(([a-zA-Z_]+)\)' #without_numbers
+    pattern = r'(f\d+)\((\w+)\)' # with numbers, i.e. f(x1)
     all_funcs = re.findall(pattern, equation_str)
     unique_funcs = list(OrderedDict.fromkeys(all_funcs))
     return unique_funcs
@@ -277,9 +278,9 @@ def train_SymbReg(df, equations, params=None):
         # end loop over functions
         mean_mse = np.mean(mse_accum) if mse_accum else np.inf
         if outer % 1 == 0:
-            print(f"SymbReg outer iter {outer+1}/{max_iterations}, Loss: {mean_mse:.4e}")
+            print(f"SymbReg outer iter {outer+1}/{max_iterations}, Loss: {mean_mse:.2e}")
         if abs(prev_loss - mean_mse) < tol:
-            print(f"Converged with tol={tol}. Stopping outer loop.")
+            print(f"Converged with Delta_Loss={tol}. Stopping outer loop.")
             break
         prev_loss = mean_mse
 

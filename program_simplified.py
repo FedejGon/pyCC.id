@@ -50,15 +50,15 @@ omega=1.2
 #epsilon=1e-6 # m/s
 Tsimul=40
 Nsimul=500
-Tval=2*Tsimul
-Nval=2*Nsimul
+Teval=2*Tsimul
+Neval=2*Nsimul
 noise=0.0
 
 
 t_span = (0, Tsimul)  # Intervalo de tiempo
 t_simul = np.linspace(*t_span, Nsimul)  # Puntos de evaluación
-t_span_val = (0, Tval)  # Intervalo de tiempo
-t_val = np.linspace(*t_span_val, Nval)  # Puntos de evaluación
+t_span_eval = (0, Teval)  # Intervalo de tiempo
+t_eval = np.linspace(*t_span_eval, Neval)  # Puntos de evaluación
 
 alpha=-1.0
 beta=1.0
@@ -72,7 +72,7 @@ print(f"Omega={Omega}, F0={F0}, $x_0$={x0}, $v_0$={v0}")
 
 
 SNR_dB=[np.inf] #   20
-SNR_dB=10
+SNR_dB=30
 
 y0 = [x0, v0]  # [x(0), x'(0)]
 #y0_val = [x0, v0]
@@ -502,7 +502,7 @@ constraints = [
 parameters_NN = {
     'neurons': 100,
     'lr': 1e-4,
-    'epochs': 20000,
+    'epochs': 10000,
     'error_threshold': 1e-6,
     'extrapolation': None,
     'weight_loss_param': 1e1,
@@ -600,7 +600,75 @@ if obtained_coefs:
 #plt.legend() 
 #plt.show()
 
+######################### forward integration with post SR processing of CCs
 
+
+# Run symbolic regression post-processing
+sr_results = pycc.process_evals_SymbReg(
+    evals,
+    function_names=["f1", "f2"],  # must match training
+    sr_params={"niterations": 100, "populations": 20},
+    plot=True
+)
+
+
+# Print obtained symbolic expressions
+print("\nFinal symbolic regression results:")
+for fname, out in sr_results.items():
+    print(f"{fname}(x) ≈ {out['expr']}")
+
+
+# Option 2: Or manually create it with explicit scalar handling
+f1 = sr_results["f1"]["func"]
+f2 = sr_results["f2"]["func"]
+
+def F_ext(t):
+    return F0 * np.cos(Omega * t)
+
+def ode_rhs(t, y):
+    x, x_dot = y
+    F_ext_val = F_ext(t)  # example forcing
+    
+    # Ensure scalar operations for ODE integration
+    f1_val = f1(float(x_dot))  # Explicitly convert to scalar
+    f2_val = f2(float(x))      # Explicitly convert to scalar
+    
+    # Ensure the results are scalars
+    #if hasattr(f1_val, '__len__'):
+    #    f1_val = float(f1_val[0])
+    #else:
+    #    f1_val = float(f1_val)
+        
+    #if hasattr(f2_val, '__len__'):
+    #    f2_val = float(f2_val[0])
+    #else:
+    #    f2_val = float(f2_val)
+    
+    x_ddot = F_ext_val - f1_val - f2_val
+    
+    return [float(x_dot), float(x_ddot)]
+
+# Now integration should work
+y0 = [x0, v0]
+#t_span = (0, 10)
+#t_eval = np.linspace(0, 10, 500)
+
+sol = solve_ivp(ode_rhs, t_span_eval, y0, t_eval=t_eval)
+time_sim=sol.t
+x_sim=sol.y[0]
+x_dot_sim=sol.y[1]
+
+# Plot solution
+plt.figure()
+plt.plot(time_sim, x_sim, label="x(t) simulated NN(sym+SR)")
+plt.plot(time_data, x_data, label="x(t) th")
+plt.xlabel('t')
+plt.ylabel('x(t)')
+#plt.figure()
+#plt.plot(sol.t, sol.y[1], label="x_dot(t) simulated NN(sym+SR)")
+#plt.plot(time_data, x_dot_data, label="x_dot(t) th")
+plt.legend()
+plt.show()
 
 
 ################################################

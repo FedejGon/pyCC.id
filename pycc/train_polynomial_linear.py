@@ -8,7 +8,8 @@ def parse_functions(equation_str):
     """
     Return list of (f_name, var_name) in appearance order, e.g. [('f1','x_dot'), ('f2','x')]
     """
-    pattern = r'(f\d+)\(([a-zA-Z_]+)\)'
+    #pattern = r'(f\d+)\(([a-zA-Z_]+)\)' #without_numbers
+    pattern = r'(f\d+)\((\w+)\)' # with numbers, i.e. f(x1)
     funcs = re.findall(pattern, equation_str)
     unique_funcs = list(dict.fromkeys(funcs))
     return unique_funcs

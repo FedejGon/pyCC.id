@@ -1,6 +1,9 @@
 
 # to do:
 #1) compatibility with gpu cuda and gpu intel
+
+
+
 import pycc
 import numpy as np
 import pandas as pd
@@ -27,9 +30,9 @@ print(f"Omega={Omega}, F0={F0}, $x_0$={x0}, $v_0$={v0}")
 # --- Force models ---
 def Ff_coul(x_dot):
     """Simple Coulomb friction."""
-    return 0.5 * np.sign(x_dot)   # replace with your smooth_sign if needed
+    return 0.5 * np.tanh(500*x_dot)   # replace with your smooth_sign if needed
 def F1(x_dot):
-    return delta * x_dot #+ Ff_coul(x_dot)
+    return delta * x_dot + Ff_coul(x_dot)
 def F2(x):
     return alpha * x + beta * x**3
 def F_ext(t):
@@ -38,7 +41,7 @@ def F_ext(t):
 # --- ODE system ---
 def S2_ode(t, y):
     x, x_dot = y
-    x_ddot = F_ext(t) - F1(x_dot) - F2(x)
+    x_ddot = F_ext(t) - F1(x_dot)*np.exp(x_dot*2) - F2(x)
     return [x_dot, x_ddot]
 
 
@@ -114,6 +117,33 @@ F2_th=F2(x_data)
 ##### automatic integrator from a defined equation string 
 ###########################3
 
+# --- Force models ---
+def Ff_coul(x_dot):
+    """Simple Coulomb friction."""
+    return 0.5 * np.tanh(500*x_dot)   # replace with your smooth_sign if needed
+def F1(x_dot):
+    return delta * x_dot + Ff_coul(x_dot)
+def F2(x):
+    return alpha * x + beta * x**3
+def F_ext(t):
+    return F0 * np.cos(Omega * t)
+
+## --- ODE system ---
+#def S2_ode(t, y):
+#    x, x_dot = y
+#    x_ddot = F_ext(t) - F1(x_dot) - F2(x)
+#    return [x_dot, x_ddot]
+#
+## --- Simulation ---
+#t_span  = (0, 20)
+#t_eval  = np.linspace(*t_span, 1000)
+#y0      = [x0, v0]  # initial conditions
+#sol = solve_ivp(S2_ode, t_span, y0, t_eval=t_eval, method='LSODA')
+#a1=2
+
+equation1='x1_dot = x2'
+equation2='x2_dot = F_ext - f1(x2) - f2(x1)'
+equations = [equation1,equation2]
 # Functions defined in main code
 #def Ff_coul(x_dot):
 #    """Simple Coulomb friction."""
@@ -125,17 +155,43 @@ F2_th=F2(x_data)
 #def F_ext(t):
 #    return F0 * np.cos(Omega * t)
 ## Parameters for simulation
-#params_th = {
-#    "t_span": (0, 50),
-#    "y0": [0.0, 0.0],  # x, x_dot, x_ddot
-#    "t_eval": np.linspace(0, 50, 5000),
-#    "method": "LSODA",
-#    "local_funcs": {"f1": f1, "f2": f2, "F_ext": F_ext}
-#}
+params_th = {
+    "t_span": t_span,
+    "y0": y0,  # x, x_dot, x_ddot
+    "t_eval": t_eval,
+    "method": "LSODA",
+    'local_funcs': {'f1': lambda t: F1(t),'f2': lambda t: F2(t),'F_ext': lambda t: F_ext(t)},
+ #   "local_funcs": {"f1": f1, "f2": f2, "F_ext": F_ext}
+     "scalar_params": {'a1':2.0}
+}
 #equation = "x_ddot + f1(x_dot) + f2(x) - F_ext = 0"
-#df = pycc.simulate(equation,method="Theoretical", params=params_th)
-#print(df.head())
+sol,derivatives = pycc.simulate(equations,method="Theoretical", params=params_th)
 
+# --- Extract results ---
+time_data  = sol.t
+x_data     = sol.y[0]
+x_dot_data = sol.y[1]
+F_ext_val  = F_ext(time_data)
+x_ddot_data=derivatives[1]
+
+#x_ddot_data = np.array([S2_ode(t, y)[1] for t, y in zip(time_data, sol.y.T)])
+
+# --- Define DataFrame ---
+df = pd.DataFrame({
+    't': time_data,
+    'x': x_data,
+    'x_dot': x_dot_data,
+    'x_ddot': x_ddot_data,
+    'F_ext': F_ext_val
+})
+print(df.head())
+print(sol.status)   # 0 = success, 1 = reached event, -1 = failed
+print(sol.message)
+#, method='DOP853', rtol=1e-9, atol=1e-12)
+#, method='Radau', rtol=1e-6, atol=1e-8
+#, method='BDF'
+F1_th=F1(x_dot_data)
+F2_th=F2(x_data)
 
 
 
@@ -159,18 +215,20 @@ df = pd.DataFrame({
     'x2':x_dot_data,
     'x1_dot':x_dot_data,
     'x2_dot':x_ddot_data,
-    #'x': x_data,
-    #'x_dot': x_dot_data,
+    'x': x_data,
+    'x_dot': x_dot_data,
+    'x_ddot': x_ddot_data,
     'F_ext': F_ext_val
 })
 
 
 #equation1='x_ddot + f1(x_dot) + f2(x)- F_ext  = 0'
-#equation2='f2(x)=0'
+#equation2='F_ext=(f1(x_dot))**2-f2(x)'
 
-equation1='x1_dot = x2'
-equation2='x2_dot = F_ext - f1(x2) - f2(x1)'
-
+############## identification equation
+eq1='x1_dot = x2*exp(a3-2)'
+eq2='x2_dot = F_ext - f1(x2) - f2(x1)'
+equations = [eq1,eq2]
 
 #df = pd.DataFrame({
 #    't': time_data,
@@ -183,6 +241,8 @@ equation2='x2_dot = F_ext - f1(x2) - f2(x1)'
 #    'x_ddot': x_ddot_data,
 #    'F_ext': F_ext_val
 #})
+
+
 #equation1='x1_dot = x2'
 #equation2='x2_dot = F_ext - f1(x_dot) - f2(x)'
 
@@ -191,7 +251,6 @@ equation2='x2_dot = F_ext - f1(x2) - f2(x1)'
 #+ f1(x_dot) + f2(x)- F_ext  = 0'
 #equation2='f2(x)=0'
 
-equations = [equation1,equation2]
 
 ########################################
           #### method NN  ####
@@ -199,10 +258,10 @@ equations = [equation1,equation2]
 #equation='x_ddot + f1(x_dot) + a1*x + a2*x**3 - F_ext = 0'
 #equation='x_ddot + a1*x_dot + a2*x + a3*x**3 - F_ext = 0'
 constraints = [
-    {'constraint': 'f1(0)=0', 'penalty': 1e-2},
+    #{'constraint': 'f1(0)=0', 'penalty': 1e-2},
    #{'constraint': 'f2(0)=0', 'penalty': 1e-2},
-    {'constraint': 'f1 odd', 'penalty': 1e-1, 'eval': 'array','Nval_array':100}, # penaly is optional
-    {'constraint': 'f2 odd', 'penalty': 1e-1, 'eval': 'array','Nval_array':100}, # eval=data/array array is default
+    #{'constraint': 'f1 odd', 'penalty': 1e-1, 'eval': 'array','Nval_array':100}, # penaly is optional
+    #{'constraint': 'f2 odd', 'penalty': 1e-1, 'eval': 'array','Nval_array':100}, # eval=data/array array is default
 ]
 #constraints = [
 #    {'constraint': 'f1(0)=0'},
@@ -210,11 +269,13 @@ constraints = [
 #]
 parameters_NN = {
     'neurons': 100,
+    'layers':3,
+    #'activation':'ReLu',
     'lr': 1e-4,
-    'epochs': 1000,
+    'epochs': 5000,
     'error_threshold': 1e-6,
     'extrapolation': None,
-    'weight_loss_param': 1e1,
+    'weight_loss_param': 1e-3,
     # 'param_penalty_weight': 0.0,
     'constraints': constraints,
     #'eq_weights': [1.0, 1.0]
@@ -284,16 +345,60 @@ plt.show()
 #    plt.legend()
 #    plt.show()
     
+   
 # Print learned parameters (if any)
 if obtained_coefs:
     print("\nLearned scalar parameters:")
     for name, val in obtained_coefs.items():
         print(f"{name} = {val.item():.4f}")
 
+#####################################  simulate NN ##########################################
+#pycc.save_trained_models('trained_models.pt', models, obtained_coefs)
+#models, scalar_params = load_trained_models('trained_models.pt', device='cpu')
+
+#equation1='x1_dot = x2'
+#equation2='x2_dot = F_ext *(a1-1) - f1(x2) - f2(x1)'
+#equations = [equation1,equation2]
+
+params_NN_simul = {
+    'models': models,
+    'obtained_coefs': obtained_coefs,
+    #'local_funcs': {'F_ext': lambda t: F0 * np.cos(Omega * t)},
+    'local_funcs': {'F_ext': lambda t: F_ext(t)},
+    #'local_funcs': {'F_ext'},
+    't_span':t_span,
+    'y0': y0,   # corresponds to equations order: first eq -> y0[0], second -> y0[1]
+    't_eval': t_eval,
+    'method': 'LSODA',  # solver for solve_ivp
+    'atol': 1e-8,
+    'rtol': 1e-6,
+    'check_nan': True
+}
+
+sol = pycc.simulate(equations, method='NN', params=params_NN_simul)
+print("Integration success:", sol.success)
+
+time_sim=sol.t
+x_sim=sol.y[0]
+x_dot_sim=sol.y[1]
+
+# Plot solution
+plt.figure()
+plt.plot(time_sim, x_sim, label="x(t) simulated NN(sym+SR)")
+plt.plot(time_data, x_data, label="x(t) th")
+plt.xlabel('t')
+plt.ylabel('x(t)')
+#plt.figure()
+#plt.plot(sol.t, sol.y[1], label="x_dot(t) simulated NN(sym+SR)")
+#plt.plot(time_data, x_dot_data, label="x_dot(t) th")
+plt.legend()
+plt.show()
 
 
 
 
+###############################################################################################
+print("now making POST-SR")
 # Run symbolic regression post-processing
 sr_results = pycc.process_evals_SymbReg(
     evals,

@@ -10,13 +10,13 @@ torch.manual_seed(10)
 
 
 from .train_manager import train
-from .train_NN_hybrid import train_NN_hybrid
-from .train_polynomial import train_polynomial
-from .train_polynomial_linear import train_polynomial_linear
-from .train_SymbReg import train_SymbReg
+#from .train_NN_hybrid import train_NN_hybrid
+#from .train_polynomial import train_polynomial
+#from .train_polynomial_linear import train_polynomial_linear
+#from .train_SymbReg import train_SymbReg
 
 from .simulate_manager import simulate
-from .simulate_th import simulate_th
+#from .simulate_th import simulate_th
 
 
 from .process_evals_SymbReg import process_evals_SymbReg

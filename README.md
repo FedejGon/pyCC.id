@@ -1,6 +1,5 @@
 <div align="center">
 
-# pyCC.id
 # pyCC :  High-Performance System Identification using Characteristic Curves
 Library to find interpretable models for nonlinear system identification based on the concept of characteristic curves (CCs)
 

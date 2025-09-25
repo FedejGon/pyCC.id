@@ -11,13 +11,39 @@ https://github.com/FedejGon/pyCC.id
 |:---:|:---:|:---:|
 |[![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)|[![Discussions](https://img.shields.io/badge/discussions-github-informational)](https://github.com/FedejGon/pyCC.id/discussions)|[![Paper](https://img.shields.io/badge/arXiv-2305.01582-b31b1b)](https://arxiv.org/)||
 
+</div>
+
 # Instalation with pip (recommended)
+
+## ✅ Installation
+
+### Pip (recommended for users)
+PyCC uses Symbolic Regression in some stages. We advise to install both packages in order to use all the functionalities. You can install PyCC and PySR with pip:
+```bash
 pip install pycc.id
+pip install pysr
+```
+
+### From source (for developers)
+Download or clone the repository and install with:
+```bash
+pip install -e .
+```
+
+## Usage
+PyCC package is imported using:
+```bash
+import pycc
+import pysr
+```
+(⏱️ Please note that the initial import may take a few minutes to set everything up.)
 
 
 ## Test
-python program.py
-
+To test PyCC, there are several Tutorials available. You can download or copy them to your local machine or a cluster. Then, simply execute them, for example:
+```bash
+python Tutorial1.py
+```
 
 ## Usage
 model1, model2 = pycc.train_nn_models(t, x, x_dot, x_ddot, F_ext)
@@ -28,11 +54,8 @@ F_pred = pycc.predict(model1, model2, x, x_dot)
 
 ---
 
-## ✅ How to Install Locally from source 
 
-Download source, from the root directory run:
 
-pip install -e .
 
 
 

@@ -130,8 +130,10 @@ url={https://arxiv.org/abs/2305.01582},
 ```
 
 
-### We are open to collaborations and adding new possible features. 
+### We are open to collaborations and adding new possible features.
 Please,add **Ideas** into the forum or conctact to: 
 F.J. Gonzalez: fgonzalez@ifir-conicet.gov.ar 
+
+For **Issues** or **bugs**, add "[New issue](https://github.com/FedejGon/pyCC.id/issues)".   
 
 

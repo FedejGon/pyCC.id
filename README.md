@@ -40,7 +40,9 @@ import pysr
 
 
 ## ✅ Tutorials
-To test PyCC, there are several Tutorials available. You can download or copy them to your local machine or a cluster. Then, simply execute them, for example:
+**First time execution? We recommend using the Google Colab demo!**
+
+Additionally, there are several Tutorials available. You can download or copy them to your local machine or a cluster. Then, simply execute them, for example:
 ```bash
 python Tutorial1.py
 ```

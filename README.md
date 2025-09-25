@@ -131,9 +131,9 @@ url={https://arxiv.org/abs/2305.01582},
 
 
 ### We are open to collaborations and adding new possible features.
-Please,add **Ideas** into the forum or conctact to: 
-F.J. Gonzalez: fgonzalez@ifir-conicet.gov.ar 
+Please share your Ideas in the forum or contact: 
+ - F.J. Gonzalez: fgonzalez@ifir-conicet.gov.ar 
 
-For **Issues** or **bugs**, add "[New issue](https://github.com/FedejGon/pyCC.id/issues)".   
+For **Issues** or **bugs**, add "[![Issues](https://img.shields.io/badge/discussions-github-informational)](https://github.com/FedejGon/pyCC.id/issues)".   
 
 

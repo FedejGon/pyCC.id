@@ -66,14 +66,17 @@ General reference to this package:
 
 
 
+###
 In case of using NN approach, additionally cite **Gonzalez2025nody** and **Gonzalez2025symmetries**:
   - Gonzalez, F. J. and Lara, L. P. "[Interpretable neural network system identification method for two families of second-order systems based on characteristic curves](https://doi.org/10.1007/s11071-025-11744-6)." Nonlinear Dyn. (2025)
   
 
+###
 In case of using Polynomial (Poly) approach, additionally cite **Gonzalez2023** and **Gonzalez2024**: 
   - Gonzalez, F.J. "[Determination of the characteristic curves of a nonlinear first order system from fourier analysis](https://doi.org/10.1038/s41598-023-29151-5)." Sci. Rep., vol. 13, 1955, (2023).
   - Gonzalez, F.J. "[System identification based on characteristic curves: a mathematical connection between power series and Fourier analysis for first-order nonlinear systems](https://doi.org/10.1007/s11071-024-09890-4)." Nonlinear Dyn. 112, 16167–16197 (2024). 
 
+###
 In case of using post-SR and/or SymbReg-CC approaches, additionally cite **Cranmer2023PySR**
   - Cranmer, M. "[Interpretable Machine Learning for Science with PySR and SymbolicRegression.jl](https://doi.org/10.48550/arXiv.2305.01582)." arXiv preprint arXiv:2305.01582 (2023).
 

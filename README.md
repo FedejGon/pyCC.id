@@ -30,7 +30,7 @@ Download or clone the repository and install with:
 pip install -e .
 ```
 
-## Usage
+## ✅ Usage
 PyCC package is imported using:
 ```bash
 import pycc
@@ -39,16 +39,11 @@ import pysr
 (⏱️ Please note that the initial import may take a few minutes to set everything up.)
 
 
-## Test
+## ✅ Tutorials
 To test PyCC, there are several Tutorials available. You can download or copy them to your local machine or a cluster. Then, simply execute them, for example:
 ```bash
 python Tutorial1.py
 ```
-
-## Usage
-model1, model2 = pycc.train_nn_models(t, x, x_dot, x_ddot, F_ext)
-F_pred = pycc.predict(model1, model2, x, x_dot)
-
 
 
 

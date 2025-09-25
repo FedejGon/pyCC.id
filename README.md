@@ -1,11 +1,12 @@
 <div align="center">
 
 # pyCC.id
+# pyCC :  High-Performance System Identification using Characteristic Curves
 Library to find interpretable models for nonlinear system identification based on the concept of characteristic curves (CCs)
 
 https://github.com/FedejGon/pyCC.id
 
-# pyCC :  High-Performance System Identification using Characteristic Curves
+
 
 | **colab demo** | **Forums** | **Paper** | 
 |:---:|:---:|:---:|
@@ -18,10 +19,10 @@ https://github.com/FedejGon/pyCC.id
 ## ✅ Installation
 
 ### Pip (recommended for users)
-PyCC uses Symbolic Regression in some stages. We advise to install both packages in order to use all the functionalities. You can install PyCC and PySR with pip:
+PyCC uses Symbolic Regression (pySR) in some features. We advise to install both packages to use all the functionalities, using pip:
 ```bash
-pip install pycc.id
 pip install pysr
+pip install pycc.id
 ```
 
 ### From source (for developers)
@@ -34,9 +35,8 @@ pip install -e .
 PyCC package is imported using:
 ```bash
 import pycc
-import pysr
 ```
-(⏱️ Please note that the initial import may take a few minutes to set everything up.)
+(⏱️ Please note that the initial import automatically installs dependencies on a bare installation, which may take ∼3 minutes)
 
 
 ## ✅ Tutorials

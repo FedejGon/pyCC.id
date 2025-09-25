@@ -6,3 +6,5 @@ pycc.id*info
 
 # Ignore distribution folder
 dist/
+
+.ipynb*/

@@ -178,10 +178,8 @@ def train_polynomial(df, equation, params=None):
             coeffs_idx_map[f_name] = (start_idx, end_idx)
             start_idx = end_idx
         # scalar params appear after all function active coeffs
-        # Ensure we slice exactly n_params elements
         scalar_slice = p[start_idx:start_idx + n_params] if n_params > 0 else np.array([])
         scalar_vals = {name: float(scalar_slice[i]) for i, name in enumerate(param_names)} if n_params > 0 else {}
-        # build param index map
         for i, name in enumerate(param_names):
             param_idx_map[name] = start_idx + i
 
@@ -207,12 +205,10 @@ def train_polynomial(df, equation, params=None):
                 elif s_name in scalar_vals:
                     lambda_args[s_name] = scalar_vals[s_name]
                 else:
-                    # default zeros if symbol not provided (should be rare)
                     lambda_args[s_name] = np.zeros(N_data)
 
             # Evaluate residual (array length N_data)
             try:
-                # pass kwargs in symbol order
                 kwargs = {s.name: lambda_args[s.name] for s in lambdas[f'vars_{i}']}
                 R_i = lambdas[f'R_{i}'](**kwargs)
                 R_i = np.nan_to_num(np.asarray(R_i, dtype=float)) * sqrt_w
@@ -229,13 +225,9 @@ def train_polynomial(df, equation, params=None):
                 dRdF_arr = np.nan_to_num(np.asarray(dRdF, dtype=float))
                 if dRdF_arr.ndim == 0:
                     dRdF_arr = np.full(N_data, dRdF_arr.item(), dtype=float)
-                # Z_active (N_data, n_active_f)
                 Z_active = Z_map[f_name][:, coeffs_mask[f_name]]
                 start_global, end_global = coeffs_idx_map[f_name]
                 if Z_active.size != 0:
-                    # derivative contribution to each active coefficient column:
-                    # column_j = dRdF * Z_active[:, j]
-                    # fill into J_i columns [start_global:end_global]
                     J_i[:, start_global:end_global] = (dRdF_arr[:, np.newaxis] * Z_active) * sqrt_w
 
             # derivatives wrt scalar parameters (a_i)
@@ -252,68 +244,127 @@ def train_polynomial(df, equation, params=None):
             R_blocks.append(R_i)
 
         # --- Penalty residuals AND their Jacobians (fill into correct global columns) ---
+        # We support:
+        #  - point constraints: f1(x0)=y0  (generic)
+        #  - special case f1(0)=0 (also covered by the generic)
+        #  - odd / even symmetry constraints with eval='array' or 'data'
+        float_re = r'([-+]?\d*\.?\d+(?:[eE][-+]?\d+)?)'
+        point_pat = re.compile(r'^(f\d+)\(\s*' + float_re + r'\s*\)\s*=\s*' + float_re + r'\s*$', re.I)
+
         for cons in constraints:
-            rule = cons.get("constraint", "")
-            penalty = cons.get("penalty", 1.0)
-            if not rule.startswith("f"):
-                continue
-            f_name_match = re.match(r'(f\d+)', rule)
-            if f_name_match is None:
-                continue
-            f_name = f_name_match.group(1)
-            if f_name not in coeffs_map:
-                continue
-            coeffs = coeffs_map[f_name]
-            var_name = func_map[f_name]
-            A0, A1 = scaling_params[var_name]
-            n_coeffs = len(coeffs)
-            start_global, end_global = coeffs_idx_map[f_name]
-            active_powers = np.nonzero(coeffs_mask[f_name])[0]  # polynomial powers that are active
+            rule = cons.get("constraint", "").strip()
+            penalty = float(cons.get("penalty", 1.0))
+            eval_mode = cons.get("eval", "array")
             sqrt_pen = np.sqrt(penalty)
 
-            # f(0)=0 pointwise constraint
-            if re.search(r'\(0\)\s*=\s*0', rule):
+            if not rule:
+                continue
+
+            # --- Generic value-at-point constraint: fN(x0)=y0 ---
+            m_val = point_pat.match(rule)
+            if m_val:
+                f_name = m_val.group(1)
+                x_val = float(m_val.group(2))
+                y_target = float(m_val.group(3))
+                if f_name not in coeffs_map:
+                    continue
+                coeffs = coeffs_map[f_name]
+                var_name = func_map[f_name]
+                A0, A1 = scaling_params[var_name]
+                # compute z at the point
+                z0 = (x_val - A0) / A1
+                # build Z_point vector (length n_coeffs_per_func)
+                Z_point = np.array([z0**k for k in range(n_coeffs_per_func)], dtype=float)
+                # residual is (Z_point @ coeffs - y_target) * sqrt_pen
+                val0 = float(np.dot(Z_point, coeffs) - y_target)
+                R_pen = np.array([val0 * sqrt_pen])
+                J_pen = np.zeros((1, total_unknowns), dtype=float)
+                active_powers = np.nonzero(coeffs_mask[f_name])[0]
+                for local_idx, poly_power in enumerate(active_powers):
+                    global_col = coeffs_idx_map[f_name][0] + local_idx
+                    J_pen[0, global_col] = (z0**poly_power) * sqrt_pen
+                # no derivatives w.r.t scalar parameters in this point-constraint (unless you'd want to)
+                R_blocks.append(R_pen)
+                J_blocks.append(J_pen)
+                # done with this constraint
+                continue
+
+            # --- f(0)=0 legacy style (if not captured above) ---
+            m_f0 = re.match(r'^(f\d+)\(\s*0\s*\)\s*=\s*0\s*$', rule)
+            if m_f0:
+                f_name = m_f0.group(1)
+                if f_name not in coeffs_map:
+                    continue
+                coeffs = coeffs_map[f_name]
+                var_name = func_map[f_name]
+                A0, A1 = scaling_params[var_name]
+                n_coeffs = len(coeffs)
+                start_global, end_global = coeffs_idx_map[f_name]
+                # evaluate function at x=0 (scaled z0)
                 z0 = (0.0 - A0) / A1
                 val0 = np.sum([coeffs[k] * (z0**k) for k in range(n_coeffs)])
                 R_pen = np.array([val0 * sqrt_pen])
                 J_pen = np.zeros((1, total_unknowns), dtype=float)
+                active_powers = np.nonzero(coeffs_mask[f_name])[0]
                 for local_idx, poly_power in enumerate(active_powers):
                     global_col = start_global + local_idx
                     J_pen[0, global_col] = (z0**poly_power) * sqrt_pen
                 R_blocks.append(R_pen)
                 J_blocks.append(J_pen)
+                continue
 
-            # odd/even symmetry
-            elif "odd" in rule or "even" in rule:
-                eval_mode = cons.get("eval", "array")
+            # --- odd/even symmetry ---
+            if re.search(r'\bodd\b', rule, re.I) or re.search(r'\beven\b', rule, re.I):
+                # check which f this constraint refers to: must start with fN
+                f_name_match = re.match(r'^(f\d+)', rule)
+                if f_name_match is None:
+                    continue
+                f_name = f_name_match.group(1)
+                if f_name not in coeffs_map:
+                    continue
+                coeffs = coeffs_map[f_name]
+                var_name = func_map[f_name]
+                A0, A1 = scaling_params[var_name]
+                n_coeffs = len(coeffs)
+                start_global, end_global = coeffs_idx_map[f_name]
+                active_powers = np.nonzero(coeffs_mask[f_name])[0]
+
+                # build evaluation x values
                 if eval_mode == "array":
                     Nval = int(cons.get("Nval_array", 50))
                     x_test = np.linspace(-1.0, 1.0, Nval) * A1 + A0
                 else:
+                    # 'data' or anything else -> use actual df points of this variable
                     x_test = df[func_map[f_name]].values
                 z_test = (x_test - A0) / A1
                 Z_test = np.vstack([z_test**i for i in range(n_coeffs)]).T
                 z_neg = -z_test
                 Z_neg = np.vstack([z_neg**i for i in range(n_coeffs)]).T
-                if "odd" in rule:
-                    err = (Z_test @ coeffs) + (Z_neg @ coeffs)  # should be zero for odd
-                    sign = +1.0
-                else:
-                    err = (Z_test @ coeffs) - (Z_neg @ coeffs)  # should be zero for even
-                    sign = -1.0
 
-                R_pen = err * sqrt_pen
-                M = len(R_pen)
-                J_pen = np.zeros((M, total_unknowns), dtype=float)
-                for local_idx, poly_power in enumerate(active_powers):
-                    global_col = start_global + local_idx
-                    if "odd" in rule:
+                if re.search(r'\bodd\b', rule, re.I):
+                    err = (Z_test @ coeffs) + (Z_neg @ coeffs)  # should be zero for odd
+                    # derivative w.r.t active coeffs: Z_test[:,p] + Z_neg[:,p]
+                    M = len(err)
+                    R_pen = err * sqrt_pen
+                    J_pen = np.zeros((M, total_unknowns), dtype=float)
+                    for local_idx, poly_power in enumerate(active_powers):
+                        global_col = start_global + local_idx
                         deriv = (Z_test[:, poly_power] + Z_neg[:, poly_power])
-                    else:
+                        J_pen[:, global_col] = deriv * sqrt_pen
+                    R_blocks.append(R_pen)
+                    J_blocks.append(J_pen)
+                else:
+                    # even
+                    err = (Z_test @ coeffs) - (Z_neg @ coeffs)  # should be zero for even
+                    M = len(err)
+                    R_pen = err * sqrt_pen
+                    J_pen = np.zeros((M, total_unknowns), dtype=float)
+                    for local_idx, poly_power in enumerate(active_powers):
+                        global_col = start_global + local_idx
                         deriv = (Z_test[:, poly_power] - Z_neg[:, poly_power])
-                    J_pen[:, global_col] = deriv * sqrt_pen
-                R_blocks.append(R_pen)
-                J_blocks.append(J_pen)
+                        J_pen[:, global_col] = deriv * sqrt_pen
+                    R_blocks.append(R_pen)
+                    J_blocks.append(J_pen)
 
         # --- Stack everything and do Gauss-Newton step ---
         if len(J_blocks) == 0:

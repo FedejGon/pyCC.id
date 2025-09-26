@@ -241,6 +241,7 @@ def train_NN_hybrid(df, equation_str, params=None):
     extrapolation = params.get('extrapolation', None)
     weight_loss_param = params.get('weight_loss_param', 1e-3)
     constraints = params.get('constraints', [])
+    n_eval = int(params.get('n_eval', 200))
     # Accept single equation or list of equations (backward compatible)
     if isinstance(equation_str, (list, tuple)):
         equations = list(equation_str)
@@ -335,7 +336,7 @@ def train_NN_hybrid(df, equation_str, params=None):
         model = models[f_name]
         model.eval()
         x_vals = tensors[var].detach().numpy().flatten()
-        x_plot = np.linspace(np.min(x_vals), np.max(x_vals), 200).reshape(-1, 1).astype(np.float32)
+        x_plot = np.linspace(np.min(x_vals), np.max(x_vals), n_eval).reshape(-1, 1).astype(np.float32)
         x_plot_tensor = torch.tensor(x_plot)
         with torch.no_grad():
             y_plot = model(x_plot_tensor).numpy().flatten()

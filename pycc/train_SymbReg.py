@@ -81,7 +81,8 @@ def train_SymbReg(df, equations, params=None):
     max_iterations = int(params.get('max_iterations',15 ))
     tol = float(params.get('tol', 1e-10))
     scaling = bool(params.get('scaling', False))
-
+    n_eval = int(params.get('n_eval', 200))
+    
     if PySRRegressor is None:
         raise ImportError('PySR is required for SymbReg method. pip install pysr')
 
@@ -289,7 +290,7 @@ def train_SymbReg(df, equations, params=None):
     for f_name, var_name in func_order:
         model = models.get(f_name, None)
         x_data = df[var_name].values
-        x_plot = np.linspace(x_data.min(), x_data.max(), 200)
+        x_plot = np.linspace(x_data.min(), x_data.max(), n_eval)
         if model is None:
             y_plot = np.zeros_like(x_plot)
         elif model.get('pysr_model') is None:

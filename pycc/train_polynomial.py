@@ -77,7 +77,8 @@ def train_polynomial(df, equation, params=None):
     n_iter = int(params.get('n_iter', 1000))
     learning_rate = float(params.get('learning_rate', 0.01))
     error_threshold = float(params.get('error_threshold', 1e-10))
-
+    n_eval = int(params.get('n_eval', 200))
+        
     equations = list(equation) if isinstance(equation, (list, tuple)) else [equation]
     N_data = len(df)
     n_coeffs_per_func = N_order + 1
@@ -367,7 +368,7 @@ def train_polynomial(df, equation, params=None):
     for f_name, var_name in func_order:
         model = models[f_name]
         x_data = df[var_name].values
-        x_plot = np.linspace(x_data.min(), x_data.max(), 200)
+        x_plot = np.linspace(x_data.min(), x_data.max(), n_eval)
         z_plot = (x_plot - model['A0']) / model['A1']
         Z_plot = np.vstack([z_plot**i for i in range(n_coeffs_per_func)]).T
         y_plot = Z_plot @ model['coeffs']

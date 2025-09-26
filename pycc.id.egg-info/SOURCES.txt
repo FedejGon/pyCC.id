@@ -23,7 +23,7 @@ pycc/train_SymbReg_backup3_working_but_fiopposite.py
 pycc/train_manager.py
 pycc/train_old.py
 pycc/train_polynomial.py
-pycc/train_polynomial_backup.py
+pycc/train_polynomial_backup_old.py
 pycc/train_polynomial_improved_parametric.py
 pycc/train_polynomial_linear.py
 pycc/train_s.py

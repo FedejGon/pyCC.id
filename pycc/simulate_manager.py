@@ -1,5 +1,6 @@
 from .simulate_th import simulate_th
 from .simulate_NN import simulate_NN
+from .simulate_Poly import simulate_Poly
 
 def simulate(equations, method='Theoretical', params=None):
     """
@@ -11,8 +12,8 @@ def simulate(equations, method='Theoretical', params=None):
         return simulate_th(equations, params=params)
     elif method == 'NN':
          return simulate_NN(equations, params=params)
-    # elif method == 'Poly':
-    #     return simulate_Poly(df, equations, params=params)
+    elif method == 'Poly':
+         return simulate_Poly(equations, params=params)
     else:
         raise ValueError(f"Unknown simulation method '{method}'")
         

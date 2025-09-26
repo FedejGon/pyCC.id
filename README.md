@@ -15,14 +15,14 @@ https://github.com/FedejGon/pyCC.id
 
 ## ✅ Installation with pip (recommended) 
 
-### Pip (for users)
+### Installation for users
 PyCC uses Symbolic Regression (pySR) in some features. We advise to install both packages to use all the functionalities, using pip:
 ```bash
 pip install pysr
 pip install pycc.id
 ```
 
-### From source (for developers)
+### Installation for developers (from source)
 Download or clone the repository and install with:
 ```bash
 pip install -e .

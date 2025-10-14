@@ -10,21 +10,6 @@ import time
 import re # for processing equation string
 import matplotlib.pyplot as plt
 import sympy as sp
-
-# Check for GPU availability
-if torch.cuda.is_available():
-    print("GPU is available, using GPU")
-else:
-    print("GPU is not available, using CPU.")
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-# Free GPU memory if using CUDA
-if torch.cuda.is_available():
-    torch.cuda.empty_cache()
-    torch.cuda.ipc_collect()
-    
-    
-
 # --- 1) Define NN model class ---
 class NNModel(nn.Module):
     def __init__(self, neurons=100, layers=3):
@@ -306,17 +291,6 @@ def train_NN_hybrid(df, equation_str, params=None):
     lhs_exprs = [eqo.lhs for eqo in eq_objs]
     rhs_exprs = [eqo.rhs for eqo in eq_objs]
     criterion = nn.MSELoss()
-    
-    # --- Move all models, params, and tensors to GPU ---
-    if torch.cuda.is_available():
-        print("Moving models and data to GPU...")
-        for model in models.values():
-            model.to(device)
-        for k in tensors:
-            tensors[k] = tensors[k].to(device)
-        for k in scalar_params:
-            scalar_params[k] = scalar_params[k].to(device)
-    
     for epoch in range(epochs):
         optimizer.zero_grad()
         # Compute total loss as weighted sum over all equations' MSE(lhs, rhs)
@@ -356,15 +330,6 @@ def train_NN_hybrid(df, equation_str, params=None):
         if total_data_loss.item() < error_threshold:
             print(f"Early stopping at epoch {epoch}")
             break
-    # --- Move everything back to CPU for evaluation/plotting ---
-    print("Moving models and data back to CPU...")
-    for model in models.values():
-        model.to('cpu')
-    for k in tensors:
-        tensors[k] = tensors[k].to('cpu')
-    for k in scalar_params:
-        scalar_params[k] = scalar_params[k].to('cpu')        
-            
     # Evaluate learned functions on their variable ranges for plotting (same as before)
     results = []
     for f_name, var in func_order:

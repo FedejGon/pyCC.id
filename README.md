@@ -13,10 +13,10 @@ https://github.com/FedejGon/pyCC.id
 
 </div>
 
-## ✅ Installation with pip (recommended) 
+## 📥  Installation with pip (Recommended) 
 
 ### Installation for users
-PyCC uses Symbolic Regression (pySR) in some features. We advise to install both packages to use all the functionalities, using pip:
+Some features in PyCC include using the Symbolic Regression (pySR) package. Thus we recommend installing this package first. To install both packages use:  
 ```bash
 pip install pysr
 pip install pycc.id
@@ -28,18 +28,17 @@ Download or clone the repository and install with:
 pip install -e .
 ```
 
-## ✅ Usage
-PyCC package is imported using:
+## 🚀 Usage
+Import the package into your Python environment:
 ```bash
 import pycc
 ```
-(⏱️ Please note that the initial import automatically installs dependencies on a bare installation, which may take ∼3 minutes)
+> ⏱️ **Initial import delay** : the very first time you run * *import pycc* * after a frech installation, the package automatically sets up dependencies. This process may take ∼3. Subsequent imports will be much faster.
 
+## 📚  Tutorials
+**First time? We recommend starting with our Google Colab Notebook** [![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)!
 
-## ✅ Tutorials
-**First time execution? We recommend using the Google Colab demo!**
-
-Additionally, there are several Tutorials available. You can download or copy them to your local machine or a cluster. Then, simply execute them, for example:
+Additionally, there are other Tutorials and test on * *Tutorials folder* *. You can download or copy them to your local machine or a cluster. Then, simply execute them, for example:
 ```bash
 python Tutorial1.py
 ```
@@ -53,7 +52,7 @@ python Tutorial1.py
 
 
 
-## How to cite this package
+## ✅ How to cite this package
 
 General reference to this package:
 **Gonzalez2025code**

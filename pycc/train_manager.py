@@ -16,7 +16,7 @@ def train(df, equations, method='NN', params=None):
     elif method == 'Poly_linear':
         return train_polynomial_linear(df, equations, params=params)
     elif method == 'SymbReg':
-        return train_SymbReg(df, equations, params=params)
+        return train_SymbR(df, equations, params=params)
     else:
         raise ValueError(f"Unknown training method '{method}'")
 

@@ -74,7 +74,7 @@ def fit_symbolic_regression(x_vals, y_vals, niterations=200, populations=15):
     
     return expr, f_num, model
 
-def process_evals_SymbReg(evals, function_names=None, sr_params=None, plot=True):
+def process_evals_SymbR(evals, function_names=None, sr_params=None, plot=True):
     """
     Fit SR to each f_i from evals list [x1, y1, x2, y2, ...].
     Returns dict {f_name: {"expr": sympy_expr, "func": callable, "model": model}}

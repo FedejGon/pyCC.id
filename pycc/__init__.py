@@ -19,7 +19,7 @@ from .simulate_manager import simulate
 #from .simulate_th import simulate_th
 
 
-from .process_evals_SymbReg import process_evals_SymbReg
+from .process_evals_SymbR import process_evals_SymbR
 
 from .eval_cc import eval_cc
 

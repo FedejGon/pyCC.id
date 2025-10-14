@@ -12,17 +12,24 @@ import matplotlib.pyplot as plt
 import sympy as sp
 
 # Check for GPU availability
-if torch.cuda.is_available():
-    print("GPU is available, using GPU")
-else:
-    print("GPU is not available, using CPU.")
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
+#if torch.cuda.is_available():
+#    print("GPU is available, using GPU")
+#else:
+#    print("GPU is not available, using CPU.")
+#device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # Free GPU memory if using CUDA
-if torch.cuda.is_available():
-    torch.cuda.empty_cache()
-    torch.cuda.ipc_collect()
+#if torch.cuda.is_available():
+#    torch.cuda.empty_cache()
+#    torch.cuda.ipc_collect()
     
+if torch.cuda.is_available():
+    print("GPU is available")   
+    # Free GPU memory in case of being used
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        torch.cuda.ipc_collect()
+else:
+    print("GPU not available")
     
 
 # --- 1) Define NN model class ---
@@ -247,6 +254,31 @@ def train_NN_hybrid(df, equation_str, params=None):
     """
     if params is None:
         params = {}
+    device_option = params.get('device', 'automatic').lower()    
+    
+    if device_option == 'automatic':
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    elif device_option in ['gpu', 'cuda']:
+        if torch.cuda.is_available():
+            device = torch.device("cuda")
+        else:
+            print("⚠️ GPU requested but not available. Running on CPU.")
+            device = torch.device("cpu")
+    elif device_option == 'cpu':
+        device = torch.device("cpu")
+    else:
+        raise ValueError(f"Invalid device option '{device_option}'. Use 'automatic', 'cpu', or 'gpu'/'cuda'.")
+
+    print(f"Using device: {device}")
+        
+    #if torch.cuda.is_available():
+    #    print("GPU is available, using GPU") 
+    #else:
+    #    print("GPU is not available, using CPU.")
+    #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+
+        
     # Extract hyperparameters with defaults
     neurons = params.get('neurons', 100)
     layers = params.get('layers', 3)
@@ -308,14 +340,15 @@ def train_NN_hybrid(df, equation_str, params=None):
     criterion = nn.MSELoss()
     
     # --- Move all models, params, and tensors to GPU ---
-    if torch.cuda.is_available():
-        print("Moving models and data to GPU...")
-        for model in models.values():
-            model.to(device)
-        for k in tensors:
-            tensors[k] = tensors[k].to(device)
-        for k in scalar_params:
-            scalar_params[k] = scalar_params[k].to(device)
+    print(f"Moving models and data to {device}...")
+    #if torch.cuda.is_available():
+    #    print("Moving models and data to GPU...")
+    for model in models.values():
+        model.to(device)
+    for k in tensors:
+        tensors[k] = tensors[k].to(device)
+    for k in scalar_params:
+        scalar_params[k] = scalar_params[k].to(device)
     
     for epoch in range(epochs):
         optimizer.zero_grad()

@@ -33,12 +33,12 @@ Import the package into your Python environment:
 ```bash
 import pycc
 ```
-> ⏱️ **Initial import delay** : the very first time you run * *import pycc* * after a frech installation, the package automatically sets up dependencies. This process may take ∼3. Subsequent imports will be much faster.
+> ⏱️ **Initial import delay** : the very first time you run *import pycc* after a frech installation, the package automatically sets up dependencies. This process may take ∼3. Subsequent imports will be much faster.
 
 ## 📚  Tutorials
 **First time? We recommend starting with our Google Colab Notebook** [![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)!
 
-Additionally, there are other Tutorials and test on * *Tutorials folder* *. You can download or copy them to your local machine or a cluster. Then, simply execute them, for example:
+Additionally, there are other Tutorials and test on *Tutorials* folder. You can download or copy them to your local machine or a cluster. Then, simply execute them, for example:
 ```bash
 python Tutorial1.py
 ```

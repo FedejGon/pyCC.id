@@ -114,9 +114,9 @@ elif len(evals) == 4:
 
 
 ########################################
-          #### method SymbReg  ####
+          #### method SymbR  ####
 ########################################
-params_SymbReg = {
+params_SymbR = {
   'pysr': {
     'niterations': 100,
     'unary_operators': ['tanh','sin','cos'],
@@ -135,8 +135,8 @@ params_SymbReg = {
 models, evals , scalar_coefs = pycc.train(
     df=df,
     equations=equations,
-    method='SymbReg',
-    params=params_SymbReg
+    method='SymbR',
+    params=params_SymbR
 )
 
 

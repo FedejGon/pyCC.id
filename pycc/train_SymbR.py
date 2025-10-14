@@ -1,5 +1,5 @@
 """
-train_SymbReg.py
+train_SymbR.py
 
 Iterative symbolic-regression fitter for functions f1(x), f2(x_dot), ...
 Given a list of algebraic equations like
@@ -27,7 +27,7 @@ try:
     from pysr import PySRRegressor
 except Exception as e:
     PySRRegressor = None
-    warnings.warn("PySR import failed. Install pysr to use SymbReg method.")
+    warnings.warn("PySR import failed. Install pysr to use SymbR method.")
 
 
 # ------------------ Utilities copied/adapted from train_polynomial ------------------
@@ -43,9 +43,9 @@ def extract_parameters(equation_str):
     return sorted(set(re.findall(r'\ba\d+\b', equation_str)))
 
 
-# ------------------ Core SymbReg trainer ------------------
+# ------------------ Core SymbR trainer ------------------
 
-def train_SymbReg(df, equations, params=None):
+def train_SymbR(df, equations, params=None):
     """Fit functions f1,f2,... appearing in equations using PySR.
 
     Args:
@@ -84,7 +84,7 @@ def train_SymbReg(df, equations, params=None):
     n_eval = int(params.get('n_eval', 200))
     
     if PySRRegressor is None:
-        raise ImportError('PySR is required for SymbReg method. pip install pysr')
+        raise ImportError('PySR is required for SymbR method. pip install pysr')
 
     # Prepare
     equations = list(equations) if isinstance(equations, (list, tuple)) else [equations]
@@ -279,7 +279,7 @@ def train_SymbReg(df, equations, params=None):
         # end loop over functions
         mean_mse = np.mean(mse_accum) if mse_accum else np.inf
         if outer % 1 == 0:
-            print(f"SymbReg outer iter {outer+1}/{max_iterations}, Loss: {mean_mse:.2e}")
+            print(f"SymbR outer iter {outer+1}/{max_iterations}, Loss: {mean_mse:.2e}")
         if abs(prev_loss - mean_mse) < tol:
             print(f"Converged with Delta_Loss={tol}. Stopping outer loop.")
             break
@@ -305,6 +305,6 @@ def train_SymbReg(df, equations, params=None):
 
 ## If used as script, provide a small example (guarded)
 #if __name__ == '__main__':
-#    # simple demonstration with synthetic data - user should import train_symbreg from this file.
-#    print('This module provides train_symbreg(df, equations, params). Import and call from your script.')
+#    # simple demonstration with synthetic data - user should import train_symb from this file.
+#    print('This module provides train_symbr(df, equations, params). Import and call from your script.')
 

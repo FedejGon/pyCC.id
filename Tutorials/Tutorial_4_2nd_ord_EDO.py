@@ -467,7 +467,7 @@ plt.show()
 ###############################################################################################
 print("now making POST-SR")
 # Run symbolic regression post-processing
-sr_results = pycc.process_evals_SymbReg(
+sr_results = pycc.process_evals_SymbR(
     evals,
     function_names=["f1", "f2"],  # must match training
     sr_params={"niterations": 100, "populations": 20},
@@ -556,9 +556,9 @@ plt.show()
 
 
 ########################################
-          #### method SymbReg  ####
+          #### method SymbR  ####
 ########################################
-params_SymbReg = {
+params_SymbR = {
   'pysr': {
     'niterations': 100,
     'unary_operators': ['tanh'],
@@ -577,8 +577,8 @@ params_SymbReg = {
 models, evals , scalar_coefs = pycc.train(
     df=df,
     equations=equations,
-    method='SymbReg',
-    params=params_SymbReg
+    method='SymbR',
+    params=params_SymbR
 )
 
 

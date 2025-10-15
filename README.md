@@ -52,7 +52,7 @@ python Tutorial1.py
 
 
 
-## ✅ How to cite this package
+## 🖋️ How to cite this package
 
 General reference to this package:
 **Gonzalez2025code**
@@ -127,10 +127,10 @@ In case of using post-SR and/or SymbReg-CC methods, additionally cite:
 ```
 
 
-### We are open to collaborations and adding new possible features.
+### 🤝 We are open to collaborations and adding new possible features.
 Please share your [![Ideas](https://img.shields.io/badge/ideas-github-informational)](https://github.com/FedejGon/pyCC.id/discussions/categories/ideas) or reach out for a possible collaboration to: 
  - Federico J. Gonzalez: fgonzalez@ifir-conicet.gov.ar 
 
-For **Issues** or **bugs**, add new [![Issues](https://img.shields.io/badge/issue-github-informational)](https://github.com/FedejGon/pyCC.id/issues).   
+🐞 For **Issues** or **bugs**, add new [![Issues](https://img.shields.io/badge/issue-github-informational)](https://github.com/FedejGon/pyCC.id/issues).   
 
 

@@ -382,7 +382,7 @@ def train_polynomial(df, equation, params=None):
             print(f"Warning: Singular matrix in iteration {iter_num}. Skipping update.")
 
         # Logging and early stopping
-        if (iter_num + 1) % 10 == 0 or loss < error_threshold:
+        if (iter_num + 1) % 100 == 0 or loss < error_threshold:
             print(f"Iter {iter_num+1}/{n_iter}, Loss: {loss:.4e}", end="")
             if scalar_vals:
                 print(", Params: ", end="")

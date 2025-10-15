@@ -327,8 +327,8 @@ plt.show()
 constraints = [
     #{'constraint': 'f1(0)=0', 'penalty': 1e-2},
    #{'constraint': 'f2(0)=0', 'penalty': 1e-2},
-    #{'constraint': 'f1 odd', 'penalty': 1e-1, 'eval': 'array','Nval_array':100}, # penaly is optional
-    #{'constraint': 'f2 odd', 'penalty': 1e-1, 'eval': 'array','Nval_array':100}, # eval=data/array array is default
+   {'constraint': 'f1 odd'},# 'penalty': 1e-1, 'eval': 'array','Nval_array':100}, # penaly is optional
+   {'constraint': 'f2 odd'},# 'penalty': 1e-1, 'eval': 'array','Nval_array':100}, # eval=data/array array is default
 ]
 #constraints = [
 #    {'constraint': 'f1(0)=0'},
@@ -338,13 +338,14 @@ parameters_NN = {
     'neurons': 100,
     'layers':3,
     #'activation':'ReLu',
-    'lr': 1e-4,
+    'lr': 1e-3,
     'epochs': 5000,
     'error_threshold': 1e-6,
     'extrapolation': None,
     'weight_loss_param': 1e-3,
     # 'param_penalty_weight': 0.0,
     'constraints': constraints,
+    'device': 'cpu',
     #'eq_weights': [1.0, 1.0]
 }
 #models, evals, obtained_coefs = pycc.train(

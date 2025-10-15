@@ -278,7 +278,7 @@ def train_NN_hybrid(df, equation_str, params=None):
     else:
         raise ValueError(f"Invalid device option '{device_option}'. Use 'automatic', 'cpu', 'gpu'/'cuda', or 'xpu'.")
 
-    print(f"✅ Using device: {device}")
+    print(f"💻 Using device: {device}")
 
 
     
@@ -350,10 +350,10 @@ def train_NN_hybrid(df, equation_str, params=None):
     param_names = sorted(param_names_set)
     # create models and scalar params
     models = {f_name: NNModel(neurons,layers) for f_name, _ in func_order}
+    
+    
+#    #working original    
     scalar_params = {name: nn.Parameter(torch.tensor(1.0, dtype=torch.float32)) for name in param_names}
-    # optimizer over all parameters (scalar params + all NN params)
-    full_params = list(scalar_params.values()) + [p for model in models.values() for p in model.parameters()]
-    optimizer = optim.Adam(full_params, lr=lr)
     # Prepare tensors from df (same as before)
     variables = list(df.columns)
     tensors = prepare_tensors(df, variables)
@@ -361,8 +361,10 @@ def train_NN_hybrid(df, equation_str, params=None):
     eq_objs = [sympy_expression(eq) for eq in equations]
     lhs_exprs = [eqo.lhs for eqo in eq_objs]
     rhs_exprs = [eqo.rhs for eqo in eq_objs]
-    criterion = nn.MSELoss()
-    
+    criterion = nn.MSELoss() 
+    # optimizer over all parameters (scalar params + all NN params)
+    full_params = list(scalar_params.values()) + [p for model in models.values() for p in model.parameters()]
+    optimizer = optim.Adam(full_params, lr=lr)
     # --- Move all models, params, and tensors to GPU ---
     print(f"Moving models and data to {device}...")
     #if torch.cuda.is_available():
@@ -373,7 +375,39 @@ def train_NN_hybrid(df, equation_str, params=None):
         tensors[k] = tensors[k].to(device)
     for k in scalar_params:
         scalar_params[k] = scalar_params[k].to(device)
-
+ 
+#    # new implementation with a module container
+#    # Build a module container so everything is registered and moveable as one unit
+#    model_container = nn.Module()
+#    model_container.models = nn.ModuleDict(models)
+#    # Register scalar parameters in a ParameterDict so they're visible to module.parameters()
+#    model_container.scalars = nn.ParameterDict({
+#        name: nn.Parameter(torch.tensor(1.0, dtype=torch.float32))
+#        for name in param_names
+#        })
+#    # Move the whole container to device BEFORE creating optimizer
+#    model_container.to(device)
+#    # Expose convenient references for evaluate & training loops
+#    models = {k: model_container.models[k] for k in model_container.models.keys()}
+#    scalar_params = {k: model_container.scalars[k] for k in model_container.scalars.keys()}
+#    # Prepare tensors (move to device)
+#    variables = list(df.columns)
+#    tensors = prepare_tensors(df, variables)
+#    for k in tensors:
+#        tensors[k] = tensors[k].to(device)
+#    # Optional: set different hyperparams per parameter group
+#    # e.g. smaller LR for scalar params, or no weight decay for them:
+#    scalar_lr = params.get('scalar_lr', lr)
+#    scalar_wd = params.get('scalar_weight_decay', 0.0)
+#    nn_wd = params.get('nn_weight_decay', 0.0)
+#    param_groups = [
+#        {'params': [p for p in model_container.models.parameters()], 'lr': lr, 'weight_decay': nn_wd},
+#        {'params': [p for _, p in model_container.scalars.items()], 'lr': scalar_lr, 'weight_decay': scalar_wd}
+#    ]
+#    optimizer = optim.Adam(param_groups)
+    
+ 
+ 
     # --- Intel XPU optimization with IPEX ---
     if device.type == 'xpu':
         try:
@@ -381,9 +415,52 @@ def train_NN_hybrid(df, equation_str, params=None):
             print(f"IPEX version: {ipex.__version__}")
             print(f"XPU available: {torch.xpu.is_available()}")
             print(f"XPU device count: {torch.xpu.device_count()}")
-            print("Applying Intel IPEX optimization for XPU device...")
-            for f_name, model in models.items():
-                model, optimizer = ipex.optimize(model, optimizer=optimizer)
+            print("Applying Intel IPEX optimization for XPU device...")            
+          
+            #try1
+            #for f_name, model in models.items():
+            #    model, optimizer = ipex.optimize(model, optimizer=optimizer)
+            # 1. Optimize each model with a dummy optimizer or just the model
+            
+            
+            #try2
+            #for f_name, model in models.items():
+            #    optimized_model, _ = ipex.optimize(model, optimizer=None)
+            #    models[f_name] = optimized_model # Update the models dictionary
+            #full_params = list(scalar_params.values()) + [p for model in models.values() for p in model.parameters()]
+            #optimizer = optim.Adam(full_params, lr=lr)
+            
+            # try3
+            ### We use model=None to only optimize/move the optimizer state.
+            #dummy_module = torch.nn.Module().to(device)
+            #_, optimizer = ipex.optimize(dummy_module, optimizer=optimizer)
+            #model_container = nn.ModuleDict(models)
+            ## Optimize the container ONCE. The optimizer already contains all 
+            ## parameters (NNs + scalars) and IPEX will handle them correctly.
+            #model_container, optimizer = ipex.optimize(model_container, optimizer=optimizer)
+            #for f_name in models.keys():
+            #    models[f_name] = model_container[f_name] 
+                
+            #try4     
+            model_container = nn.Module()
+            model_container.models = nn.ModuleDict(models)   # models is dict created earlier 
+            # use ParameterDict so scalars are registered and visible to module.parameters()
+            model_container.scalars = nn.ParameterDict({
+                name: nn.Parameter(torch.tensor(1.0, dtype=torch.float32))
+                for name in param_names
+            })
+            model_container.to(device)
+            optimizer = optim.Adam(model_container.parameters(), lr=lr)
+            model_container, optimizer = ipex.optimize(model_container, optimizer=optimizer)
+            models = {k: model_container.models[k] for k in model_container.models.keys()}
+            scalar_params = {k: model_container.scalars[k] for k in model_container.scalars.keys()}
+
+            #try5
+            #model_container, optimizer = ipex.optimize(model_container, optimizer=optimizer)
+            ## rebind references in case identities changed
+            #models = {k: model_container.models[k] for k in model_container.models.keys()}
+            #scalar_params = {k: model_container.scalars[k] for k in model_container.scalars.keys()}
+ 
         except ImportError:
             print("⚠️ IPEX not installed. Continuing without XPU optimizations.")
 

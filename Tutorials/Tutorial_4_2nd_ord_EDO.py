@@ -226,7 +226,7 @@ df = pd.DataFrame({
 #equation2='F_ext=(f1(x_dot))**2-f2(x)'
 
 ############## identification equation
-eq1='x1_dot = x2*exp(a3-2)' #
+eq1='x1_dot = x2'# *exp(a3-2)' #
 eq2='x2_dot = F_ext - f1(x2) - f2(x1)'
 equations = [eq1,eq2]
 
@@ -254,6 +254,85 @@ equations = [eq1,eq2]
 
 
 
+
+########################################
+          #### method SymbR  ####
+########################################
+params_SymbR = {
+  'pysr': {
+    'niterations': 100,
+    'unary_operators': ['tanh'],
+    'binary_operators': ['+','-','*'],
+    'maxsize': 12,
+    'populations':10,
+   'model_selection': 'best', # 'best' , 'accuracy' , 'score'
+    'verbosity': 0
+  },
+  'N_fit_points': 200,
+  'max_iterations': 8,
+}
+
+models, evals , obtained_coefs = pycc.train(
+    df=df,
+    equations=equations,
+    method='SymbR',
+    params=params_SymbR
+)
+
+
+if len(evals) == 2:
+    x_f1_cc, f1_cc = evals
+elif len(evals) == 4:
+    x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
+
+# then your plotting code:
+x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
+plt.figure()
+plt.plot(x_f1_cc, f1_cc, label='f1 SR')
+plt.plot(x_dot_data,F1_th, '--', label="f1 theory")
+plt.xlabel('x_dot')
+plt.ylabel('f1(x_dot)')
+plt.legend()
+plt.figure()
+plt.plot(x_f2_cc, f2_cc, label='f2 SR')
+plt.plot(x_data, F2_th, '--', label="f2 theory")
+plt.xlabel('x')
+plt.ylabel('f2(x)')
+plt.legend()
+plt.show()
+
+
+############## Simulate SymbR code #############
+params_SR_simul = {
+    'models': models,
+    'obtained_coefs': obtained_coefs,
+    'local_funcs': {'F_ext': lambda t: F_ext(t)},
+    't_span':t_span,
+    'y0': y0,   # corresponds to equations order: first eq -> y0[0], second -> y0[1]
+    't_eval': t_eval,
+    'method': 'LSODA',  # solver for solve_ivp
+    'atol': 1e-8,
+    'rtol': 1e-6,
+    'check_nan': True
+}
+sol,_  = pycc.simulate(equations, method='SymbR', params=params_SR_simul)
+print("Integration success:", sol.success)
+
+time_sim=sol.t
+x_sim=sol.y[0]
+x_dot_sim=sol.y[1]
+
+# Plot solution
+plt.figure()
+plt.plot(time_sim, x_sim, label="x(t) simulated SR")
+plt.plot(time_data, x_data, label="x(t) th")
+plt.xlabel('t')
+plt.ylabel('x(t)')
+#plt.figure()
+#plt.plot(sol.t, sol.y[1], label="x_dot(t) simulated NN(sym+SR)")
+#plt.plot(time_data, x_dot_data, label="x_dot(t) th")
+plt.legend()
+plt.show()
 
 
 ########################################
@@ -345,7 +424,7 @@ parameters_NN = {
     'weight_loss_param': 1e-3,
     # 'param_penalty_weight': 0.0,
     'constraints': constraints,
-    'device': 'cpu',
+    'device': 'xpu',
     #'eq_weights': [1.0, 1.0]
 }
 #models, evals, obtained_coefs = pycc.train(
@@ -554,55 +633,6 @@ plt.show()
 #plt.show()
 
 
-
-
-########################################
-          #### method SymbR  ####
-########################################
-params_SymbR = {
-  'pysr': {
-    'niterations': 100,
-    'unary_operators': ['tanh'],
-    'binary_operators': ['+','-','*'],
-    'maxsize': 12,
-    'populations':10,
-   'model_selection': 'best', # 'best' , 'accuracy' , 'score'
-    'verbosity': 0
-  },
-  'N_fit_points': 200,
-  'max_iterations': 15,
-}
-
-
-
-models, evals , scalar_coefs = pycc.train(
-    df=df,
-    equations=equations,
-    method='SymbR',
-    params=params_SymbR
-)
-
-
-if len(evals) == 2:
-    x_f1_cc, f1_cc = evals
-elif len(evals) == 4:
-    x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
-
-# then your plotting code:
-x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
-plt.figure()
-plt.plot(x_f1_cc, f1_cc, label='f1 SR')
-plt.plot(x_dot_data,F1_th, '--', label="f1 theory")
-plt.xlabel('x_dot')
-plt.ylabel('f1(x_dot)')
-plt.legend()
-plt.figure()
-plt.plot(x_f2_cc, f2_cc, label='f2 SR')
-plt.plot(x_data, F2_th, '--', label="f2 theory")
-plt.xlabel('x')
-plt.ylabel('f2(x)')
-plt.legend()
-plt.show()
 
 
 

@@ -10,6 +10,7 @@ pycc/print_cc.py
 pycc/process_evals_SymbR.py
 pycc/simulate_NN.py
 pycc/simulate_Poly.py
+pycc/simulate_SymbR.py
 pycc/simulate_manager.py
 pycc/simulate_th.py
 pycc/simulate_th_backup.py

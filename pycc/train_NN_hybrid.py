@@ -23,11 +23,13 @@ import sympy as sp
 #    torch.cuda.ipc_collect()
     
 if torch.cuda.is_available():
-    print("GPU is available")   
+    print("GPU cuda is available")   
     # Free GPU memory in case of being used
     if torch.cuda.is_available():
         torch.cuda.empty_cache()
         torch.cuda.ipc_collect()
+elif hasattr(torch, "xpu") and torch.xpu.is_available():
+    print("GPU intel xpu available")        
 else:
     print("GPU not available")
     
@@ -255,21 +257,43 @@ def train_NN_hybrid(df, equation_str, params=None):
     if params is None:
         params = {}
     device_option = params.get('device', 'automatic').lower()    
-    
-    if device_option == 'automatic':
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    elif device_option in ['gpu', 'cuda']:
+
+
+
+    if device_option == 'automatic' or device_option in ['gpu', 'cuda']:
         if torch.cuda.is_available():
             device = torch.device("cuda")
+        elif hasattr(torch, "xpu") and torch.xpu.is_available():
+            device = torch.device("xpu")
         else:
-            print("⚠️ GPU requested but not available. Running on CPU.")
+            device = torch.device("cpu")
+    elif device_option == 'xpu':
+        if hasattr(torch, "xpu") and torch.xpu.is_available():
+            device = torch.device("xpu")
+        else:
+            print("⚠️ Intel XPU requested but not available. Running on CPU.")
             device = torch.device("cpu")
     elif device_option == 'cpu':
         device = torch.device("cpu")
     else:
-        raise ValueError(f"Invalid device option '{device_option}'. Use 'automatic', 'cpu', or 'gpu'/'cuda'.")
+        raise ValueError(f"Invalid device option '{device_option}'. Use 'automatic', 'cpu', 'gpu'/'cuda', or 'xpu'.")
 
-    print(f"Using device: {device}")
+    print(f"✅ Using device: {device}")
+
+
+    
+#    if device_option == 'automatic':
+#        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+#    elif device_option in ['gpu', 'cuda']:
+#        if torch.cuda.is_available():
+#            device = torch.device("cuda")
+#        else:
+#            print("⚠️ GPU requested but not available. Running on CPU.")
+#            device = torch.device("cpu")
+#    elif device_option == 'cpu':
+#        device = torch.device("cpu")
+#    else:
+#        raise ValueError(f"Invalid device option '{device_option}'. Use 'automatic', 'cpu', or 'gpu'/'cuda'.")
         
     #if torch.cuda.is_available():
     #    print("GPU is available, using GPU") 
@@ -349,6 +373,20 @@ def train_NN_hybrid(df, equation_str, params=None):
         tensors[k] = tensors[k].to(device)
     for k in scalar_params:
         scalar_params[k] = scalar_params[k].to(device)
+
+    # --- Intel XPU optimization with IPEX ---
+    if device.type == 'xpu':
+        try:
+            import intel_extension_for_pytorch as ipex
+            print(f"IPEX version: {ipex.__version__}")
+            print(f"XPU available: {torch.xpu.is_available()}")
+            print(f"XPU device count: {torch.xpu.device_count()}")
+            print("Applying Intel IPEX optimization for XPU device...")
+            for f_name, model in models.items():
+                model, optimizer = ipex.optimize(model, optimizer=optimizer)
+        except ImportError:
+            print("⚠️ IPEX not installed. Continuing without XPU optimizations.")
+
     
     for epoch in range(epochs):
         optimizer.zero_grad()
@@ -390,13 +428,14 @@ def train_NN_hybrid(df, equation_str, params=None):
             print(f"Early stopping at epoch {epoch}")
             break
     # --- Move everything back to CPU for evaluation/plotting ---
-    print("Moving models and data back to CPU...")
-    for model in models.values():
-        model.to('cpu')
-    for k in tensors:
-        tensors[k] = tensors[k].to('cpu')
-    for k in scalar_params:
-        scalar_params[k] = scalar_params[k].to('cpu')        
+    if device.type == 'xpu' or device.type == 'cuda':
+        print("Moving models and data back to CPU...")
+        for model in models.values():
+            model.to('cpu')
+        for k in tensors:
+            tensors[k] = tensors[k].to('cpu')
+        for k in scalar_params:
+            scalar_params[k] = scalar_params[k].to('cpu')        
             
     # Evaluate learned functions on their variable ranges for plotting (same as before)
     results = []

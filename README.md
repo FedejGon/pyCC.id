@@ -18,21 +18,32 @@ $$
 
 Here, $\mathbf{x}(t)$ is the vector of the system's state variables (like position, velocity, etc.). The problem is that the function $\mathbf{F}$ can be incredibly complex and act like a "black box," making it difficult to gain physical insight.
 
-The core philosophy of **pyCC.id** is to break down this complex function $\mathbf{F}$ into a combination of simpler, **interpretable building blocks**. This approach mirrors how a scientist would construct a model: by adding distinct terms for phenomena like stiffness, damping, or external forces.
+The core philosophy of **pyCC.id** is to break down this complex function $\mathbf{F}$ into a combination of simpler, **interpretable building blocks**. This approach mirrors how a scientist or practitioner would construct a model: by considering different functions and parameters for modeling phenomena like stiffness, damping, or external forces.
 
-We express this decomposition with the following structured form:
+We express this decomposition as:
 
 $$
-\frac{d\mathbf{x}}{dt} = \mathbf{G}(\mathbf{f}(\mathbf{x}), \mathbf{F}_{ext}(t); \mathbf{a})
+\frac{d\mathbf{x}}{dt} = \mathbf{G}(\mathbf{x}, \mathbf{F}_{ext}(t); \{\mathbf{f}\}, \mathbf{a})
 $$
 
-In this equation, the dynamics are modeled by a function $\mathbf{G}$ that combines three key components:
+where:
 
-* **Characteristic Curves $\mathbf{f}(\mathbf{x})$**: This is a collection of simple, nonlinear functions. Crucially, each function $f_j$ in this collection typically depends on only a **single state variable** $x_i$. For example, one function might represent a nonlinear spring force that depends only on position ($f(x_1)$), while another represents damping that depends only on velocity ($f(x_2)$).
+* **$\mathbf{x}$** and **$\mathbf{F}_{ext}(t)$** are the **inputs** to the model:
+    * $\mathbf{x}$ is the dymanical variable or **state** of the system.
+    * $\mathbf{F}_{ext}(t)$ is a set of known, time-dependent **external forces** or inputs. 
+  These are the quantities you measure or control.
 
-* **External Forces $\mathbf{F}_{ext}(t)$**: These are the known external inputs or driving forces acting on the system.
+* The semicolon **`;`** separates the variables of the system from the components of the model you are trying to find. To the left are the inputs; to the right are the unknowns that define the model.
 
-* **Parameters $\mathbf{a}$**: This is a vector of constant scalar values (like mass, damping coefficients, etc.) that are optimized during the identification process to best fit the data.
+* **$\{\mathbf{f}\}$** is a set of **unknown functions**, which we call the **Characteristic Curves**. The key insight of our method is that each function $f_j$ in this set typically depends on only a *single state variable* $x_i$. This makes them interpretable—for example, one function could represent a nonlinear spring force ($f(x_{position})$), while another represents aerodynamic drag ($f(x_{velocity})$).
+
+* **$\mathbf{a}$** is a vector of **unknown scalar parameters**, such as mass, damping coefficients, or other physical constants.
+
+* **$\mathbf{G}$** represents the **model structure** you propose. It's the template that dictates how the building blocks—the functions $\{\mathbf{f}\}$ and parameters $\mathbf{a}$—are combined with the state $\mathbf{x}$ to compute the system's evolution. This structure is not limited to a simple sum and can be an arbitrary user-defined function.
+
+The goal of **pyCC.id** is to discover the optimal functions $\{\mathbf{f}\}$ and parameters $\mathbf{a}$ that make your proposed model structure $\mathbf{G}$ best fit the observed data.
+
+
 
 By finding the forms of the functions in $\mathbf{f}(\mathbf{x})$ and the values of the parameters in $\mathbf{a}$, **pyCC.id** helps you discover a transparent and physically meaningful model of your system.
 

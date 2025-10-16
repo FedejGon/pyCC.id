@@ -35,17 +35,17 @@ $$
 
 where:
 
-* **$\mathbf{x}$** and **$\mathbf{F}_{ext}(t)$** are the **inputs** to the model: $\mathbf{x}$ is the dynamical variable or **state** of the system; and $\mathbf{F}_{ext}(t)$ is a set of known, time-dependent **external forces** or inputs. These are the quantities you measure or control.
+* **$\mathbf{x}$** and **$\mathbf{F}_{ext}(t)$** are the **inputs** to the model: $\mathbf{x}$ is the dynamical variable or **state** of the system; and $\mathbf{F}_{ext}(t)$ is a set of known, time-dependent **external forces**. These are the quantities you measure or control.
 
 * The semicolon **`;`** separates the variables of the system from the components of the model you are trying to find. To the left are the inputs; to the right are the unknowns that define the model.
 
-* **$\\{\mathbf{f}\\}$** is a set of **unknown functions**, which we call the **Characteristic Curves**. The key insight of our method is that each function $f_j$ in this set typically depends on only a *single state variable* $x_i$. This makes them interpretable—for example, one function could represent a nonlinear spring force (**$f(x_{position})$**), while another represents aerodynamic drag (**$f(x_{velocity})$**).
+* **$\\{\mathbf{f}\\}$** is a set of **unknown functions**, which we call the **Characteristic Curves**. In this approach, each function in this set depends on only a *single state variable* $x_i$. This makes them interpretable (for example, one function could represent a nonlinear spring force, while another one an aerodynamic drag).
 
 * **$\mathbf{a}$** is a vector of **unknown scalar parameters**, such as mass, damping coefficients, or other physical constants.
 
-* **$\mathbf{G}$** represents the **model structure** you propose. It's the template that dictates how the building blocks—the functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$—are combined with the state $\mathbf{x}$ to compute the system's evolution. This structure is not limited to a simple sum and can be an arbitrary user-defined function.
+* **$\mathbf{G}$** represents a proposed **model structure**. It defines the template that dictates how the building blocks (the functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$) are combined with the state ($\mathbf{x}$) to compute the system evolution. This structure is not limited to a simple sum and can be an arbitrary user-defined function.
 
-The goal of **pyCC** is to discover the optimal functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$ that make your proposed model structure $\mathbf{G}$ best fit the observed data. By finding the forms of the functions in $\{\mathbf{f}\}$ and the values of the parameters in $\mathbf{a}$, **pyCC** helps you discover a transparent and physically meaningful model of your system.
+The goal of **pyCC** is to discover the optimal functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$ that best fit the observed data based on a predefined model structure $\mathbf{G}$. 
 
 ---
 
@@ -83,7 +83,7 @@ $$
 \end{cases}
 $$
 
-After simulating this system, the input data that will be used for identification is defined by $x_1$, $x_2$ $\dot{x}_1$, $\dot{x}_2$ and $F_{ext}$. 
+After simulating this system, the input data that will be used for identification is defined by $x_1$, $x_2$, $\dot{x}_1$, $\dot{x}_2$ and $F_{ext}$. 
 
 * ### Step 2: Define an Identification Strategy
 With **pyCC.id**, you can face the identification problem in several ways:

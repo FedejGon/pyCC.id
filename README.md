@@ -143,7 +143,7 @@ Import the package into your Python environment:
 ```bash
 import pycc
 ```
-> ⏱️ **Initial import delay** : the very first time you run *import pycc* after a fresh installation, the package automatically sets up dependencies. This process may take ∼3 minutes. Subsequent imports will be fast.
+> ⏳ **Initial import delay** : the first time you run *import pycc*, it may take ∼3 minutes to set up dependencies. Subsequent imports will be fast.
 
 ## 📚  Tutorials
 **First time? We recommend starting with our Google Colab Notebook** [![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)!
@@ -162,7 +162,7 @@ python Tutorial1.py
 
 
 
-## 🖋️ How to cite this package
+## 🏛️ How to cite this package
 
 General reference to this package:
 **Gonzalez2025code**

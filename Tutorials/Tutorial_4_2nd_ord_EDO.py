@@ -340,6 +340,7 @@ plt.show()
 print("simulating SymbR using interpolation (evals)")
 params_SR_simul = {
     'evals': evals,
+    #'interp_method':'spline'   # optional 'pchip','linear','cubic','spline' default:pchip
     'obtained_coefs': obtained_coefs,
     'local_funcs': {'F_ext': lambda t: F_ext(t)},
     't_span':t_span,

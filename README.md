@@ -86,9 +86,7 @@ $$
 After simulating this system, the input data that will be used for identification is defined  **$\\{x_1, x_2, \dot{x}_1, \dot{x}_2, F_{ext}\\}$** (or equivalently, **$\\{x, \dot{x}, \ddot{x}, F_{ext}\\}$**).
 
 * ### Step 2: Define an Identification Strategy
-
 With **pyCC.id**, you can face the identification problem in several ways:
-
     *(i) Functional Approach
 Here, we assume the structure of the equation but leave key components as unknown functions to be discovered from data.
 

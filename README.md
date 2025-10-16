@@ -43,7 +43,7 @@ where:
 
 * **$\mathbf{a}$** is a vector of **unknown scalar parameters**, such as mass, damping coefficients, or other physical constants.
 
-* **$\mathbf{G}$** represents a proposed **model structure**. It defines the template that dictates how the building blocks (the functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$) are combined with the state ($\mathbf{x}$) to compute the system evolution. This structure is not limited to a simple sum and can be an arbitrary user-defined function.
+* **$\mathbf{G}$** represents a proposed **model structure**. It defines the template that dictates how the building blocks (the functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$) are combined with the state $\mathbf{x}$ to compute the system evolution. This structure can be an arbitrary user-defined function.
 
 The goal of **pyCC** is to discover the optimal functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$ that best fit the observed data based on a predefined model structure $\mathbf{G}$. 
 
@@ -56,6 +56,7 @@ The goal of **pyCC** is to discover the optimal functions $\\{\mathbf{f}\\}$ and
     * Neural Networks (NN-CC)
     * Polynomials (Poly-CC)
     * Symbolic Regression (SymbR-CC)
+* **Physics-Informed Discovery**: Incorporate known physical constraints, such as symmetries (e.g., even and odd functions) or conservation laws, to guide the discovery process and produce more robust and physically plausible models.
 * **Built-in Simulator**: Includes a module for simulating higher-order and coupled ODEs, which is fully compatible with all identification methodologies.
 * **User-Focused Design**: Aims for an API that is both easy to use for standard problems and highly customizable for advanced research.
 

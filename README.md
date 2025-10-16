@@ -30,12 +30,12 @@ The core philosophy of **pyCC.id** is to break down this complex function $\math
 We express this decomposition as:
 
 $$
-\frac{d\mathbf{x}}{dt} = \mathbf{G}(\mathbf{x}, \mathbf{F}_{ext}(t); \{\mathbf{f}\}, \mathbf{a})
+\frac{d\mathbf{x}}{dt} = \mathbf{G}(\mathbf{x}, \mathbf{F}_{ext}(t); \\{\mathbf{f}\\}, \mathbf{a})
 $$
 
 where:
 
-* **$\mathbf{x}$** and **$\mathbf{F}_{ext}(t)$** are the **inputs** to the model: $\mathbf{x}$ is the dymanical variable or **state** of the system; and $\mathbf{F}_{ext}(t)$ is a set of known, time-dependent **external forces** or inputs. These are the quantities you measure or control.
+* **$\mathbf{x}$** and **$\mathbf{F}_{ext}(t)$** are the **inputs** to the model: $\mathbf{x}$ is the dynamical variable or **state** of the system; and $\mathbf{F}_{ext}(t)$ is a set of known, time-dependent **external forces** or inputs. These are the quantities you measure or control.
 
 * The semicolon **`;`** separates the variables of the system from the components of the model you are trying to find. To the left are the inputs; to the right are the unknowns that define the model.
 
@@ -43,9 +43,9 @@ where:
 
 * **$\mathbf{a}$** is a vector of **unknown scalar parameters**, such as mass, damping coefficients, or other physical constants.
 
-* **$\mathbf{G}$** represents the **model structure** you propose. It's the template that dictates how the building blocks—the functions $\{\mathbf{f}\}$ and parameters $\mathbf{a}$—are combined with the state $\mathbf{x}$ to compute the system's evolution. This structure is not limited to a simple sum and can be an arbitrary user-defined function.
+* **$\mathbf{G}$** represents the **model structure** you propose. It's the template that dictates how the building blocks—the functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$—are combined with the state $\mathbf{x}$ to compute the system's evolution. This structure is not limited to a simple sum and can be an arbitrary user-defined function.
 
-The goal of **pyCC.id** is to discover the optimal functions $\{\mathbf{f}\}$ and parameters $\mathbf{a}$ that make your proposed model structure $\mathbf{G}$ best fit the observed data.
+The goal of **pyCC.id** is to discover the optimal functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$ that make your proposed model structure $\mathbf{G}$ best fit the observed data.
 
 
 
@@ -77,7 +77,7 @@ where $F_{ext}(t) = A\cos(\omega t)$. The term $\tanh(500\dot{x})$ is a smooth a
 
 ### Step 1: Convert to a First-Order System
 
-For compatibility and generalization, we recommend transforming the system into a to a set of first-order equations. By defining the state variables $x_1 = x$ and $x_2 = \dot{x}$, the system becomes:
+For compatibility and generalization, we recommend transforming the system into a set of first-order equations. By defining the state variables $x_1 = x$ and $x_2 = \dot{x}$, the system becomes:
 
 $$
 \begin{cases}
@@ -117,7 +117,7 @@ $$
 \ddot{x} + a_1\dot{x} + a_2\tanh(a_3\dot{x}) + a_4x + a_5x^3 = F_{ext}(t)
 $$
 
-The goal is to find the optimal values for the parameters $\{a_i\}$ using nonlinear iterative algorithms.
+The goal is to find the optimal values for the parameters $\\{a_i\\}$ using nonlinear iterative algorithms.
 
 **First-Order System:**
 

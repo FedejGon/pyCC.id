@@ -83,7 +83,7 @@ $$
 \end{cases}
 $$
 
-After simulating this system, the input data that will be used for identification is defined by $x_1$, $x_2$ , $\dot{x}_1$ , $\dot{x}_2$ and $F_{ext}$. 
+After simulating this system, the input data that will be used for identification is defined by $x_1$, $x_2$ , $\dot{x}_{1}$, $\dot{x}_{2}$ and $F_{ext}$. 
 
 * ### Step 2: Define an Identification Strategy
 With **pyCC.id**, you can face the identification problem in several ways:

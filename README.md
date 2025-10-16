@@ -9,24 +9,32 @@
 ---
 
 ## 🎯 Core Idea
-System identification (also known as equation discovery) is the process of finding the underlying governing equations of a system from observational data. This package provides a data-driven framework to identify models for dynamical systems, including those with external forces.
 
-The general form of a dynamical system is often written as a set of first-order ordinary differential equations (ODEs):
+System identification (also known as equation discovery) is the process of finding the underlying governing equations of a system from observational data.  🔬 For many physical systems, the dynamics can be described by a set of first-order ordinary differential equations (ODEs):
+
 $$
 \frac{d\mathbf{x}}{dt} = \mathbf{F}(\mathbf{x}, t)
 $$
-where $\mathbf{x}(t)$ is an $n$-dimensional state vector.
 
-The core motivation behind **pyCC.id** is to decompose the potentially complex function $\mathbf{F}$ into a combination of simpler, interpretable expressions. This decomposition is a natural approach of how a user or practitioner test different models. We rewrite the equation in a structured form:
+Here, $\mathbf{x}(t)$ is the vector of the system's state variables (like position, velocity, etc.). The problem is that the function $\mathbf{F}$ can be incredibly complex and act like a "black box," making it difficult to gain physical insight.
+
+The core philosophy of **pyCC.id** is to break down this complex function $\mathbf{F}$ into a combination of simpler, **interpretable building blocks**. This approach mirrors how a scientist would construct a model: by adding distinct terms for phenomena like stiffness, damping, or external forces.
+
+We express this decomposition with the following structured form:
 
 $$
-\frac{d\mathbf{x}}{dt} = \mathbf{G}\left(\{f_j(x_i)\}_{j=1}^{N_f}, \{\mathbf{F}_{ext,l}(t)\}_{l=1}^{N_{ext}}; \{a_k\}_{k=1}^{N_p}\right)
+\frac{d\mathbf{x}}{dt} = \mathbf{G}(\mathbf{f}(\mathbf{x}), \mathbf{F}_{ext}(t); \mathbf{a})
 $$
 
-Here, the system's dynamics are modeled as a function $\mathbf{G}$ that depends on:
-* A set of nonlinear functions $\{f_j\}$, where each function depends on a **single state variable** $x_i$.
-* A set of external forces $\{\mathbf{F}_{ext,l}(t)\}$.
-* A set of scalar parameters $\{a_k\}$ that are optimized together with $\{f_j\}$ during the identification process.
+In this equation, the dynamics are modeled by a function $\mathbf{G}$ that combines three key components:
+
+* **Characteristic Curves $\mathbf{f}(\mathbf{x})$**: This is a collection of simple, nonlinear functions. Crucially, each function $f_j$ in this collection typically depends on only a **single state variable** $x_i$. For example, one function might represent a nonlinear spring force that depends only on position ($f(x_1)$), while another represents damping that depends only on velocity ($f(x_2)$).
+
+* **External Forces $\mathbf{F}_{ext}(t)$**: These are the known external inputs or driving forces acting on the system.
+
+* **Parameters $\mathbf{a}$**: This is a vector of constant scalar values (like mass, damping coefficients, etc.) that are optimized during the identification process to best fit the data.
+
+By finding the forms of the functions in $\mathbf{f}(\mathbf{x})$ and the values of the parameters in $\mathbf{a}$, **pyCC.id** helps you discover a transparent and physically meaningful model of your system.
 
 ---
 
@@ -45,20 +53,24 @@ Here, the system's dynamics are modeled as a function $\mathbf{G}$ that depends 
 ## 📖 Example: Identifying a Nonlinear Oscillator
 
 Let's consider a second-order nonlinear differential equation:
+
 $$
 \ddot{x} + \delta\dot{x} + \mu\tanh(500\dot{x}) + \alpha x + \beta x^3 = F_{ext}(t)
 $$
+
 where $F_{ext}(t) = A\cos(\omega t)$. The term $\tanh(500\dot{x})$ is a smooth approximation of the signum function, $\text{sign}(\dot{x})$, often used to model Coulomb friction.
 
 ### Step 1: Convert to a First-Order System
 
 For compatibility and generalization, we recommend transforming the system into a to a set of first-order equations. By defining the state variables $x_1 = x$ and $x_2 = \dot{x}$, the system becomes:
+
 $$
 \begin{cases}
 \dot{x}_1 = x_2 \\
 \dot{x}_2 = F_{ext}(t) - \delta x_2 - \mu\tanh(500x_2) - \alpha x_1 - \beta x_1^3
 \end{cases}
 $$
+
 After simulating this system, the input data that will be used for identification is defined by the time series of $\{x_1, x_2, \dot{x}_1, \dot{x}_2, F_{ext}\}$ (or equivalently, $\{x, \dot{x}, \ddot{x}, F_{ext}\}$).
 
 ### Step 2: Define an Identification Strategy
@@ -67,12 +79,15 @@ With **pyCC.id**, you can approach the identification problem in several ways:
 
 #### (i) Functional Approach
 Here, we assume the structure of the equation but leave key components as unknown functions to be discovered from data.
+
 $$
 \ddot{x} + f_1(\dot{x}) + f_2(x) = F_{ext}(t)
 $$
+
 The goal is to find the shapes of the characteristic curves $f_1$ and $f_2$. These functions can be parameterized using neural networks, polynomials, or other methods.
 
 **First-Order System:**
+
 $$
 \begin{cases}
 \dot{x}_1 = x_2 \\
@@ -82,12 +97,15 @@ $$
 
 #### (ii) Parametric Approach
 If you have a strong hypothesis about the functional forms, you can identify the unknown parameters directly.
+
 $$
 \ddot{x} + a_1\dot{x} + a_2\tanh(a_3\dot{x}) + a_4x + a_5x^3 = F_{ext}(t)
 $$
+
 The goal is to find the optimal values for the parameters $\{a_i\}$ using nonlinear iterative algorithms.
 
 **First-Order System:**
+
 $$
 \begin{cases}
 \dot{x}_1 = x_2 \\
@@ -95,14 +113,18 @@ $$
 \end{cases}
 $$
 
+
 #### (iii) Hybrid Approach
 This approach combines the functional and parametric methods. You can assume known forms for some parts of the equation while leaving other parts as unknown functions.
+
 $$
 \ddot{x} + f_1(\dot{x}) + a_1x + a_2x^3 = F_{ext}(t)
 $$
+
 Here, we identify the function $f_1(\dot{x})$ and the parameters $a_1$ and $a_2$ simultaneously.
 
 **First-Order System:**
+
 $$
 \begin{cases}
 \dot{x}_1 = x_2 \\

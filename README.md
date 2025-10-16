@@ -39,17 +39,13 @@ where:
 
 * The semicolon **`;`** separates the variables of the system from the components of the model you are trying to find. To the left are the inputs; to the right are the unknowns that define the model.
 
-* **$\{\mathbf{f}\}$** is a set of **unknown functions**, which we call the **Characteristic Curves**. The key insight of our method is that each function $f_j$ in this set typically depends on only a *single state variable* $x_i$. This makes them interpretable—for example, one function could represent a nonlinear spring force ($f(x_{position})$), while another represents aerodynamic drag ($f(x_{velocity})$).
+* **$\\{\mathbf{f}\\}$** is a set of **unknown functions**, which we call the **Characteristic Curves**. The key insight of our method is that each function $f_j$ in this set typically depends on only a *single state variable* $x_i$. This makes them interpretable—for example, one function could represent a nonlinear spring force (**$f(x_{position})$**), while another represents aerodynamic drag (**$f(x_{velocity})$**).
 
 * **$\mathbf{a}$** is a vector of **unknown scalar parameters**, such as mass, damping coefficients, or other physical constants.
 
 * **$\mathbf{G}$** represents the **model structure** you propose. It's the template that dictates how the building blocks—the functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$—are combined with the state $\mathbf{x}$ to compute the system's evolution. This structure is not limited to a simple sum and can be an arbitrary user-defined function.
 
-The goal of **pyCC.id** is to discover the optimal functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$ that make your proposed model structure $\mathbf{G}$ best fit the observed data.
-
-
-
-By finding the forms of the functions in $\mathbf{f}(\mathbf{x})$ and the values of the parameters in $\mathbf{a}$, **pyCC.id** helps you discover a transparent and physically meaningful model of your system.
+The goal of **pyCC** is to discover the optimal functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$ that make your proposed model structure $\mathbf{G}$ best fit the observed data. By finding the forms of the functions in $\{\mathbf{f}\}$ and the values of the parameters in $\mathbf{a}$, **pyCC** helps you discover a transparent and physically meaningful model of your system.
 
 ---
 
@@ -75,9 +71,10 @@ $$
 
 where $F_{ext}(t) = A\cos(\omega t)$. The term $\tanh(500\dot{x})$ is a smooth approximation of the signum function, $\text{sign}(\dot{x})$, often used to model Coulomb friction.
 
-### Step 1: Convert to a First-Order System
 
-For compatibility and generalization, we recommend transforming the system into a set of first-order equations. By defining the state variables $x_1 = x$ and $x_2 = \dot{x}$, the system becomes:
+### Step 1: Generating data
+
+For compatibility with higher-order systems, we recommend rewritting the system into a set of first-order equations. By defining the state variables $x_1 = x$ and $x_2 = \dot{x}$, the system becomes:
 
 $$
 \begin{cases}
@@ -86,22 +83,14 @@ $$
 \end{cases}
 $$
 
-After simulating this system, the input data that will be used for identification is defined by the time series of $\{x_1, x_2, \dot{x}_1, \dot{x}_2, F_{ext}\}$ (or equivalently, $\{x, \dot{x}, \ddot{x}, F_{ext}\}$).
+After simulating this system, the input data that will be used for identification is defined  **$\\{x_1, x_2, \dot{x}_1, \dot{x}_2, F_{ext}\\}$** (or equivalently, **$\\{x, \dot{x}, \ddot{x}, F_{ext}\\}$**).
 
 ### Step 2: Define an Identification Strategy
 
-With **pyCC.id**, you can approach the identification problem in several ways:
+With **pyCC.id**, you can face the identification problem in several ways:
 
 #### (i) Functional Approach
 Here, we assume the structure of the equation but leave key components as unknown functions to be discovered from data.
-
-$$
-\ddot{x} + f_1(\dot{x}) + f_2(x) = F_{ext}(t)
-$$
-
-The goal is to find the shapes of the characteristic curves $f_1$ and $f_2$. These functions can be parameterized using neural networks, polynomials, or other methods.
-
-**First-Order System:**
 
 $$
 \begin{cases}
@@ -110,16 +99,14 @@ $$
 \end{cases}
 $$
 
+The goal is to find the shapes of the characteristic curves $f_1$ and $f_2$. These functions can be parameterized using neural networks, polynomials, or other methods.
+
+**We should define equations to identify as:**
+
+
+
 #### (ii) Parametric Approach
 If you have a strong hypothesis about the functional forms, you can identify the unknown parameters directly.
-
-$$
-\ddot{x} + a_1\dot{x} + a_2\tanh(a_3\dot{x}) + a_4x + a_5x^3 = F_{ext}(t)
-$$
-
-The goal is to find the optimal values for the parameters $\\{a_i\\}$ using nonlinear iterative algorithms.
-
-**First-Order System:**
 
 $$
 \begin{cases}
@@ -128,17 +115,10 @@ $$
 \end{cases}
 $$
 
+The goal is to find the optimal values for the parameters $\\{a_i\\}$ using nonlinear iterative algorithms.
 
 #### (iii) Hybrid Approach
 This approach combines the functional and parametric methods. You can assume known forms for some parts of the equation while leaving other parts as unknown functions.
-
-$$
-\ddot{x} + f_1(\dot{x}) + a_1x + a_2x^3 = F_{ext}(t)
-$$
-
-Here, we identify the function $f_1(\dot{x})$ and the parameters $a_1$ and $a_2$ simultaneously.
-
-**First-Order System:**
 
 $$
 \begin{cases}
@@ -147,12 +127,7 @@ $$
 \end{cases}
 $$
 
-
-
-
-
-
-
+Here, we identify the function $f_1(\dot{x})$ and the parameters $a_1$ and $a_2$ simultaneously.
 
 
 ## 📥  Installation with pip (Recommended) 

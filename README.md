@@ -83,7 +83,7 @@ $$
 \end{cases}
 $$
 
-After simulating this system, the input data that will be used for identification is defined  **$\\{x_1, x_2, \dot{x}_1, \dot{x}_2, F_{ext}\\}$** (or equivalently, **$\\{x, \dot{x}, \ddot{x}, F_{ext}\\}$**).
+After simulating this system, the input data that will be used for identification is defined  **$\\{ x_1, x_2, \dot{x}_1, \dot{x}_2, F_{ext}\\}$** (or equivalently, **$\\{x, \dot{x}, \ddot{x}, F_{ext}\\}$**).
 
 * ### Step 2: Define an Identification Strategy
 With **pyCC.id**, you can face the identification problem in several ways:
@@ -107,7 +107,7 @@ If you have a strong hypothesis about the functional forms, you can identify the
 $$
 \begin{cases}
 \dot{x}_1 = x_2 \\
-\dot{x}_2 = F_{ext}(t) - a_1x_2 - a_2\tanh(a_3x_2) - a_4x_1 - a_5x_1^3
+\dot{x}_2 = F_{ext}(t) - a_1x_2 - a_2\tanh(a_3x_2) - a_4x_1 - a_5 x_1^3
 \end{cases}
 $$
 
@@ -119,11 +119,11 @@ This approach combines the functional and parametric methods. You can assume kno
 $$
 \begin{cases}
 \dot{x}_1 = x_2 \\
-\dot{x}_2 = F_{ext}(t) - f_1(x_2) - a_1x_1 - a_2x_1^3
+\dot{x}_2 = F_{ext}(t) - f_1(x_2) - a_4 x_1 - a_5 x_1^3
 \end{cases}
 $$
 
-Here, we identify the function $f_1(\dot{x})$ and the parameters $a_1$ and $a_2$ simultaneously.
+Here, we identify the function $f_1(\dot{x})$ and the parameters $a_4$ and $a_5$ simultaneously.
 
 
 ## 📥  Installation with pip (Recommended) 

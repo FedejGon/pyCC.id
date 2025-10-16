@@ -35,7 +35,7 @@ $$
 
 where:
 
-* **`$\mathbf{x}$`** and **$\mathbf{F}_{ext}(t)$** are the **inputs** to the model: $\mathbf{x}$ is the dymanical variable or **state** of the system; and * $\mathbf{F}_{ext}(t)$ is a set of known, time-dependent **external forces** or inputs. These are the quantities you measure or control.
+* **$`\mathbf{x}`$** and **$\mathbf{F}_{ext}(t)$** are the **inputs** to the model: $\mathbf{x}$ is the dymanical variable or **state** of the system; and * $\mathbf{F}_{ext}(t)$ is a set of known, time-dependent **external forces** or inputs. These are the quantities you measure or control.
 
 * The semicolon **`;`** separates the variables of the system from the components of the model you are trying to find. To the left are the inputs; to the right are the unknowns that define the model.
 

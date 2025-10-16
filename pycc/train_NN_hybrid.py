@@ -488,7 +488,7 @@ def train_NN_hybrid(df, equation_str, params=None):
         # printing — same behavior as before but using total_data_loss
         if epoch % 100 == 0 or total_data_loss.item() < error_threshold:
             if scalar_params and constraints:
-                print(f"Epoch {epoch}, Loss: {total_data_loss.item():.2e}, Constraint: {constraint_loss:.2e}, Params: ", end="")
+                print(f"Epoch {epoch}, Loss: {total_data_loss.item():.2e}, Constraints: {constraint_loss:.2e}, Params: ", end="")
                 for k in scalar_params:
                     print(f"{k}: {scalar_params[k].item():.2e}", end="  ")
                 print()
@@ -498,7 +498,7 @@ def train_NN_hybrid(df, equation_str, params=None):
                     print(f"{k}: {scalar_params[k].item():.2e}", end="  ")
                 print()
             elif constraints:
-                print(f"Epoch {epoch}, Loss: {total_data_loss.item():.2e}, Constraint: {constraint_loss:.2e}")
+                print(f"Epoch {epoch}, Loss: {total_data_loss.item():.2e}, Constraints: {constraint_loss:.2e}")
             else:
                 print(f"Epoch {epoch}, Loss: {total_data_loss.item():.2e}")
         if total_data_loss.item() < error_threshold:

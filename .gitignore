@@ -8,3 +8,6 @@ pycc.id*info
 dist/
 
 .ipynb*/
+
+
+bash_install_and_submit.sh

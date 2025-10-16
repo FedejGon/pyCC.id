@@ -11,6 +11,8 @@ pycc/process_evals_SymbR.py
 pycc/simulate_NN.py
 pycc/simulate_Poly.py
 pycc/simulate_SymbR.py
+pycc/simulate_SymbR_only_SR.py
+pycc/simulate_from_evals_interp.py
 pycc/simulate_manager.py
 pycc/simulate_th.py
 pycc/simulate_th_backup.py

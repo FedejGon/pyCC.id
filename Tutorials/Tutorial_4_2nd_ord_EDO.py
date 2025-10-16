@@ -418,13 +418,13 @@ parameters_NN = {
     'layers':3,
     #'activation':'ReLu',
     'lr': 1e-3,
-    'epochs': 5000,
+    'epochs': 2000,
     'error_threshold': 1e-6,
     'extrapolation': None,
     'weight_loss_param': 1e-3,
     # 'param_penalty_weight': 0.0,
     'constraints': constraints,
-    'device': 'xpu',
+    #'device': 'xpu',
     #'eq_weights': [1.0, 1.0]
 }
 #models, evals, obtained_coefs = pycc.train(
@@ -506,7 +506,7 @@ if obtained_coefs:
 #equation1='x1_dot = x2'
 #equation2='x2_dot = F_ext *(a1-1) - f1(x2) - f2(x1)'
 #equations = [equation1,equation2]
-
+print("simulation with NN simul")
 params_NN_simul = {
     'models': models,
     'obtained_coefs': obtained_coefs,
@@ -544,6 +544,42 @@ plt.show()
 
 
 
+
+
+print("now using evals to make  Post-SR")
+############## Simulate SymbR NN-postSR #############
+params_SR_simul = {
+    'evals': evals,
+    'obtained_coefs': obtained_coefs,
+    'local_funcs': {'F_ext': lambda t: F_ext(t)},
+    't_span':t_span,
+    'y0': y0,   # corresponds to equations order: first eq -> y0[0], second -> y0[1]
+    't_eval': t_eval,
+    'method': 'LSODA',  # solver for solve_ivp
+    'atol': 1e-8,
+    'rtol': 1e-6,
+    'check_nan': True
+}
+sol,_  = pycc.simulate(equations, method='SymbR', params=params_SR_simul)
+print("Integration success:", sol.success)
+
+time_sim=sol.t
+x_sim=sol.y[0]
+x_dot_sim=sol.y[1]
+
+# Plot solution
+plt.figure()
+plt.plot(time_sim, x_sim, label="x(t) simulated SR")
+plt.plot(time_data, x_data, label="x(t) th")
+plt.xlabel('t')
+plt.ylabel('x(t)')
+#plt.figure()
+#plt.plot(sol.t, sol.y[1], label="x_dot(t) simulated NN(sym+SR)")
+#plt.plot(time_data, x_dot_data, label="x_dot(t) th")
+plt.legend()
+plt.show()
+
+
 ###############################################################################################
 print("now making POST-SR")
 # Run symbolic regression post-processing
@@ -559,6 +595,54 @@ sr_results = pycc.process_evals_SymbR(
 print("\nFinal symbolic regression results:")
 for fname, out in sr_results.items():
     print(f"{fname}(x) ≈ {out['expr']}")
+
+
+### 
+print("simulating post-SR giving manually the functions")
+models_sr = {'f1': {'func': sr_results['f1']['func']}, 'f2': {'func': sr_results['f2']['func']}}
+params = {'models': models_sr, 't_span': t_span, 'y0': y0, 'local_funcs': {'F_ext':F_ext}}
+
+params_SR_simul = {
+    'models': models_sr,
+    'obtained_coefs': obtained_coefs,
+    'local_funcs': {'F_ext': lambda t: F_ext(t)},
+    't_span':t_span,
+    'y0': y0,   # corresponds to equations order: first eq -> y0[0], second -> y0[1]
+    't_eval': t_eval,
+    'method': 'LSODA',  # solver for solve_ivp
+    'atol': 1e-8,
+    'rtol': 1e-6,
+    'check_nan': True
+}
+sol,_  = pycc.simulate(equations, method='SymbR', params=params_SR_simul)
+print("Integration success:", sol.success)
+
+time_sim=sol.t
+x_sim=sol.y[0]
+x_dot_sim=sol.y[1]
+
+# Plot solution
+plt.figure()
+plt.plot(time_sim, x_sim, label="x(t) post-SR giving manually fi")
+plt.plot(time_data, x_data, label="x(t) th")
+plt.xlabel('t')
+plt.ylabel('x(t)')
+#plt.figure()
+#plt.plot(sol.t, sol.y[1], label="x_dot(t) simulated NN(sym+SR)")
+#plt.plot(time_data, x_dot_data, label="x_dot(t) th")
+plt.legend()
+plt.show()
+
+
+
+
+
+
+
+
+
+
+
 
 
 # Option 2: Or manually create it with explicit scalar handling
@@ -631,7 +715,6 @@ plt.show()
 #plt.ylabel('f2(x)')
 #plt.legend() 
 #plt.show()
-
 
 
 

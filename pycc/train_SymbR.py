@@ -279,7 +279,7 @@ def train_SymbR(df, equations, params=None):
         # end loop over functions
         mean_mse = np.mean(mse_accum) if mse_accum else np.inf
         if outer % 1 == 0:
-            print(f"SymbR outer iter {outer+1}/{max_iterations}, Loss: {mean_mse:.2e}")
+            print(f"SymbR outer loop. Iter {outer+1}/{max_iterations}, Loss: {mean_mse:.2e}")
         if abs(prev_loss - mean_mse) < tol:
             print(f"Converged with Delta_Loss={tol}. Stopping outer loop.")
             break

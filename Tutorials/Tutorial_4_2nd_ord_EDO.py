@@ -583,6 +583,7 @@ plt.show()
 ###############################################################################################
 print("now making POST-SR manually")
 # Run symbolic regression post-processing
+
 sr_results = pycc.process_evals_SymbR(
     evals,
     function_names=["f1", "f2"],  # must match training
@@ -597,7 +598,8 @@ for fname, out in sr_results.items():
     print(f"{fname}(x) ≈ {out['expr']}")
 
 
-### 
+
+###  old simulation using 
 print("simulating post-SR giving manually the functions")
 #models_sr = {'f1': {'func': sr_results['f1']['func']}, 'f2': {'func': sr_results['f2']['func']}}
 models_sr = sr_results
@@ -635,6 +637,61 @@ plt.ylabel('x(t)')
 plt.legend()
 plt.show()
 
+
+
+
+
+
+print("now making POST-SR manually but with post_processing module")
+params_postSR = {
+    'evals': evals,
+    'pysr': {
+    'niterations': 100,
+    'unary_operators': ['tanh'],
+    'binary_operators': ['+','-','*'],
+    'maxsize': 12,
+    'populations':20,
+    'model_selection': 'best', # 'best' , 'accuracy' , 'score'
+    'verbosity': 0
+    },
+    'plot':True
+}
+sr_results_2 = pycc.post_processing(equations, method='SymbR', params=params_postSR)
+print("\nFinal symbolic regression results:")
+for fname, out in sr_results_2.items():
+    print(f"{fname}(x) ≈ {out['expr']}")
+
+
+params_SR_simul = {
+    'models': sr_results_2,
+    'obtained_coefs': obtained_coefs,
+    'local_funcs': {'F_ext': lambda t: F_ext(t)},
+    't_span':t_span,
+    'y0': y0,   # corresponds to equations order: first eq -> y0[0], second -> y0[1]
+    't_eval': t_eval,
+    'method': 'LSODA',  # solver for solve_ivp
+    'atol': 1e-8,
+    'rtol': 1e-6,
+    'check_nan': True
+}
+sol,_  = pycc.simulate(equations, method='SymbR', params=params_SR_simul)
+print("Integration success:", sol.success)
+
+time_sim=sol.t
+x_sim=sol.y[0]
+x_dot_sim=sol.y[1]
+
+# Plot solution
+plt.figure()
+plt.plot(time_sim, x_sim, label="x(t) post-SR giving manually fi")
+plt.plot(time_data, x_data, label="x(t) th")
+plt.xlabel('t')
+plt.ylabel('x(t)')
+#plt.figure()
+#plt.plot(sol.t, sol.y[1], label="x_dot(t) simulated NN(sym+SR)")
+#plt.plot(time_data, x_dot_data, label="x_dot(t) th")
+plt.legend()
+plt.show()
 
 
 

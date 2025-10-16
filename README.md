@@ -30,7 +30,7 @@ The core philosophy of **pyCC.id** is to break down this complex function $\math
 We express this decomposition as:
 
 $$
-\frac{d\mathbf{x}}{dt} = \mathbf{G}(\mathbf{x}, \mathbf{F}_{ext}(t); \left{\mathbf{f}\right}, \mathbf{a})
+\frac{d\mathbf{x}}{dt} = \mathbf{G}(\mathbf{x}, \mathbf{F}_{ext}(t); \{\mathbf{f}\}, \mathbf{a})
 $$
 
 where:

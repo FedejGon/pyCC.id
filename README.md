@@ -6,6 +6,7 @@
 
 **pyCC.id** is a Python library for discovering interpretable, nonlinear dynamical systems from data. It is built on the concept of **Characteristic Curves (CCs)** and is designed to be highly customizable and user-friendly.
 
+<div align="left">
 ---
 
 ## 🎯 Core Idea

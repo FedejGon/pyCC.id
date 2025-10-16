@@ -61,7 +61,7 @@ The goal of **pyCC** is to discover the optimal functions $\\{\mathbf{f}\\}$ and
 
 ---
 
-## 📖 Example: Identifying a Nonlinear Oscillator
+## 📖 Example: Nonlinear Oscillator
 
 Let's consider a second-order nonlinear differential equation:
 
@@ -70,9 +70,6 @@ $$
 $$
 
 where $F_{ext}(t) = A\cos(\omega t)$. The term $\tanh(500\dot{x})$ is a smooth approximation of the signum function, $\text{sign}(\dot{x})$, often used to model Coulomb friction.
-
-
-### Step 1: Generating data
 
 For compatibility with higher-order systems, we recommend rewritting the system into a set of first-order equations. By defining the state variables $x_1 = x$ and $x_2 = \dot{x}$, the system becomes:
 
@@ -83,9 +80,9 @@ $$
 \end{cases}
 $$
 
-After simulating this system, the input data that will be used for identification is defined by $x_i$, **$\dot{x}_{i}$** and **$F_{ext}$**.
+After simulating this system, the input data that will be used for identification is defined by **$x_i$**, **$\dot{x}_{i}$** and **$F_{ext}$**.
 
-### Step 2: Define an Identification Strategy
+### Define an Identification Strategy
 With **pyCC.id**, you can face the identification problem in several ways:
 
 #### (i) Functional Approach

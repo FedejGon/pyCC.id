@@ -6,7 +6,13 @@
 
 **pyCC.id** is a Python library for discovering interpretable, nonlinear dynamical systems from data. It is built on the concept of **Characteristic Curves (CCs)** and is designed to be highly customizable and user-friendly.
 
-<div align="left">
+
+| **colab demo** | **Forums** | **Paper** | 
+|:---:|:---:|:---:|
+|[![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)|[![Discussions](https://img.shields.io/badge/discussions-github-informational)](https://github.com/FedejGon/pyCC.id/discussions)|[![Paper](https://img.shields.io/badge/arXiv-2305.01582-b31b1b)](https://arxiv.org/)||
+
+</div>
+
 ---
 
 ## 🎯 Core Idea
@@ -150,11 +156,7 @@ $$
 
 
 
-| **colab demo** | **Forums** | **Paper** | 
-|:---:|:---:|:---:|
-|[![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)|[![Discussions](https://img.shields.io/badge/discussions-github-informational)](https://github.com/FedejGon/pyCC.id/discussions)|[![Paper](https://img.shields.io/badge/arXiv-2305.01582-b31b1b)](https://arxiv.org/)||
 
-</div>
 
 ## 📥  Installation with pip (Recommended) 
 

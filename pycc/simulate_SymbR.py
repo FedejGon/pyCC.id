@@ -21,6 +21,33 @@ try:
 except Exception:
     PySRRegressor = None
 
+def _simplify_and_format_expr(expr_str: str, precision: int = 5) -> str:
+    """
+    Uses sympy to expand and simplify a symbolic expression string for better readability.
+    - Expands products (e.g., (x+1)*(x-2) -> x**2 - x - 2)
+    - Rounds floating-point numbers to a specified precision.
+    """
+    try:
+        # Sympy needs to know what the variables are. 'x0' is the standard for single-variable PySR.
+        x0 = sp.Symbol('x0')
+        
+        # Convert the string into a manipulatable sympy expression
+        expr = sp.sympify(expr_str, locals={'x0': x0})
+        
+        # Expand the expression to resolve products of sums
+        # This turns (a-x)*(b*x**2 - c) into a standard polynomial form
+        expr = sp.expand(expr)
+        
+        # This part recursively finds all numbers in the expression and rounds them
+        simplified_expr = expr.xreplace({
+            n: sp.Float(round(n, precision)) for n in expr.atoms(sp.Number)
+        })
+
+        # Convert the simplified expression back to a human-readable string
+        return str(simplified_expr)
+    except (sp.SympifyError, TypeError, Exception):
+        # If simplification fails for any reason, just return the original cleaned string
+        return " ".join(str(expr_str).split())
 
 def _parse_equation(eq: str) -> Tuple[str, sp.Expr]:
     s = eq.replace("^", "**")
@@ -260,7 +287,6 @@ def simulate_SymbR(equations: List[str], params: Dict[str, Any]):
     evals = params.get('evals', None)
     function_names = params.get('function_names', None)
     sr_params = params.get('sr_params', None)
-    sr_results = params.get('sr_results', {}) or {}
 
     local_funcs = params.get('local_funcs', {}) or {}
     t_span = params.get('t_span', None)
@@ -310,43 +336,37 @@ def simulate_SymbR(equations: List[str], params: Dict[str, Any]):
             dydt[i] = float(val)
         return dydt
 
-
     if bool(params.get('print_models', True)):
         print('=== Models used in simulation ===')
         for fname in sorted(model_preds.keys()):
             pred = model_preds[fname]
+            original_model_dict = original_models.get(fname)
             expr_str = None
 
-            # --- New, clearer logic to find the expression string ---
-
-            # 1. First, try to get a pre-computed expression string that was attached to the predictor.
-            #    This comes from the dictionary you pass in, e.g., models={'f1': {'expr': '0.5*x'}}
-            if hasattr(pred, '_expr'):
-                expr_str = getattr(pred, '_expr', None)
-
-            # 2. If a pre-computed string isn't found, get the underlying PySR model object
-            #    and extract the symbolic expression directly from it. This is the most robust method.
+            # 1. First, check the original model dictionary for a pre-computed expression.
+            #    This is the most direct source when using process_evals_SymbR.
+            if isinstance(original_model_dict, dict):
+                for key in ('expr', 'equation', 'sympy_format'):
+                    if key in original_model_dict and original_model_dict[key] is not None:
+                        expr_str = str(original_model_dict[key])
+                        break
+            
+            # 2. If not found, fall back to extracting it from the PySR model object
+            #    that was attached to the predictor function during its creation.
             if expr_str is None:
                 pysr_model = getattr(pred, '_pymodel', None)
                 if pysr_model is not None:
                     try:
-                        # This helper function gets the best equation from the PySR model
                         expr_str = _extract_expr_from_pysr(pysr_model)
                     except Exception as e:
                         warnings.warn(f"Could not extract expression for {fname} from PySR model: {e}")
-            
-            # --- End of new logic ---
 
             # Now, print the results based on whether an expression was found
             if expr_str is not None:
-                try:
-                    # Clean up the expression for printing (removes extra whitespace/newlines)
-                    cleaned_expr = " ".join(str(expr_str).split())
-                    print(f"{fname}(x) = {cleaned_expr}")
-                except Exception as e:
-                    print(f"{fname}: (Expression available but failed to print: {e})")
+                # NEW: Call the simplification function before printing
+                simplified_str = _simplify_and_format_expr(expr_str)
+                print(f"{fname}(x) ≈ {simplified_str}") # Use '≈' to show it's an approximation
                 
-                # Also print a few sample points to verify the function's behavior
                 try:
                     xs = np.array(params.get('print_x_samples', [-1.0, 0.0, 1.0]), dtype=float)
                     ys = pred(xs)
@@ -355,14 +375,9 @@ def simulate_SymbR(equations: List[str], params: Dict[str, Any]):
                 except Exception as e:
                     warnings.warn(f"Could not print samples for {fname}: {e}")
             else:
-                # This is the fallback message if no symbolic expression could be found at all
+                # Fallback message if no symbolic expression could be found at all
                 src = getattr(pred, '_source', 'unknown')
-                line = f"{fname}: No symbolic expression found. Source='{src}'"
-                if src == 'pysr':
-                    a0 = getattr(pred, '_A0', None)
-                    a1 = getattr(pred, '_A1', None)
-                    line += f" (A0={a0:.4g}, A1={a1:.4g})" if a0 is not None and a1 is not None else ""
-                print(line)
+                print(f"{fname}: No symbolic expression found. Source='{src}'")
 
         print('=== end models ===')
 

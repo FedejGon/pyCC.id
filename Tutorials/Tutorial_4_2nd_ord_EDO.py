@@ -581,7 +581,7 @@ plt.show()
 
 
 ###############################################################################################
-print("now making POST-SR")
+print("now making POST-SR manually")
 # Run symbolic regression post-processing
 sr_results = pycc.process_evals_SymbR(
     evals,
@@ -599,8 +599,10 @@ for fname, out in sr_results.items():
 
 ### 
 print("simulating post-SR giving manually the functions")
-models_sr = {'f1': {'func': sr_results['f1']['func']}, 'f2': {'func': sr_results['f2']['func']}}
-params = {'models': models_sr, 't_span': t_span, 'y0': y0, 'local_funcs': {'F_ext':F_ext}}
+#models_sr = {'f1': {'func': sr_results['f1']['func']}, 'f2': {'func': sr_results['f2']['func']}}
+models_sr = sr_results
+
+#params = {'models': models_sr, 't_span': t_span, 'y0': y0, 'local_funcs': {'F_ext':F_ext}}
 
 params_SR_simul = {
     'models': models_sr,

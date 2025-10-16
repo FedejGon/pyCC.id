@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pycc.id',
-    version='0.0.47',
+    version='0.0.49',
     packages=find_packages(),
     install_requires=[
         'torch',

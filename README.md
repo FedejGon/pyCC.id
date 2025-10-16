@@ -89,7 +89,7 @@ After simulating this system, the input data that will be used for identificatio
 
 With **pyCC.id**, you can face the identification problem in several ways:
 
-    * ### (i) Functional Approach
+    *(i) Functional Approach
 Here, we assume the structure of the equation but leave key components as unknown functions to be discovered from data.
 
 $$
@@ -102,7 +102,7 @@ $$
 The goal is to find the shapes of the characteristic curves $f_1$ and $f_2$. These functions can be parameterized using neural networks, polynomials, or other methods.
 
 
-    * ### (ii) Parametric Approach
+    * (ii) Parametric Approach
 If you have a strong hypothesis about the functional forms, you can identify the unknown parameters directly.
 
 $$
@@ -114,7 +114,7 @@ $$
 
 The goal is to find the optimal values for the parameters $\\{a_i\\}$ using nonlinear iterative algorithms.
 
-    * ### (iii) Hybrid Approach
+    * (iii) Hybrid Approach
 This approach combines the functional and parametric methods. You can assume known forms for some parts of the equation while leaving other parts as unknown functions.
 
 $$

@@ -303,6 +303,7 @@ plt.show()
 
 
 ############## Simulate SymbR code #############
+print("simulating SymbR using functions")
 params_SR_simul = {
     'models': models,
     'obtained_coefs': obtained_coefs,
@@ -325,6 +326,40 @@ x_dot_sim=sol.y[1]
 # Plot solution
 plt.figure()
 plt.plot(time_sim, x_sim, label="x(t) simulated SR")
+plt.plot(time_data, x_data, label="x(t) th")
+plt.xlabel('t')
+plt.ylabel('x(t)')
+#plt.figure()
+#plt.plot(sol.t, sol.y[1], label="x_dot(t) simulated NN(sym+SR)")
+#plt.plot(time_data, x_dot_data, label="x_dot(t) th")
+plt.legend()
+plt.show()
+
+
+
+print("simulating SymbR using interpolation (evals)")
+params_SR_simul = {
+    'evals': evals,
+    'obtained_coefs': obtained_coefs,
+    'local_funcs': {'F_ext': lambda t: F_ext(t)},
+    't_span':t_span,
+    'y0': y0,   # corresponds to equations order: first eq -> y0[0], second -> y0[1]
+    't_eval': t_eval,
+    'method': 'LSODA',  # solver for solve_ivp
+    'atol': 1e-8,
+    'rtol': 1e-6,
+    'check_nan': True
+}
+sol,_  = pycc.simulate(equations, method='Interp', params=params_SR_simul)
+print("Integration success:", sol.success)
+
+time_sim=sol.t
+x_sim=sol.y[0]
+x_dot_sim=sol.y[1]
+
+# Plot solution
+plt.figure()
+plt.plot(time_sim, x_sim, label="x(t) post-SR giving manually fi")
 plt.plot(time_data, x_data, label="x(t) th")
 plt.xlabel('t')
 plt.ylabel('x(t)')

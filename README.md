@@ -72,7 +72,7 @@ $$
 where $F_{ext}(t) = A\cos(\omega t)$. The term $\tanh(500\dot{x})$ is a smooth approximation of the signum function, $\text{sign}(\dot{x})$, often used to model Coulomb friction.
 
 
-### Step 1: Generating data
+* ### Step 1: Generating data
 
 For compatibility with higher-order systems, we recommend rewritting the system into a set of first-order equations. By defining the state variables $x_1 = x$ and $x_2 = \dot{x}$, the system becomes:
 
@@ -85,11 +85,11 @@ $$
 
 After simulating this system, the input data that will be used for identification is defined  **$\\{x_1, x_2, \dot{x}_1, \dot{x}_2, F_{ext}\\}$** (or equivalently, **$\\{x, \dot{x}, \ddot{x}, F_{ext}\\}$**).
 
-### Step 2: Define an Identification Strategy
+* ### Step 2: Define an Identification Strategy
 
 With **pyCC.id**, you can face the identification problem in several ways:
 
-#### (i) Functional Approach
+    * #### (i) Functional Approach
 Here, we assume the structure of the equation but leave key components as unknown functions to be discovered from data.
 
 $$
@@ -101,11 +101,8 @@ $$
 
 The goal is to find the shapes of the characteristic curves $f_1$ and $f_2$. These functions can be parameterized using neural networks, polynomials, or other methods.
 
-**We should define equations to identify as:**
 
-
-
-#### (ii) Parametric Approach
+    * #### (ii) Parametric Approach
 If you have a strong hypothesis about the functional forms, you can identify the unknown parameters directly.
 
 $$
@@ -117,7 +114,7 @@ $$
 
 The goal is to find the optimal values for the parameters $\\{a_i\\}$ using nonlinear iterative algorithms.
 
-#### (iii) Hybrid Approach
+    * #### (iii) Hybrid Approach
 This approach combines the functional and parametric methods. You can assume known forms for some parts of the equation while leaving other parts as unknown functions.
 
 $$

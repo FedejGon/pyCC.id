@@ -142,8 +142,46 @@ pip install -e .
 Import the package into your Python environment:
 ```bash
 import pycc
+# define database
+df = pd.DataFrame({
+    'x1':x1_data,
+    'x2':x2_data,
+    'x1_dot':x1_dot_data,
+    'x2_dot':x2_dot_data,
+    'F_ext': F_ext_val
+})
+# Propose some equations
+eqs = [
+     'x1_dot = x2',
+     'x2_dot = F_ext - f1(x2) - f2(x1)'
+]
+#define constraints (optional)  
+constraints = [ # adding prior known information
+   {'constraint': 'f2(0)=0'},
+   {'constraint': 'f1 odd'},
+   {'constraint': 'f2 odd'},
+]
+#define parameters (optional)
+params_NN = {
+    'neurons': 100,
+    'layers':3,
+    'lr': 1e-4,
+    'epochs': 2000,
+    'error_threshold': 1e-6,
+    'extrapolation': None,
+    'weight_loss_param': 1e-3,
+    'constraints': constraints,
+}
+#train/fit the model 
+models, evals, obtained_coefs = pycc.train(df, eqs,method='NN', params=params_NN)
+
+
 ```
+
+
 > ⏳ **Initial import delay** : the first time you run *import pycc*, it may take ∼3 minutes to set up dependencies. Subsequent imports will be fast.
+
+
 
 ## 📚  Tutorials
 **First time? We recommend starting with our Google Colab Notebook** [![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)!

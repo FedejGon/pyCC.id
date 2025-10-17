@@ -286,4 +286,9 @@ def simulate_Poly(equations: List[str], params: Dict[str, Any]):
     if check_nan and (np.any(np.isnan(sol.y)) or np.any(np.isinf(sol.y))):
         raise RuntimeError("Simulation produced NaN/Inf")
 
-    return sol
+    # --- Calculate derivatives at each time step of the solution ---
+    derivatives = [rhs(sol.t[i], sol.y[:, i]) for i in range(len(sol.t))]
+    derivatives_array = np.array(derivatives).T # Transpose to match sol.y shape
+
+    # --- Return both the solution and the derivatives ---
+    return sol, derivatives_array

@@ -181,5 +181,8 @@ def simulate_NN(equations, params):
         if np.any(np.isnan(sol.y)) or np.any(np.isinf(sol.y)):
             raise RuntimeError("Simulation produced NaN or Inf values in solution.")
 
-    return sol
+    derivatives = [rhs(sol.t[i], sol.y[:, i]) for i in range(len(sol.t))]
+    derivatives_array = np.array(derivatives).T # Transpose to match sol.y shape
+
+    return sol, derivatives_array
 

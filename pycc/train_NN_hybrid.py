@@ -151,7 +151,7 @@ def evaluate_expr(expr, tensors, models, scalar_params):
     else:
         raise NotImplementedError(f"Expr type {expr} not implemented")
 # --- 7) Optional constraints ---
-def compute_constraint_loss(models, constraints, func_list, tensors):
+def compute_constraint_loss(models, constraints, func_list, tensors, device):
     """
     models: dict of function name -> nn.Module
     constraints: list of dicts like {'constraint': str, 'penalty': float}
@@ -175,7 +175,7 @@ def compute_constraint_loss(models, constraints, func_list, tensors):
             y_target = float(m_val_at.group(3))
             if f_name in models:
                 model = models[f_name]
-                x_tensor = torch.tensor([[x_val]], dtype=torch.float32)
+                x_tensor = torch.tensor([[x_val]], dtype=torch.float32, device=device)
                 y_pred = model(x_tensor)
                 loss = ((y_pred - y_target) ** 2).mean()
                 total_loss += penalty * loss
@@ -366,15 +366,16 @@ def train_NN_hybrid(df, equation_str, params=None):
     full_params = list(scalar_params.values()) + [p for model in models.values() for p in model.parameters()]
     optimizer = optim.Adam(full_params, lr=lr)
     # --- Move all models, params, and tensors to GPU ---
-    print(f"Moving models and data to {device}...")
-    #if torch.cuda.is_available():
-    #    print("Moving models and data to GPU...")
-    for model in models.values():
-        model.to(device)
-    for k in tensors:
-        tensors[k] = tensors[k].to(device)
-    for k in scalar_params:
-        scalar_params[k] = scalar_params[k].to(device)
+    if device=='cuda' or device=='xpu':
+        print(f"Moving models and data to {device}...")
+        #if torch.cuda.is_available():
+        #    print("Moving models and data to GPU...")
+        for model in models.values():
+            model.to(device)
+        for k in tensors:
+            tensors[k] = tensors[k].to(device)
+        for k in scalar_params:
+            scalar_params[k] = scalar_params[k].to(device)
  
 #    # new implementation with a module container
 #    # Build a module container so everything is registered and moveable as one unit
@@ -407,9 +408,9 @@ def train_NN_hybrid(df, equation_str, params=None):
 #    optimizer = optim.Adam(param_groups)
     
  
- 
+    #print("device=",device, ";  device.type=",device.type)
     # --- Intel XPU optimization with IPEX ---
-    if device.type == 'xpu':
+    if device == 'xpu':
         try:
             import intel_extension_for_pytorch as ipex
             print(f"IPEX version: {ipex.__version__}")
@@ -463,8 +464,8 @@ def train_NN_hybrid(df, equation_str, params=None):
  
         except ImportError:
             print("⚠️ IPEX not installed. Continuing without XPU optimizations.")
-
-    
+            
+    print("Note: if Constraints are present, then:  Total_loss=Loss+Constraints")
     for epoch in range(epochs):
         optimizer.zero_grad()
         # Compute total loss as weighted sum over all equations' MSE(lhs, rhs)
@@ -475,7 +476,7 @@ def train_NN_hybrid(df, equation_str, params=None):
             # compute MSE and multiply by eq weight
             total_data_loss = total_data_loss + w * criterion(lhs_val, rhs_val)
         # constraint loss (same helper, uses func_order and tensors)
-        constraint_loss = compute_constraint_loss(models, constraints, func_order, tensors)
+        constraint_loss = compute_constraint_loss(models, constraints, func_order, tensors, device)
         # L2 penalty for scalar params
         param_penalty = 0.0
         if weight_loss_param > 0:
@@ -505,7 +506,7 @@ def train_NN_hybrid(df, equation_str, params=None):
             print(f"Early stopping at epoch {epoch}")
             break
     # --- Move everything back to CPU for evaluation/plotting ---
-    if device.type == 'xpu' or device.type == 'cuda':
+    if device == 'xpu' or device=='cuda':
         print("Moving models and data back to CPU...")
         for model in models.values():
             model.to('cpu')

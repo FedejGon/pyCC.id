@@ -53,12 +53,12 @@ The goal of **pyCC** is to discover the optimal functions $\\{\mathbf{f}\\}$ and
 
 * **Interpretable Models**: Decomposes complex dynamics into simpler, physically meaningful functions.
 * **Flexible Function Parametrization**: Supports various techniques to model the characteristic curves, including:
-    * Neural Networks (NN-CC)
-    * Polynomials (Poly-CC)
-    * Symbolic Regression (SymbR-CC)
-* **Physics-Informed Discovery**: Incorporate known physical constraints, such as symmetries (e.g., even and odd functions) or conservation laws, to guide the discovery process and produce more robust and physically plausible models.
-* **Built-in Simulator**: Includes a module for simulating higher-order and coupled ODEs, which is fully compatible with all identification methodologies.
-* **User-Focused Design**: Aims for an API that is both easy to use for standard problems and highly customizable for advanced research.
+    * Neural Networks (NN-CC) — Compatible with multicore CPUs and GPUs from both NVIDIA (CUDA) and Intel (XPU) architectures. GPU acceleration on Intel devices is enabled through the intel_extension_for_pytorch.
+    * Polynomials (Poly-CC) — Using polynomial expansion basis functions for comparison.
+    * Symbolic Regression (SymbR-CC)  —  Parallelized for multicore CPU execution, using the internal parallelization features of PySR.
+* **Physics-Informed Discovery**: Incorporate known physical constraints, such as symmetries (e.g., even and odd functions) or conservation laws, to guide the discovery process and ensure robust, physically consistent models. 
+* **Built-in Simulator**: Includes a module for simulating higher-order and coupled ODEs, fully compatible with all identification methodologies.
+* **User-Focused Design**: Offers an API that is both easy to use for standard problems and highly customizable for advanced research.
 
 ---
 
@@ -143,6 +143,46 @@ pip install -e .
 Import the package into your Python environment:
 ```bash
 import pycc
+import numpy as np
+import pandas as pd
+import matplotlib
+# This example shows how to simulate a stick-slip second order system using pycc [pycc.simulate()]
+# We define a database and then use NN-CC method to identify the model [pycc.train()] and 
+# then to simulate the identified model [pycc.simulate()]
+
+# --- Parameters ---
+alpha=1.0;beta=0.2;delta=0.1;Omega=1.0;
+x0=0.0;v0=0.0; y0=[x0,v0] # initial conditions
+t_span=(0, 20); t_eval=np.linspace(*t_span, 1000)
+
+def F1_th(x_dot):
+    return delta * x_dot + 0.5 * np.tanh(500*x_dot)
+def F2_th(x):
+    return alpha * x + beta * x**3
+def F_ext(t):
+    return np.cos(Omega * t)
+
+
+eqs_th = ['x1_dot = x2',
+          'x2_dot = F_ext - f1(x2) - f2(x1)']
+# Parameters for simulation
+params_th = {
+    't_pan': t_span,
+    'y0': y0,  
+    't_eval': t_eval,
+    'method': 'LSODA',
+    'local_funcs': {'f1': lambda t: F1_th(t),'f2': lambda t: F2_th(t),'F_ext': lambda t: F_ext(t)},
+    'scalar_params': {'a1':2.0}
+}
+sol,derivatives = pycc.simulate(equations,method="Theoretical", params=params_th)
+
+#extract data from theoretical solution
+time_data  = sol.t
+x_data     = sol.y[0]
+x_dot_data = sol.y[1]
+x_ddot_data=derivatives[1]
+F_ext_val  = F_ext(time_data)
+
 # define database
 df = pd.DataFrame({
     'x1':x1_data,
@@ -151,9 +191,9 @@ df = pd.DataFrame({
     'x2_dot':x2_dot_data,
     'F_ext': F_ext_val
 })
-# Propose some equations
+# Propose equations to use for identification (fi functions and ai parameters).
 eqs = [
-     'x1_dot = x2',
+     'x1_dot = x2*np.exp(a1-2.0)',
      'x2_dot = F_ext - f1(x2) - f2(x1)'
 ]
 #define constraints (optional)  
@@ -176,6 +216,61 @@ params_NN = {
 #train/fit the model 
 models, evals, obtained_coefs = pycc.train(df, eqs,method='NN', params=params_NN)
 
+
+# plotting obtained functions f1 and f2
+x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
+plt.figure()
+plt.plot(x_f1_cc, f1_cc, label='f1 learned')
+plt.plot(x_dot_data,F1_th(x_dot_data), '--', label="f1 theory")
+plt.xlabel('x_dot')
+plt.ylabel('f1(x_dot)')
+plt.legend()
+plt.figure()
+plt.plot(x_f2_cc, f2_cc, label='f2 learned')
+plt.plot(x_data, F2_th(x_data),_val '--', label="f2 theory")
+plt.xlabel('x')
+plt.ylabel('f2(x)')
+plt.legend()
+plt.show()
+
+# Print learned parameters (if any)
+if obtained_coefs:
+    print("\nLearned scalar parameters:")
+    for name, val in obtained_coefs.items():
+        print(f"{name} = {val.item():.4f}")
+
+### Simulation using the NN models
+
+print("simulation with NN simul")
+#define parameters
+params_NN_simul = {
+    'models': models,
+    'obtained_coefs': obtained_coefs,
+    'local_funcs': {'F_ext': lambda t: F_ext(t)},
+    't_span':t_span,
+    'y0': y0,   
+    't_eval': t_eval,
+    'method': 'LSODA',  # solve_ivp 
+    'atol': 1e-8,
+    'rtol': 1e-6,
+    'check_nan': True
+}
+#integrate forward equations
+sol,_ = pycc.simulate(equations, method='NN', params=params_NN_simul)
+print("Integration success:", sol.success)
+
+time_sim=sol.t
+x_sim=sol.y[0]
+x_dot_sim=sol.y[1]
+
+# Identified vs theoretical solution
+plt.figure()
+plt.plot(time_sim, x_sim, label="x(t) simulated NN(sym+SR)")
+plt.plot(time_data, x_data, label="x(t) th")
+plt.xlabel('t')
+plt.ylabel('x(t)')
+plt.legend()
+plt.show()
 
 ```
 

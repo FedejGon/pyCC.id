@@ -13,7 +13,7 @@
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../../_static/documentation_options.js?v=01f34227"></script>
-      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -42,6 +42,9 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../selected_functions.html">Selected functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../selected_functions.html#pycc-train">pycc.train()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../selected_functions.html#pycc-simulate">pycc.simulate()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
 </ul>
 
         </div>
@@ -78,10 +81,47 @@
 <a class="viewcode-back" href="../../selected_functions.html#pycc.train">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">equations</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;NN&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Manager to select training method.</span>
-<span class="sd">    method: &#39;NN&#39; for train_NN_hybrid, &#39;Poly&#39; for train_polynomial, etc.</span>
-<span class="sd">    params: dict with hyperparameters</span>
+<span class="sd">    Trains a model to identify the system dynamics from data.</span>
+
+<span class="sd">    This function acts as a dispatcher, selecting the appropriate training</span>
+<span class="sd">    method based on the `method` argument. It passes the data, equations,</span>
+<span class="sd">    and hyperparameters to the selected specialized training function.</span>
+
+<span class="sd">    :param df: The input data.</span>
+<span class="sd">    :type df: pandas.DataFrame</span>
+<span class="sd">    :param equations: A string or list of strings defining the system equations.</span>
+<span class="sd">                      It defines the equations we want to fit with a given df.</span>
+<span class="sd">                      The user can include functions and parameters defined by f_i and a_j, respectively </span>
+<span class="sd">                      (i,j=0,1,...). It can also include time dependent functions, which must be</span>
+<span class="sd">                      defined in the df. </span>
+<span class="sd">    :type equations: str or list[str]</span>
+<span class="sd">    :param method: The system identification method to use.</span>
+<span class="sd">                   Options: \&#39;NN\&#39;, \&#39;Poly\&#39;, \&#39;SymbR\&#39;. **Default: \&#39;NN\&#39;**. </span>
+<span class="sd">    :type method: str, optional</span>
+<span class="sd">    :param params: A dictionary of hyperparameters for the training process.</span>
+<span class="sd">                   See the notes below for method-specific parameters.</span>
+<span class="sd">    :type params: dict, optional</span>
+
+<span class="sd">    :raises ValueError: If an unknown `method` is specified.</span>
+
+<span class="sd">    :return: A tuple containing the trained models, plotting results, and identified scalar parameters.</span>
+<span class="sd">    :rtype: tuple(dict, list, dict)</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">        The `params` dictionary can contain different keys depending on the</span>
+<span class="sd">        selected `method`. For method=&#39;NN&#39;`:</span>
+
+<span class="sd">        * **&#39;neurons&#39;** (*int*): Number of neurons in each hidden layer. Default: 100.</span>
+<span class="sd">        * **&#39;layers&#39;** (*int*): Number of hidden layers in the neural network. Default: 3.</span>
+<span class="sd">        * **&#39;lr&#39;** (*float*): Learning rate for the optimizer. Default: 1e-3.</span>
+<span class="sd">        * **&#39;epochs&#39;** (*int*): Number of training epochs. Default: 1000.</span>
+<span class="sd">        * **&#39;device&#39;** (*str*): The computing device (&#39;cpu&#39;, &#39;cuda&#39;, &#39;xpu&#39;, &#39;automatic&#39;). Default: &#39;automatic&#39;.</span>
+<span class="sd">        * ... and other ..</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+<span class="c1">#    .. seealso::</span>
+<span class="c1">#        For a complete definition of params, refer to Documentation:</span>
+<span class="c1">#    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;NN&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">train_NN_hybrid</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">equations</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;Poly&#39;</span><span class="p">:</span>

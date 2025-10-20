@@ -16,3 +16,6 @@ documentation for details.
    :caption: Contents:
 
    selected_functions
+   
+   api
+   

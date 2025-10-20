@@ -19,6 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api.html" />
     <link rel="prev" title="pyCC.id documentation" href="index.html" /> 
 </head>
 
@@ -43,11 +44,20 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Selected functions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#pycc.train"><code class="docutils literal notranslate"><span class="pre">train()</span></code></a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Selected functions</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#pycc-train">pycc.train()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#neural-network-method-nn"><strong>Neural Network (method='NN')</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#symbolic-regression-method-symbr"><strong>Symbolic Regression (method='SymbR')</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#polynomial-method-poly"><strong>Polynomial (method='Poly')</strong></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="#pycc-simulate">pycc.simulate()</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#pycc.simulate"><code class="docutils literal notranslate"><span class="pre">simulate()</span></code></a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
 </ul>
 
         </div>
@@ -78,14 +88,373 @@
 <h1>Selected functions<a class="headerlink" href="#selected-functions" title="Link to this heading"></a></h1>
 <div class="toctree-wrapper compound">
 </div>
+<p>This section provides a detailed reference for the core functions in the <code class="docutils literal notranslate"><span class="pre">pycc</span></code> library.</p>
+</section>
+<section id="pycc-train">
+<h1>pycc.train()<a class="headerlink" href="#pycc-train" title="Link to this heading"></a></h1>
+<p>This is the main function for identifying system dynamics from data. It acts as a manager that calls a specific training method based on the <code class="docutils literal notranslate"><span class="pre">method</span></code> parameter.</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="pycc.train">
-<span class="sig-prename descclassname"><span class="pre">pycc.</span></span><span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NN'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pycc/train_manager.html#train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pycc.train" title="Link to this definition"></a></dt>
-<dd><p>Manager to select training method.
-method: ‘NN’ for train_NN_hybrid, ‘Poly’ for train_polynomial, etc.
-params: dict with hyperparameters</p>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">pycc.</span></span><span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NN'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pycc/train_manager.html#train"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<dd><p>Trains a model to identify the system dynamics from data.</p>
+<p>This function acts as a dispatcher, selecting the appropriate training
+method based on the <cite>method</cite> argument. It passes the data, equations,
+and hyperparameters to the selected specialized training function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The input data.</p></li>
+<li><p><strong>equations</strong> (<em>str</em><em> or </em><em>list</em><em>[</em><em>str</em><em>]</em>) – A string or list of strings defining the system equations.
+It defines the equations we want to fit with a given df.
+The user can include functions and parameters defined by f_i and a_j, respectively
+(i,j=0,1,…). It can also include time dependent functions, which must be
+defined in the df.</p></li>
+<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – The system identification method to use.
+Options: ‘NN’, ‘Poly’, ‘SymbR’. <strong>Default: ‘NN’</strong>.</p></li>
+<li><p><strong>params</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary of hyperparameters for the training process.
+See the notes below for method-specific parameters.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>ValueError</strong> – If an unknown <cite>method</cite> is specified.</p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A tuple containing the trained models, plotting results, and identified scalar parameters.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>tuple(dict, list, dict)</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <cite>params</cite> dictionary can contain different keys depending on the
+selected <cite>method</cite>. For method=’NN’<a href="#id1"><span class="problematic" id="id2">`</span></a>:</p>
+<ul class="simple">
+<li><p><strong>‘neurons’</strong> (<em>int</em>): Number of neurons in each hidden layer. Default: 100.</p></li>
+<li><p><strong>‘layers’</strong> (<em>int</em>): Number of hidden layers in the neural network. Default: 3.</p></li>
+<li><p><strong>‘lr’</strong> (<em>float</em>): Learning rate for the optimizer. Default: 1e-3.</p></li>
+<li><p><strong>‘epochs’</strong> (<em>int</em>): Number of training epochs. Default: 1000.</p></li>
+<li><p><strong>‘device’</strong> (<em>str</em>): The computing device (‘cpu’, ‘cuda’, ‘xpu’, ‘automatic’). Default: ‘automatic’.</p></li>
+<li><p>… and other ..</p></li>
+</ul>
+</div>
 </dd></dl>
 
+<p><strong>Example Usage:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pycc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+
+<span class="c1"># Assume we have simulated a second order system</span>
+<span class="c1"># and obtained x1,x2,x1_dot,x2_dot,Fext(t) variables</span>
+<span class="c1"># Now define a pandas DataFrame with your data</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">&#39;x1&#39;</span><span class="p">:</span><span class="n">x1_data</span><span class="p">,</span>
+    <span class="s1">&#39;x2&#39;</span><span class="p">:</span><span class="n">x2_data</span><span class="p">,</span>
+    <span class="s1">&#39;x1_dot&#39;</span><span class="p">:</span><span class="n">x1_dot_data</span><span class="p">,</span>
+    <span class="s1">&#39;x2_dot&#39;</span><span class="p">:</span><span class="n">x2_dot_data</span><span class="p">,</span>
+    <span class="s1">&#39;F_ext&#39;</span><span class="p">:</span> <span class="n">F_ext_val</span>
+<span class="p">})</span>
+
+<span class="c1">#now define the system we want to fit</span>
+<span class="n">eqs</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;x1_dot = x2&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;x2_dot = F_ext - f1(x2) - f2(x1)&#39;</span>
+<span class="p">]</span>
+
+<span class="c1">#define constraints and parameters</span>
+<span class="n">constraints</span><span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f1 odd&#39;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f2 odd&#39;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f2(0)=0&#39;</span><span class="p">},</span>
+<span class="p">]</span>
+<span class="n">nn_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;neurons&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="s1">&#39;layers&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;lr&#39;</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span>
+    <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">2000</span><span class="p">,</span>
+    <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cpu&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;constraints&#39;</span><span class="p">:</span> <span class="n">constraints</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1">#train a NN model</span>
+<span class="n">models</span><span class="p">,</span> <span class="n">evals</span><span class="p">,</span> <span class="n">coefs</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">eqs</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;NN&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">nn_params</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Return Values</p>
+<p>Training methods return a tuple of three variables: <code class="docutils literal notranslate"><span class="pre">(models,</span> <span class="pre">evals,</span> <span class="pre">obtained_params)</span></code>.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">models</span></code>: A dictionary containing the trained models. This variable that depends on the chosen model. For example, for the <strong>NN</strong> method, this will be a dictionary mapping function names (e.g., <code class="docutils literal notranslate"><span class="pre">'f1'</span></code>, and <code class="docutils literal notranslate"><span class="pre">'f2'</span></code>) to their corresponding PyTorch <code class="docutils literal notranslate"><span class="pre">NNModel</span></code> objects. It is useful for using as input argument for pycc.simulate().</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">evals</span></code>: A flat list of NumPy arrays ready for plotting, containing the identified functions. It contains the x and y valures of each identified function in the format <code class="docutils literal notranslate"><span class="pre">[x_f1,</span> <span class="pre">y_f1,</span> <span class="pre">x_f2,</span> <span class="pre">y_f2,</span> <span class="pre">...]</span></code>. All training methods return this variable using the same format.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">obtained_params</span></code>: A dictionary containing the identified scalar parameters from the equations (e.g., <code class="docutils literal notranslate"><span class="pre">a1</span></code>, <code class="docutils literal notranslate"><span class="pre">a2</span></code>). It contains the the parameter name (string) and its final identified value (float). All training methods return this variable using the same format.</p></li>
+</ul>
+<p><strong>Method-Specific Details</strong></p>
+<p>Below are the details and available <code class="docutils literal notranslate"><span class="pre">params</span></code> for each training method.</p>
+<section id="neural-network-method-nn">
+<h2><strong>Neural Network (method='NN')</strong><a class="headerlink" href="#neural-network-method-nn" title="Link to this heading"></a></h2>
+<p>This method uses a physics-informed neural network to learn the unknown functions as characteristic curves. It is flexible and powerful for complex systems. The <code class="docutils literal notranslate"><span class="pre">params</span></code> dictionary for this method can contain the following keys:</p>
+<ul>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'neurons':</span></code> (<em>int, optional</em>)</dt><dd><p>The number of neurons in each hidden layer of the neural networks. <strong>Default: 100</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'layers':</span></code> (<em>int, optional</em>)</dt><dd><p>The number of hidden layers for each neural network. <strong>Default: 3</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'lr':</span></code> (<em>float, optional</em>)</dt><dd><p>The learning rate for the Adam optimizer. <strong>Default: 1e-3</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'epochs':</span></code> (<em>int, optional</em>)</dt><dd><p>The maximum number of training iterations. <strong>Default: 1000</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'error_threshold':</span></code> (<em>float, optional</em>)</dt><dd><p>The training will stop early if the data loss falls below this value. <strong>Default: 1e-6</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">'device':</span></code> (<em>str, optional</em>)</dt><dd><p>Specifies the computation device. Options are <code class="docutils literal notranslate"><span class="pre">'automatic'</span></code>, <code class="docutils literal notranslate"><span class="pre">'cpu'</span></code>, <code class="docutils literal notranslate"><span class="pre">'gpu'</span></code>, <code class="docutils literal notranslate"><span class="pre">'cuda'</span></code>, and intel <code class="docutils literal notranslate"><span class="pre">'xpu'</span></code>. The <code class="docutils literal notranslate"><span class="pre">'gpu'</span></code> setting search if any <code class="docutils literal notranslate"><span class="pre">'cuda'</span></code> or <code class="docutils literal notranslate"><span class="pre">'xpu'</span></code> are available. The <code class="docutils literal notranslate"><span class="pre">'xpu'</span></code> setting is based on intel-extension-for-pytorch and supports the following hardware: Intel Arc A- and B-Series, Iris Xe Graphics, Intel Data Center GPU Max Series (see more details in the <a class="reference external" href="https://intel.github.io/intel-extension-for-pytorch/">Intel documentation for pytorch extension</a>).</p>
+<blockquote>
+<div><p>The <code class="docutils literal notranslate"><span class="pre">'automatic'</span></code> setting will prioritize <code class="docutils literal notranslate"><span class="pre">'cuda'</span></code>, <code class="docutils literal notranslate"><span class="pre">'xpu'</span></code>, and finally <code class="docutils literal notranslate"><span class="pre">'cpu'</span></code>. <strong>Default: 'automatic'</strong>.</p>
+</div></blockquote>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'eq_weights':</span></code> (<em>list[float], optional</em>)</dt><dd><p>A list of weights to apply to the loss function of each equation. The length of the list must match the number of equations. If not provided, all equations are weighted equally. <strong>Default: 'None'</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'weight_loss_param':</span></code> (<em>float, optional</em>)</dt><dd><p>A regularization factor for an L2 penalty on the identified scalar parameters (<code class="docutils literal notranslate"><span class="pre">a_i</span></code>). A small value helps prevent these parameters from growing too large. <strong>Default: 1e-3</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'n_eval':</span></code> (<em>int, optional</em>)</dt><dd><p>The number of points to evaluate for generating the final characteristic curves in the <code class="docutils literal notranslate"><span class="pre">evals</span></code> output, i.e. the number of point to evaluate the obtained <code class="docutils literal notranslate"><span class="pre">'fi'</span></code> functions. <strong>Default: 200</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">'constraints':</span></code> (<em>list[dict], optional</em>)</dt><dd><p>A list of dictionaries, where each dictionary defines a physical constraint to be imposed on the model. This is one of the most powerful features. <strong>Default: 'None'</strong>.</p>
+<p>Each constraint dictionary can have the following keys:
+* <code class="docutils literal notranslate"><span class="pre">'constraint'</span></code>: A string defining the constraint. Supported formats are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Point value</strong>: <code class="docutils literal notranslate"><span class="pre">'f1(0)=0'</span></code> or <code class="docutils literal notranslate"><span class="pre">'f2(1.5)=-0.8'</span></code></p></li>
+<li><p><strong>Symmetry</strong>: <code class="docutils literal notranslate"><span class="pre">'f1</span> <span class="pre">odd'</span></code> or <code class="docutils literal notranslate"><span class="pre">'f2</span> <span class="pre">even'</span></code></p></li>
+</ul>
+</div></blockquote>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">'penalty'</span></code>: (<em>float, optional</em>) A weight to multiply the loss from this specific constraint. <strong>Default: 1.0</strong>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'eval'</span></code>: (<em>str, optional</em>) For symmetry constraints only. Defines how the constraint is evaluated. Can be <code class="docutils literal notranslate"><span class="pre">'data'</span></code> (uses the provided data points) or <code class="docutils literal notranslate"><span class="pre">'array'</span></code> (creates a new linearly spaced array over the data range). <strong>Default: 'array'</strong>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'Nval_array'</span></code>: (<em>int, optional</em>) If <code class="docutils literal notranslate"><span class="pre">eval=\'array'</span></code>, this sets the number of points in the evaluation array. <strong>Default: 100</strong>.</p></li>
+</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Here is an example of a <code class="docutils literal notranslate"><span class="pre">constraints</span></code> list:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">constraints</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># Force f1 to pass through the origin with a high penalty</span>
+    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f1(0)=0&#39;</span><span class="p">,</span> <span class="s1">&#39;penalty&#39;</span><span class="p">:</span> <span class="mf">100.0</span><span class="p">},</span>
+
+    <span class="c1"># Enforce that f1 is an even function</span>
+    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f1 even&#39;</span><span class="p">},</span>
+
+    <span class="c1"># Enforce that f2 is an odd function and add more customization</span>
+    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f2 odd&#39;</span><span class="p">,</span> <span class="s1">&#39;eval&#39;</span><span class="p">:</span> <span class="s1">&#39;array&#39;</span><span class="p">,</span> <span class="s1">&#39;Nval_array&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">},</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</dd>
+</dl>
+</li>
+</ul>
+<p><strong>Example Usage:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Assume &#39;df&#39; is a pandas DataFrame with your data</span>
+<span class="c1"># df = pd.DataFrame(...)</span>
+
+<span class="n">eqs</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;x1_dot = x2&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;x2_dot = F_ext - f1(x2) - f2(x1)&#39;</span>
+<span class="p">]</span>
+
+<span class="n">constraints</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f1(0)=0&#39;</span><span class="p">,</span> <span class="s1">&#39;penalty&#39;</span><span class="p">:</span> <span class="mf">100.0</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f2 odd&#39;</span><span class="p">},</span>
+<span class="p">]</span>
+
+<span class="n">nn_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;neurons&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="s1">&#39;layers&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;lr&#39;</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span>
+    <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">2000</span><span class="p">,</span>
+    <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cpu&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;constraints&#39;</span><span class="p">:</span> <span class="n">constraints</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">models</span><span class="p">,</span> <span class="n">evals</span><span class="p">,</span> <span class="n">coefs</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">eqs</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;NN&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">nn_params</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="symbolic-regression-method-symbr">
+<h2><strong>Symbolic Regression (method='SymbR')</strong><a class="headerlink" href="#symbolic-regression-method-symbr" title="Link to this heading"></a></h2>
+<p>This method uses Symbolic Regression, powered by the <code class="docutils literal notranslate"><span class="pre">PySR</span></code> library, to discover concise mathematical expressions for the unknown functions. It works by iteratively by fitting a symbolic model for each function <code class="docutils literal notranslate"><span class="pre">f_i</span></code> to be compatible with the list of 'equations' for a given input database.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">params</span></code> dictionary for this method can contain the following keys:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'pysr':</span></code> (<em>dict, optional</em>)</dt><dd><p>A dictionary of keyword arguments that are passed directly to the <code class="docutils literal notranslate"><span class="pre">PySRRegressor</span></code>. This is the primary way to control the symbolic regression process. See the <a class="reference external" href="https://astroautomata.com/PySR/api/">PySR documentation</a> for all options.
+PyCC code define:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">'niterations'</span></code>: (<em>int</em>) Number of iterations for the search. <strong>Default: 100</strong>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'unary_operators'</span></code>: (<em>list[str]</em>) A list of unary operators to use (e.g., <code class="docutils literal notranslate"><span class="pre">'cos'</span></code>, <code class="docutils literal notranslate"><span class="pre">'exp'</span></code>, <code class="docutils literal notranslate"><span class="pre">'tanh'</span></code>). <strong>Default: ['tanh']</strong>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'binary_operators'</span></code>: (<em>list[str]</em>) A list of binary operators to use (e.g., <code class="docutils literal notranslate"><span class="pre">'+'</span></code>, <code class="docutils literal notranslate"><span class="pre">'*'</span></code>). <strong>Default: `['+', '-', '*']</strong>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'maxsize'</span></code>: (<em>int</em>) The maximum complexity of the expressions. <strong>Default: '12'</strong>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'populations'</span></code>: (<em>int</em>) The number of populations to use in the evolutionary search. <strong>Default: 10</strong>.</p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'max_iterations':</span></code> (<em>int, optional</em>)</dt><dd><p>The maximum number of outer-loop iterations for the alternating fitting process. <strong>Default: 15</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'tol':</span></code> (<em>float, optional</em>)</dt><dd><p>The tolerance for the change in mean squared error (MSE) between outer-loop iterations. The process will stop early if the change is less than this value. <strong>Default: 1e-10</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'N_fit_points':</span></code> (<em>int, optional</em>)</dt><dd><p>The number of data points to subsample for fitting the PySR model. Using a smaller number can significantly speed up the process. If <code class="docutils literal notranslate"><span class="pre">'None'</span></code>, all data is used. <strong>Default: 200</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'scaling':</span></code> (<em>bool, optional</em>)</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">'True'</span></code>, the input variable for each function is scaled to the range <cite>[-1, 1]</cite> before fitting, which can improve stability. <strong>Default: 'False'</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'n_eval':</span></code> (<em>int, optional</em>)</dt><dd><p>The number of points to evaluate for generating the final characteristic curves in the <code class="docutils literal notranslate"><span class="pre">evals</span></code> output. <strong>Default: 200</strong>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p><strong>Example Usage:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Assume &#39;df&#39; is a pandas DataFrame with your data</span>
+<span class="c1"># df = pd.DataFrame(...)</span>
+
+<span class="n">eqs</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;x1_dot = x2&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;x2_dot = F_ext - f1(x2) - f2(x1)&#39;</span>
+<span class="p">]</span>
+
+<span class="n">symbr_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;max_iterations&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="s1">&#39;pysr&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;niterations&#39;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+        <span class="s1">&#39;binary_operators&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">,</span> <span class="s2">&quot;/&quot;</span><span class="p">],</span>
+        <span class="s1">&#39;unary_operators&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;cos&quot;</span><span class="p">,</span> <span class="s2">&quot;sin&quot;</span><span class="p">,</span> <span class="s2">&quot;tanh&quot;</span><span class="p">],</span>
+        <span class="s1">&#39;maxsize&#39;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+
+<span class="n">models</span><span class="p">,</span> <span class="n">evals</span><span class="p">,</span> <span class="n">coefs</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">eqs</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;SymbR&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">symbr_params</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="polynomial-method-poly">
+<h2><strong>Polynomial (method='Poly')</strong><a class="headerlink" href="#polynomial-method-poly" title="Link to this heading"></a></h2>
+<p>This method models each unknown function <code class="docutils literal notranslate"><span class="pre">f_i</span></code> as a polynomial of a specified order. It uses an iterative Gauss-Newton algorithm to solve the potentially non-linear system of equations for the polynomial coefficients and any scalar parameters <code class="docutils literal notranslate"><span class="pre">a_i</span></code>. This method is very fast and serves as a great baseline.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">params</span></code> dictionary for this method can contain the following keys:</p>
+<ul>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'N_order':</span></code> (<em>int, optional</em>)</dt><dd><p>The order (highest degree) of the polynomial to fit for each function. <strong>Default: 10</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'n_iter':</span></code> (<em>int, optional</em>)</dt><dd><p>The maximum number of iterations for the Gauss-Newton solver. <strong>Default: 1000</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'learning_rate':</span></code> (<em>float, optional</em>)</dt><dd><p>The step size for the parameter update in each Gauss-Newton iteration. <strong>Default: 0.01</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'error_threshold':</span></code> (<em>float, optional</em>)</dt><dd><p>The training will stop early if the total loss falls below this value. <strong>Default: 1e-10</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'scaling':</span></code> (<em>bool, optional</em>)</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the input variable for each function is scaled to the range <cite>[-1, 1]</cite> before fitting, which improves numerical stability for high-order polynomials. <strong>Default: 'True'</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'eq_weights':</span></code> (<em>list[float], optional</em>)</dt><dd><p>A list of weights to apply to the loss function of each equation. <strong>Default: 'None'</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'n_eval':</span></code> (<em>int, optional</em>)</dt><dd><p>The number of points to evaluate for generating the final characteristic curves in the <code class="docutils literal notranslate"><span class="pre">evals</span></code> output. <strong>Default: 200</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">'constraints':</span></code> (<em>list[dict], optional</em>)</dt><dd><p>A list of dictionaries to impose constraints on the polynomial forms, effectively setting certain coefficients to zero. <strong>Default: []</strong>.</p>
+<p>Each constraint dictionary can have the following keys:
+* <code class="docutils literal notranslate"><span class="pre">'constraint'</span></code>: A string defining the constraint. Supported formats are:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><strong>Point value</strong>: <code class="docutils literal notranslate"><span class="pre">'f1(0)=0'</span></code> (This forces the constant term to be zero).</p></li>
+<li><p><strong>Symmetry</strong>: <code class="docutils literal notranslate"><span class="pre">'f1</span> <span class="pre">odd'</span></code> (This forces all even-power coefficients to be zero) or <code class="docutils literal notranslate"><span class="pre">'f1</span> <span class="pre">even'</span></code> (This forces all odd-power coefficients to be zero).</p></li>
+</ul>
+</div></blockquote>
+</dd>
+</dl>
+</li>
+</ul>
+<p><strong>Example Usage:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Assume &#39;df&#39; is a pandas DataFrame with your data</span>
+<span class="c1"># df = pd.DataFrame(...)</span>
+
+<span class="n">eqs</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;x_ddot = F_ext - a1*f1(x_dot) - f2(x)&#39;</span>
+<span class="p">]</span>
+
+<span class="n">constraints</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="c1"># f1 is a damping term, so it must be an odd function.</span>
+    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f1 odd&#39;</span><span class="p">},</span>
+    <span class="c1"># f2 is a restoring force, so it must be odd and pass through the origin.</span>
+    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f2 odd&#39;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f2(0)=0&#39;</span><span class="p">},</span>
+<span class="p">]</span>
+
+<span class="n">poly_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;N_order&#39;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>
+    <span class="s1">&#39;n_iter&#39;</span><span class="p">:</span> <span class="mi">1500</span><span class="p">,</span>
+    <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">0.05</span><span class="p">,</span>
+    <span class="s1">&#39;constraints&#39;</span><span class="p">:</span> <span class="n">constraints</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="n">models</span><span class="p">,</span> <span class="n">evals</span><span class="p">,</span> <span class="n">coefs</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">eqs</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;Poly&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">poly_params</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="pycc-simulate">
+<h1>pycc.simulate()<a class="headerlink" href="#pycc-simulate" title="Link to this heading"></a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="pycc.simulate">
 <span class="sig-prename descclassname"><span class="pre">pycc.</span></span><span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Theoretical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pycc/simulate_manager.html#simulate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pycc.simulate" title="Link to this definition"></a></dt>
@@ -101,6 +470,7 @@ params: dict with simulation parameters (t_span, y0, noise, etc.)</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="pyCC.id documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

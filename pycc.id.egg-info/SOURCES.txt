@@ -18,11 +18,13 @@ pycc/simulate_from_evals_interp.py
 pycc/simulate_manager.py
 pycc/simulate_th.py
 pycc/simulate_th_backup.py
+pycc/train_GP.py
 pycc/train_NN_hybrid.py
 pycc/train_NN_hybrid_backup.py
 pycc/train_NN_hybrid_backup_new.py
 pycc/train_NN_hybrid_trying_improve_params_fitting.py
 pycc/train_NN_hybrid_with_verification_detaframe.py
+pycc/train_SparseR.py
 pycc/train_SymbR.py
 pycc/train_SymbReg_backup1.py
 pycc/train_SymbReg_backup2_work_but_harcoded.py

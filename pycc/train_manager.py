@@ -2,6 +2,8 @@ from .train_NN_hybrid import train_NN_hybrid
 from .train_polynomial_linear import train_polynomial_linear  
 from .train_polynomial import train_polynomial  
 from .train_SymbR import train_SymbR  
+from .train_SparseR import train_SparseR
+from .train_GP import train_GP
 
 def train(df, equations, method='NN', params=None):
     """
@@ -54,6 +56,10 @@ def train(df, equations, method='NN', params=None):
         return train_polynomial_linear(df, equations, params=params)
     elif method == 'SymbR':
         return train_SymbR(df, equations, params=params)
+    elif method == 'SparseR':
+        return train_SparseR(df, equations, params=params)
+    elif method == 'GP':
+        return train_GP(df, equations, params=params)
     else:
         raise ValueError(f"Unknown training method '{method}'")
 

@@ -146,15 +146,15 @@ import pycc
 import numpy as np
 import pandas as pd
 import matplotlib
-# This example shows how to simulate a stick-slip second order system using pycc [pycc.simulate()]
-# We define a database and then use NN-CC method to identify the model [pycc.train()] and 
-# then to simulate the identified model [pycc.simulate()]
+# This example shows:
+# 1) how to simulate a stick-slip second order system using pycc.simulate()
+# 2) how to train the NN-CC method to identify the model [pycc.train()] 
+# 3) how to simulate the identified model [pycc.simulate()]
 
-# --- Parameters ---
+# 1a) define parameters and functions
 alpha=1.0;beta=0.2;delta=0.1;Omega=1.0;
 x0=0.0;v0=0.0; y0=[x0,v0] # initial conditions
 t_span=(0, 20); t_eval=np.linspace(*t_span, 1000)
-
 def F1_th(x_dot):
     return delta * x_dot + 0.5 * np.tanh(500*x_dot)
 def F2_th(x):
@@ -162,10 +162,11 @@ def F2_th(x):
 def F_ext(t):
     return np.cos(Omega * t)
 
-
+# 1b) define equation
 eqs_th = ['x1_dot = x2',
           'x2_dot = F_ext - f1(x2) - f2(x1)']
-# Parameters for simulation
+
+# 1c) define simulation parameters
 params_th = {
     't_pan': t_span,
     'y0': y0,  
@@ -174,16 +175,17 @@ params_th = {
     'local_funcs': {'f1': lambda t: F1_th(t),'f2': lambda t: F2_th(t),'F_ext': lambda t: F_ext(t)},
     'scalar_params': {'a1':2.0}
 }
+# 1d) integrate forward the theoretical equation
 sol,derivatives = pycc.simulate(equations,method="Theoretical", params=params_th)
 
-#extract data from theoretical solution
+# 1e) extract data from theoretical solution
 time_data  = sol.t
 x_data     = sol.y[0]
 x_dot_data = sol.y[1]
 x_ddot_data=derivatives[1]
 F_ext_val  = F_ext(time_data)
 
-# define database
+# define database for training
 df = pd.DataFrame({
     'x1':x1_data,
     'x2':x2_data,
@@ -191,18 +193,19 @@ df = pd.DataFrame({
     'x2_dot':x2_dot_data,
     'F_ext': F_ext_val
 })
-# Propose equations to use for identification (fi functions and ai parameters).
+
+# 2a) propose equations to use for identification (fi functions and ai parameters).
 eqs = [
      'x1_dot = x2*np.exp(a1-2.0)',
      'x2_dot = F_ext - f1(x2) - f2(x1)'
 ]
-#define constraints (optional)  
+# 2b) define constraints (optional)  
 constraints = [ # adding prior known information
    {'constraint': 'f2(0)=0'},
    {'constraint': 'f1 odd'},
    {'constraint': 'f2 odd'},
 ]
-#define parameters (optional)
+# 2c) define training parameters (optional)
 params_NN = {
     'neurons': 100,
     'layers':3,
@@ -213,7 +216,7 @@ params_NN = {
     'weight_loss_param': 1e-3,
     'constraints': constraints,
 }
-#train/fit the model 
+# 2d) train/fit/identify the model 
 models, evals, obtained_coefs = pycc.train(df, eqs,method='NN', params=params_NN)
 
 
@@ -242,7 +245,7 @@ if obtained_coefs:
 ### Simulation using the NN models
 
 print("simulation with NN simul")
-#define parameters
+# 3a) define simulation parameters 
 params_NN_simul = {
     'models': models,
     'obtained_coefs': obtained_coefs,
@@ -255,7 +258,7 @@ params_NN_simul = {
     'rtol': 1e-6,
     'check_nan': True
 }
-#integrate forward equations
+# 3b) integrate identified equations
 sol,_ = pycc.simulate(equations, method='NN', params=params_NN_simul)
 print("Integration success:", sol.success)
 

@@ -366,16 +366,8 @@ def train_NN_hybrid(df, equation_str, params=None):
     # Prepare tensors from df (same as before)
     variables = list(df.columns)
     tensors = prepare_tensors(df, variables)
-    # Parse every equation into sympy Eq objects
-    eq_objs = [sympy_expression(eq) for eq in equations]
-    lhs_exprs = [eqo.lhs for eqo in eq_objs]
-    rhs_exprs = [eqo.rhs for eqo in eq_objs]
-    criterion = nn.MSELoss() 
-    # optimizer over all parameters (scalar params + all NN params)
-    full_params = list(scalar_params.values()) + [p for model in models.values() for p in model.parameters()]
-    optimizer = optim.Adam(full_params, lr=lr)
-    # --- Move all models, params, and tensors to GPU ---
-    if device=='cuda' or device=='xpu':
+     # --- Move all models, params, and tensors to GPU ---
+    if device.type=='cuda' or device=='xpu':
         print(f"Moving models and data to {device}...")
         #if torch.cuda.is_available():
         #    print("Moving models and data to GPU...")
@@ -385,7 +377,17 @@ def train_NN_hybrid(df, equation_str, params=None):
             tensors[k] = tensors[k].to(device)
         for k in scalar_params:
             scalar_params[k] = scalar_params[k].to(device)
- 
+    
+    
+    # Parse every equation into sympy Eq objects
+    eq_objs = [sympy_expression(eq) for eq in equations]
+    lhs_exprs = [eqo.lhs for eqo in eq_objs]
+    rhs_exprs = [eqo.rhs for eqo in eq_objs]
+    criterion = nn.MSELoss() 
+    # optimizer over all parameters (scalar params + all NN params)
+    full_params = list(scalar_params.values()) + [p for model in models.values() for p in model.parameters()]
+    optimizer = optim.Adam(full_params, lr=lr)
+
 #    # new implementation with a module container
 #    # Build a module container so everything is registered and moveable as one unit
 #    model_container = nn.Module()
@@ -515,7 +517,7 @@ def train_NN_hybrid(df, equation_str, params=None):
             print(f"Early stopping at epoch {epoch}")
             break
     # --- Move everything back to CPU for evaluation/plotting ---
-    if device == 'xpu' or device=='cuda':
+    if device == 'xpu' or device.type=='cuda':
         print("Moving models and data back to CPU...")
         for model in models.values():
             model.to('cpu')

@@ -39,8 +39,8 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../why_pycc.html">Why pyCC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../selected_functions.html">Selected functions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../selected_functions.html#pycc-train">pycc.train()</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../selected_functions.html#pycc-simulate">pycc.simulate()</a></li>
@@ -76,6 +76,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.train_polynomial_linear</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_polynomial_linear</span>  
 <span class="kn">from</span><span class="w"> </span><span class="nn">.train_polynomial</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_polynomial</span>  
 <span class="kn">from</span><span class="w"> </span><span class="nn">.train_SymbR</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_SymbR</span>  
+<span class="kn">from</span><span class="w"> </span><span class="nn">.train_SparseR</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_SparseR</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.train_GP</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_GP</span>
 
 <div class="viewcode-block" id="train">
 <a class="viewcode-back" href="../../selected_functions.html#pycc.train">[docs]</a>
@@ -130,6 +132,10 @@
         <span class="k">return</span> <span class="n">train_polynomial_linear</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">equations</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;SymbR&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">train_SymbR</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">equations</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;SparseR&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">train_SparseR</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">equations</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;GP&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">train_GP</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">equations</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown training method &#39;</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span></div>
 

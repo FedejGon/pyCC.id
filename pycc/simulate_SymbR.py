@@ -286,7 +286,7 @@ def simulate_SymbR(equations: List[str], params: Dict[str, Any]):
     models = params.get('models', None)
     evals = params.get('evals', None)
     function_names = params.get('function_names', None)
-    sr_params = params.get('sr_params', None)
+    sr_params = params.get('pysr', None)
 
     local_funcs = params.get('local_funcs', {}) or {}
     t_span = params.get('t_span', None)

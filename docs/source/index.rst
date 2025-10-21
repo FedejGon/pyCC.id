@@ -13,9 +13,38 @@ documentation for details.
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
-
+   :caption: User guide:
+   
+   why_pycc   
+   installation
+   
+.. toctree::
+   :maxdepth: 2
+   :caption: Selected functions:
+   
    selected_functions
    
-   api
+.. toctree::
+   :maxdepth: 2
+   :caption: Examples:  
    
+   api   
+
+.. toctree::
+   :maxdepth: 2   
+   :caption: Tips:
+   
+   practical_tips
+      
+   
+.. toctree::
+   :maxdepth: 2   
+   :caption: Links:
+   
+   links
+   
+.. toctree::
+   :maxdepth: 2   
+   :caption: References:
+    
+   references      

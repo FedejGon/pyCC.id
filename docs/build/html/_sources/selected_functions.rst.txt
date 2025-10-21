@@ -1,8 +1,3 @@
-Selected functions
-==================
-
-.. toctree::
-   :maxdepth: 2
 
 
 This section provides a detailed reference for the core functions in the ``pycc`` library.
@@ -271,7 +266,7 @@ pycc.simulate()
 ==========
 
 .. autofunction:: pycc.simulate
-
+   :noindex:
 
 
 

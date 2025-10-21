@@ -1,0 +1,167 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Practical Tips &mdash; pyCC.id 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Community &amp; Useful Links" href="links.html" />
+    <link rel="prev" title="API Reference" href="api.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pyCC.id
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="why_pycc.html">Why pyCC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html#usage">Usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Selected functions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="selected_functions.html">pycc.train()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="selected_functions.html#pycc-simulate">pycc.simulate()</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Practical Tips</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#nn-cc-the-core-method">NN-CC: The Core Method</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#alternative-methods-poly-cc-and-symbr-cc">Alternative Methods: Poly-CC and SymbR-CC</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="links.html">Community &amp; Useful Links</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyCC.id</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Practical Tips</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/practical_tips.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="practical-tips">
+<h1>Practical Tips<a class="headerlink" href="#practical-tips" title="Link to this heading"></a></h1>
+<section id="nn-cc-the-core-method">
+<h2>NN-CC: The Core Method<a class="headerlink" href="#nn-cc-the-core-method" title="Link to this heading"></a></h2>
+<p>The primary and most flexible identification method in <code class="docutils literal notranslate"><span class="pre">pyCC</span></code> is <strong>NN-CC</strong> (Neural Network - Characteristic Curves). This method uses neural networks to approximate the unknown functions <span class="math notranslate nohighlight">\(\{\mathbf{f}\}\)</span> and can simultaneously identify unknown scalar parameters <span class="math notranslate nohighlight">\(\mathbf{a}\)</span> as part of a hybrid model.</p>
+<p>A key strategy for improving the accuracy and physical consistency of the identified model is to <strong>incorporate prior physical knowledge</strong>. This is a core strength of <code class="docutils literal notranslate"><span class="pre">pyCC</span></code>.</p>
+<p>You can inject this information using the <code class="docutils literal notranslate"><span class="pre">constraints</span></code> parameter during training. For example, if you know a restoring force <span class="math notranslate nohighlight">\(f_2(x_1)\)</span> must be an odd function (e.g., <span class="math notranslate nohighlight">\(f_2(-x_1) = -f_2(x_1)\)</span>) and must pass through the point (1,2), you can specify this:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">constraints</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f2 odd&#39;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f2(1)=2&#39;</span><span class="p">},</span>
+<span class="p">]</span>
+</pre></div>
+</div>
+<p>Adding constraints like <strong>symmetries</strong> (odd/even) or <strong>known values</strong> (e.g., <span class="math notranslate nohighlight">\(f(0)=0\)</span>) significantly aids the discovery process, reduces the space of possible solutions, and leads to more robust and physically-grounded results.</p>
+<p>Additionally, a powerful workflow is to apply <strong>Symbolic Regression as a post-processing step</strong> to the characteristic curves <span class="math notranslate nohighlight">\(\{\mathbf{f}\}\)</span> obtained from a trained NN-CC model. This has been found to be highly useful not only for discovering a final, simple <strong>analytical expression</strong> for the functions but also for <strong>reducing potential overfitting</strong> that might be present in the raw neural network fitting.</p>
+</section>
+<section id="alternative-methods-poly-cc-and-symbr-cc">
+<h2>Alternative Methods: Poly-CC and SymbR-CC<a class="headerlink" href="#alternative-methods-poly-cc-and-symbr-cc" title="Link to this heading"></a></h2>
+<p>While NN-CC is the core method, <code class="docutils literal notranslate"><span class="pre">pyCC</span></code> also provides other approaches for comparison and specific use cases:</p>
+<ul class="simple">
+<li><p><strong>Poly-CC (Polynomials)</strong>: This method uses polynomial basis functions (e.g., <span class="math notranslate nohighlight">\(f(x) = c_1 x + c_2 x^2 + ...\)</span>) to model the characteristic curves. It is less flexible than NN-CC but can be useful for simple systems or for establishing a baseline identification.</p></li>
+<li><p><strong>SymbR-CC (Symbolic Regression)</strong>: This method, which leverages the <code class="docutils literal notranslate"><span class="pre">pySR</span></code> library, attempts to find an explicit symbolic mathematical expression for the characteristic curves (e.g., <span class="math notranslate nohighlight">\(f(x) = 0.5 \tanh(500x)\)</span>).</p></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Be cautious when using SymbR-CC with complex model structures (<span class="math notranslate nohighlight">\(\mathbf{G}\)</span>). Symbolic regression can struggle or fail if the proposed equation involves complex operations. For example, it may have issues if an unknown function <span class="math notranslate nohighlight">\(f(x)\)</span> is located in the <strong>denominator</strong> of an expression or inside another complex function. It performs best when the unknown functions are combined in simpler, additive, or multiplicative ways.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Often, performing simulations with SymbR-CC is slow, as it requires to evaluate the analytical expressions for the functions at every time step. Aternatively, you can simulate the system using the <code class="docutils literal notranslate"><span class="pre">Interp</span></code> method and using as input the <code class="docutils literal notranslate"><span class="pre">evals</span></code> variable obtained from SymbR-CC. The simulation using interpolation is much faster than analytical evaluation.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="api.html" class="btn btn-neutral float-left" title="API Reference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="links.html" class="btn btn-neutral float-right" title="Community &amp; Useful Links" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Federico J. Gonzalez.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

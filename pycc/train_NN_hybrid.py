@@ -172,11 +172,20 @@ def compute_constraint_loss(models, constraints, func_list, tensors, device):
         if m_val_at:
             f_name = m_val_at.group(1)
             x_val = float(m_val_at.group(2))
-            y_target = float(m_val_at.group(3))
+            y_target_val = float(m_val_at.group(3))
+            #y_target = torch.tensor(y_target_val, dtype=torch.float32, device=device)
             if f_name in models:
                 model = models[f_name]
-                x_tensor = torch.tensor([[x_val]], dtype=torch.float32, device=device)
-                y_pred = model(x_tensor)
+                try:
+                    model_dev = next(model.parameters()).device
+                except StopIteration:
+                    # model has no parameters? fallback to provided device
+                    model_dev = device if isinstance(device, torch.device) else torch.device(str(device))
+                x_tensor = torch.tensor([[x_val]], dtype=torch.float32, device=model_dev)
+                y_target = torch.tensor([[y_target_val]], dtype=torch.float32, device=model_dev)
+                #y_pred = model(x_tensor)
+                with torch.no_grad():
+                    y_pred = model(x_tensor)                
                 loss = ((y_pred - y_target) ** 2).mean()
                 total_loss += penalty * loss
             continue

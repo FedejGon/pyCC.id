@@ -441,7 +441,7 @@ plt.show()
 #equation='x_ddot + a1*x_dot + a2*x + a3*x**3 - F_ext = 0'
 constraints = [
     #{'constraint': 'f1(0)=0', 'penalty': 1e-2},
-   #{'constraint': 'f2(0)=0', 'penalty': 1e-2},
+   {'constraint': 'f2(0)=0', 'penalty': 1e-2},
    {'constraint': 'f1 odd'},# 'penalty': 1e-1, 'eval': 'array','Nval_array':100}, # penaly is optional
    {'constraint': 'f2 odd'},# 'penalty': 1e-1, 'eval': 'array','Nval_array':100}, # eval=data/array array is default
 ]

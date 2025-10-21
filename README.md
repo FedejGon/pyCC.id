@@ -145,7 +145,7 @@ Import the package into your Python environment:
 import pycc
 import numpy as np
 import pandas as pd
-import matplotlib
+import matplotlib.pyplot as plt
 # This example shows:
 # 1) how to simulate a stick-slip second order system using pycc.simulate()
 # 2) how to train the NN-CC method to identify the model [pycc.train()] 
@@ -168,21 +168,21 @@ eqs_th = ['x1_dot = x2',
 
 # 1c) define simulation parameters
 params_th = {
-    't_pan': t_span,
+    't_span': t_span,
     'y0': y0,  
     't_eval': t_eval,
     'method': 'LSODA',
-    'local_funcs': {'f1': lambda t: F1_th(t),'f2': lambda t: F2_th(t),'F_ext': lambda t: F_ext(t)},
-    'scalar_params': {'a1':2.0}
+    'local_funcs': {'f1': lambda t: F1_th(t),'f2': lambda t: F2_th(t),'F_ext': lambda t: F_ext(t)}
 }
 # 1d) integrate forward the theoretical equation
-sol,derivatives = pycc.simulate(equations,method="Theoretical", params=params_th)
+sol,derivatives = pycc.simulate(eqs_th,method="Theoretical", params=params_th)
 
 # 1e) extract data from theoretical solution
 time_data  = sol.t
-x_data     = sol.y[0]
-x_dot_data = sol.y[1]
-x_ddot_data=derivatives[1]
+x1_data     = sol.y[0]
+x2_data = sol.y[1]
+x1_dot_data=derivatives[0]
+x2_dot_data=derivatives[1]
 F_ext_val  = F_ext(time_data)
 
 # define database for training
@@ -196,7 +196,7 @@ df = pd.DataFrame({
 
 # 2a) propose equations to use for identification (fi functions and ai parameters).
 eqs = [
-     'x1_dot = x2*np.exp(a1-2.0)',
+     'x1_dot = x2', #*exp(a1-2.0)',
      'x2_dot = F_ext - f1(x2) - f2(x1)'
 ]
 # 2b) define constraints (optional)  
@@ -213,27 +213,27 @@ params_NN = {
     'epochs': 2000,
     'error_threshold': 1e-6,
     'extrapolation': None,
+    'device':'cpu',
     'weight_loss_param': 1e-3,
     'constraints': constraints,
 }
 # 2d) train/fit/identify the model 
 models, evals, obtained_coefs = pycc.train(df, eqs,method='NN', params=params_NN)
 
-
 # plotting obtained functions f1 and f2
 x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
-plt.figure()
-plt.plot(x_f1_cc, f1_cc, label='f1 learned')
-plt.plot(x_dot_data,F1_th(x_dot_data), '--', label="f1 theory")
-plt.xlabel('x_dot')
-plt.ylabel('f1(x_dot)')
-plt.legend()
-plt.figure()
-plt.plot(x_f2_cc, f2_cc, label='f2 learned')
-plt.plot(x_data, F2_th(x_data),_val '--', label="f2 theory")
-plt.xlabel('x')
-plt.ylabel('f2(x)')
-plt.legend()
+fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+ax[0].plot(x_f1_cc, f1_cc, label='$f_1$ learned NN-CC')
+ax[0].plot(x_f1_cc, F1_th(x_f1_cc), '--', label="$f_1$ theory")
+ax[0].set_xlabel('$x_2$')
+ax[0].set_ylabel('$f_1(x_2)$')
+ax[0].legend()
+ax[1].plot(x_f2_cc, f2_cc, label='$f_2$ learned NN-CC')
+ax[1].plot(x_f2_cc, F2_th(x_f2_cc), '--', label="$f_2$ theory")
+ax[1].set_xlabel('$x_1$')
+ax[1].set_ylabel('$f_2(x_1)$')
+ax[1].legend()
+plt.tight_layout()
 plt.show()
 
 # Print learned parameters (if any)
@@ -259,17 +259,17 @@ params_NN_simul = {
     'check_nan': True
 }
 # 3b) integrate identified equations
-sol,_ = pycc.simulate(equations, method='NN', params=params_NN_simul)
+sol,_ = pycc.simulate(eqs, method='NN', params=params_NN_simul)
 print("Integration success:", sol.success)
 
 time_sim=sol.t
-x_sim=sol.y[0]
-x_dot_sim=sol.y[1]
+x1_sim=sol.y[0]
+x2_sim=sol.y[1]
 
 # Identified vs theoretical solution
 plt.figure()
-plt.plot(time_sim, x_sim, label="x(t) simulated NN(sym+SR)")
-plt.plot(time_data, x_data, label="x(t) th")
+plt.plot(time_sim, x1_sim, label="x(t) simulated NN(sym+SR)")
+plt.plot(time_data, x1_data, label="x(t) th")
 plt.xlabel('t')
 plt.ylabel('x(t)')
 plt.legend()

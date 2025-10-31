@@ -80,10 +80,10 @@ eqs = [
     'x2_dot = F_ext - f1(x2) - f2(x1)'
 ]
 
-eqs = [
-    'x1_dot = x2*(a1-1.0)',
-    'x2_dot = F_ext - a2*x2-a3*tanh(500*a4*x2) - a5*x1-a6*x1**3'
-]
+#eqs = [
+#    'x1_dot = x2*(a1-1.0)',
+#    'x2_dot = F_ext - a2*x2-a3*tanh(500*x2) - a5*x1-a6*x1**3'
+#]
 
 #alpha=1.0; beta=0.2; delta=0.1; mu=0.5; omega=1.0; A=1.0
 #def F1(x_dot):
@@ -114,14 +114,15 @@ constraints = [ # adding prior known information
 parameters_NN = {
     'neurons': 100,
     'layers':3,
-    'lr': 1e-3,
+    'lr': 1e-4,
     'scalar_lr': 1e-3, 
-    'epochs': 10000,
+    'epochs': 2000,
     'error_threshold': 1e-6,
     'extrapolation': None,
     'device':'cpu', #'cpu', 'gpu'
     'weight_loss_param': 1e-3,
     'constraints': constraints,
+    'initial_params': {'a4':2.0,'a1':2.0}  # ,'a4': 500.0qStart at 50 (or 500, but 50 is safer)
 }
 
 models, evals, obtained_coefs = pycc.train(df, eqs,method='NN', params=parameters_NN)
@@ -142,4 +143,5 @@ ax[1].set_ylabel('$f_2(x_1)$')
 ax[1].legend()
 plt.tight_layout()
 plt.show()
+
 

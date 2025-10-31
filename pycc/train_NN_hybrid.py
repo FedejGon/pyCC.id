@@ -316,12 +316,14 @@ def train_NN_hybrid(df, equation_str, params=None):
     neurons = params.get('neurons', 100)
     layers = params.get('layers', 3)
     lr = params.get('lr', 1e-3)
+    scalar_lr = params.get('scalar_lr', lr)
     epochs = params.get('epochs', 1000)
     error_threshold = params.get('error_threshold', 1e-6)
     extrapolation = params.get('extrapolation', None)
     weight_loss_param = params.get('weight_loss_param', 1e-3)
     constraints = params.get('constraints', [])
     n_eval = int(params.get('n_eval', 200))
+    initial_params = params.get('initial_params', {})
     # Accept single equation or list of equations (backward compatible)
     if isinstance(equation_str, (list, tuple)):
         equations = list(equation_str)
@@ -396,25 +398,34 @@ def train_NN_hybrid(df, equation_str, params=None):
     full_params = list(scalar_params.values()) + [p for model in models.values() for p in model.parameters()]
     optimizer = optim.Adam(full_params, lr=lr)
 
+
+###### THIS MODULE CAN BE COMMENTED AND WORK except only constants with gpu
 #    # new implementation with a module container
 #    # Build a module container so everything is registered and moveable as one unit
-#    model_container = nn.Module()
-#    model_container.models = nn.ModuleDict(models)
+    model_container = nn.Module()
+    model_container.models = nn.ModuleDict(models)
 #    # Register scalar parameters in a ParameterDict so they're visible to module.parameters()
-#    model_container.scalars = nn.ParameterDict({
-#        name: nn.Parameter(torch.tensor(1.0, dtype=torch.float32))
-#        for name in param_names
-#        })
+    model_container.scalars = nn.ParameterDict({
+        #name: nn.Parameter(torch.tensor(1.0, dtype=torch.float32))
+        name: nn.Parameter(torch.tensor(
+            # Get the initial value from the dict, or default to 1.0
+            initial_params.get(name, 1.0), 
+            dtype=torch.float32
+        ))
+        for name in param_names
+        })
 #    # Move the whole container to device BEFORE creating optimizer
-#    model_container.to(device)
+    model_container.to(device)
 #    # Expose convenient references for evaluate & training loops
+    models = model_container.models
+    scalar_params = model_container.scalars    
 #    models = {k: model_container.models[k] for k in model_container.models.keys()}
 #    scalar_params = {k: model_container.scalars[k] for k in model_container.scalars.keys()}
 #    # Prepare tensors (move to device)
-#    variables = list(df.columns)
-#    tensors = prepare_tensors(df, variables)
-#    for k in tensors:
-#        tensors[k] = tensors[k].to(device)
+    variables = list(df.columns)
+    tensors = prepare_tensors(df, variables)
+    for k in tensors:
+        tensors[k] = tensors[k].to(device)
 #    # Optional: set different hyperparams per parameter group
 #    # e.g. smaller LR for scalar params, or no weight decay for them:
 #    scalar_lr = params.get('scalar_lr', lr)
@@ -424,12 +435,16 @@ def train_NN_hybrid(df, equation_str, params=None):
 #        {'params': [p for p in model_container.models.parameters()], 'lr': lr, 'weight_decay': nn_wd},
 #        {'params': [p for _, p in model_container.scalars.items()], 'lr': scalar_lr, 'weight_decay': scalar_wd}
 #    ]
-#    optimizer = optim.Adam(param_groups)
-    
+    param_groups = [
+        {'params': model_container.models.parameters(), 'lr': lr},        
+        {'params': model_container.scalars.parameters(), 'lr': scalar_lr}
+    ]
+    optimizer = optim.Adam(param_groups)
+### END BLOCK 
  
     #print("device=",device, ";  device.type=",device.type)
     # --- Intel XPU optimization with IPEX ---
-    if device == 'xpu':
+    if device.type == 'xpu':
         try:
             import intel_extension_for_pytorch as ipex
             print(f"IPEX version: {ipex.__version__}")
@@ -525,7 +540,7 @@ def train_NN_hybrid(df, equation_str, params=None):
             print(f"Early stopping at epoch {epoch}")
             break
     # --- Move everything back to CPU for evaluation/plotting ---
-    if device == 'xpu' or device.type=='cuda':
+    if device.type == 'xpu' or device.type=='cuda':
         print("Moving models and data back to CPU...")
         for model in models.values():
             model.to('cpu')

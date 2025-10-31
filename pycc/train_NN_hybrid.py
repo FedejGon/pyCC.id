@@ -362,7 +362,15 @@ def train_NN_hybrid(df, equation_str, params=None):
     
     
 #    #working original    
-    scalar_params = {name: nn.Parameter(torch.tensor(1.0, dtype=torch.float32)) for name in param_names}
+#    scalar_params = {name: nn.Parameter(torch.tensor(1.0, dtype=torch.float32)) for name in param_names}
+    
+#    #modified cuda    
+#    scalar_params = {name: nn.Parameter(torch.tensor(1.0, dtype=torch.float32)) for name in param_names}
+    scalar_params = {
+        name: nn.Parameter(torch.tensor(1.0, dtype=torch.float32, device=device)) 
+        for name in param_names
+    }
+    
     # Prepare tensors from df (same as before)
     variables = list(df.columns)
     tensors = prepare_tensors(df, variables)
@@ -375,8 +383,8 @@ def train_NN_hybrid(df, equation_str, params=None):
             model.to(device)
         for k in tensors:
             tensors[k] = tensors[k].to(device)
-        for k in scalar_params:
-            scalar_params[k] = scalar_params[k].to(device)
+        #for k in scalar_params:
+        #    scalar_params[k] = scalar_params[k].to(device)
     
     
     # Parse every equation into sympy Eq objects

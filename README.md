@@ -140,17 +140,21 @@ pip install -e .
 ```
 
 ## 🚀 Usage
-Import the package into your Python environment:
+
 ```bash
+# Import the package into your Python environment
 import pycc
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+
 # This example shows:
 # 1) how to simulate a stick-slip second order system using pycc.simulate()
 # 2) how to train the NN-CC method to identify the model [pycc.train()] 
 # 3) how to simulate the identified model [pycc.simulate()]
 
+##############################################
+# 1) how to simulate a stick-slip second order system using pycc.simulate()
 # 1a) define parameters and functions
 alpha=1.0;beta=0.2;delta=0.1;Omega=1.0;
 x0=0.0;v0=0.0; y0=[x0,v0] # initial conditions
@@ -194,6 +198,8 @@ df = pd.DataFrame({
     'F_ext': F_ext_val
 })
 
+##############################################
+# 2) how to train the NN-CC method to identify the model [pycc.train()] 
 # 2a) propose equations to use for identification (fi functions and ai parameters).
 eqs = [
      'x1_dot = x2', #*exp(a1-2.0)',
@@ -242,8 +248,11 @@ if obtained_coefs:
     for name, val in obtained_coefs.items():
         print(f"{name} = {val.item():.4f}")
 
-### Simulation using the NN models
 
+##############################################
+# 3) how to simulate the identified model [pycc.simulate()]
+
+### Simulation using the NN models
 print("simulation with NN simul")
 # 3a) define simulation parameters 
 params_NN_simul = {

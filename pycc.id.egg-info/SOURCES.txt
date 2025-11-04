@@ -8,6 +8,7 @@ pycc/evaluate.py
 pycc/forward_integration.py
 pycc/post_processing.py
 pycc/post_processing_SymbR.py
+pycc/post_processing_SymbR_backup.py
 pycc/print_cc.py
 pycc/process_evals_SymbR.py
 pycc/simulate_NN.py

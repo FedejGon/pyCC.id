@@ -1,6 +1,7 @@
 <div align="center">
 
-# pyCC :  High-Performance System Identification using Characteristic Curves
+# pyCC.id: A Python package for nonlinear equation discovery based on characteristic curves
+
 
 [![GitHub repository](https://img.shields.io/badge/GitHub-FedejGon/pyCC.id-blue?style=flat-square&logo=github)](https://github.com/FedejGon/pyCC.id)
 

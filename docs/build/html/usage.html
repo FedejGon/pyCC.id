@@ -44,7 +44,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">User guide:</span></p>
 <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="why_pycc.html">Why pyCC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="why_pycc.html">🎯 Why pyCC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Usage</a></li>
 </ul>
@@ -56,8 +56,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Example1_training_function.html">Example1: Discovering a 1D function</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Example2_2nd_order_EDO.html">Example2: Discovering a 2nd order EDO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example1_training_function.html">Example 1: 1D function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example2_2nd_order_EDO.html">Example 2: 2nd-order EDO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example3_3rd_order_EDO.html">Example 3: 3rd-order EDO</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
 <ul>
@@ -100,11 +101,13 @@
              
   <section id="usage">
 <h1>Usage<a class="headerlink" href="#usage" title="Link to this heading"></a></h1>
-<p>Import the package into your Python environment. This example shows:</p>
+<p><strong>First time? We recommend starting with our Google Colab Notebook!</strong>
+<a class="reference external" href="https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s">https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s</a></p>
+<p>The following example shows:</p>
 <ol class="arabic simple">
-<li><p>How to simulate a stick-slip second order system using <code class="docutils literal notranslate"><span class="pre">pycc.simulate()</span></code></p></li>
-<li><p>How to train the NN-CC method to identify the model using <code class="docutils literal notranslate"><span class="pre">pycc.train()</span></code></p></li>
-<li><p>How to simulate the identified model using <code class="docutils literal notranslate"><span class="pre">pycc.simulate()</span></code></p></li>
+<li><p>How to simulate a stick-slip second order system using <code class="docutils literal notranslate"><span class="pre">pycc.simulate()</span></code> and generate the input database.</p></li>
+<li><p>How to identify the model (train) using the NN-CC method <code class="docutils literal notranslate"><span class="pre">pycc.train()</span></code></p></li>
+<li><p>How to simulate the identified model <code class="docutils literal notranslate"><span class="pre">pycc.simulate()</span></code></p></li>
 </ol>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pycc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>

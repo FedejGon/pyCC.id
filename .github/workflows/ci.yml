@@ -1,0 +1,48 @@
+# .github/workflows/ci.yml
+name: Run Python Tests
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push events but only for the "main" or "master" branch
+  push:
+    branches: [ "main", "master" ]
+  # Triggers the workflow on pull request events for the "main" or "master" branch
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  test:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
+
+    # Define a build matrix to test on multiple Python versions
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11"] # Add versions you support
+
+    steps:
+      # 1. Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # 2. Sets up the specified version of Python
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      # 3. Installs your project's dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          # If you have a requirements.txt file:
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          # If your project is a package (has a setup.py or pyproject.toml),
+          # install it in editable mode
+          pip install .
+
+      # 4. Runs pytest
+      - name: Run tests with pytest
+        run: |
+          pytest

@@ -1,14 +1,46 @@
 ========
-Why pyCC
+🎯 Why pyCC
 ======== 
 
 **pyCC.id** is a Python library for discovering interpretable, nonlinear dynamical systems from data. It is built on the concept of **Characteristic Curves (CCs)** and is designed to be highly customizable and user-friendly.
 
+
+The core problem **pyCC** aims to solve is a difficult choice often forced by other system identification tools:
+
+1.  **Black-Box Models (e.g., Neural ODEs):**
+    These methods are incredibly powerful and can fit complex dynamics with high accuracy. However, their internal workings are opaque, providing little to no physical insight. The result is a model that can *predict* but cannot *explain*.
+
+2.  **Interpretable \'Library\' Methods (e.g., SINDy, SR):**
+
+    * SINDy (Sparse Identification of Nonlinear Dynamics) is highly interpretable and computationally efficient. Its primary modeling assumption is that the dynamics can be sparsely represented in a **pre-defined library of candidate functions** (e.g., polynomials, trigonometric functions). This is highly effective if the true terms are in the library, but it can struggle if the underlying function is not (or cannot be well-approximated by) a sparse combination of these candidates. 
+    * Pure Symbolic Regression (SR) is also highly interpretable and is generally more flexible than SINDy. It builds functions from a library of basic operators (e.g., +, \*, sin, cos). While this allows it to discover analytical expressions, applying it directly to a full, high-dimensional, and often noisy differential equation, can be computationally challenging. 
+    * Additionally, both methods can be sensitive to hyperparameter tuning. Different settings can easily lead to different resulting models. 
+
+**pyCC** is designed to fill the \'gap\' between these approaches. It is designed to find models that are both accurate and interpretable by not forcing this \'all-or-nothing\' choice.
+
 ------------------------
-Motivation: The Core Idea
+💡 The pyCC Approach: A Hybrid Framework
+------------------------
+
+The core idea of pyCC is to separate the known parts of a system equations from the unknown parts. It assumes the overall structure of the differential equations is known, but the specific forms of some nonlinear functions (the Characteristic Curves, or ``fi``) and possibly some parameters (``ai``) are not.
+
+**pyCC** solves this by providing a flexible, multi-stage framework:
+
+    * Discover the Dynamics (No Bias): Instead of guessing a library of functions, you can first use a powerful, non-biased approximator. The method='NN' uses a neural network to learn the numerical shape of these unknown ``fi`` functions directly from the data.
+
+    * Enforce Physical Knowledge: pyCC allows you to add crucial domain knowledge. The constraints parameter (e.g., 'f1 odd', 'f2(0)=0') forces the model to obey physical constraints, dramatically reducing the search space and leading to more realistic solutions. Also, the possibility of adding multiple equations to the total loss functions offers a easy way to add physical quantities that are conserved throughout the motion (constants of motion).
+
+    * Achieve Interpretability (Post-processing): **pyCC** library offers a easy form to find interpretable analytical expressions from the functions ``fi`` identified, (e.g. from the 'NN' fit).
+    
+
+
+------------------------
+📝 Formalism
 ------------------------
 
 System identification (also known as equation discovery) is the process of finding the underlying governing equations of a system from observational data. 🔬 For many physical systems, the dynamics can be described by a set of first-order ordinary differential equations (ODEs):
+
+
 
 .. math::
 
@@ -39,14 +71,14 @@ where:
 The goal of **pyCC** is to discover the optimal functions :math:`\{\mathbf{f}\}` and parameters :math:`\mathbf{a}` that best fit the observed data based on a predefined model structure :math:`\mathbf{G}`.
 
 ------------
-Key Features
+✨ Key Features
 ------------
 
 * **Interpretable Models**: Decomposes complex dynamics into simpler, physically meaningful functions.
 * **Flexible Function Parametrization**: Supports various techniques to model the characteristic curves, including:
 
     * Neural Networks (NN-CC) — Compatible with multicore CPUs and GPUs from both NVIDIA (CUDA) and Intel (XPU) architectures.
-    * Polynomials (Poly-CC) — Using polynomial expansion basis functions for comparison.
+    * Polynomials (Poly-CC) — Using polynomial basis functions for comparison.
     * Symbolic Regression (SymbR-CC) — Parallelized for multicore CPU execution, using the internal parallelization features of PySR.
 
 * **Physics-Informed Discovery**: Incorporate known physical constraints, such as symmetries (e.g., even and odd functions) or conservation laws, to guide the discovery process and ensure robust, physically consistent models.

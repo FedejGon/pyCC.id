@@ -1,5 +1,5 @@
 =====
-Example 3: third-order EDO
+Example 3: 3rd-order EDO
 =====
 
 .. code-block:: python

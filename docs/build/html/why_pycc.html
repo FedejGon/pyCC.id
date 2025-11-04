@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Why pyCC &mdash; pyCC.id 0.1.0 documentation</title>
+  <title>🎯 Why pyCC &mdash; pyCC.id 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
@@ -45,9 +45,10 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">User guide:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Why pyCC</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#motivation-the-core-idea">Motivation: The Core Idea</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#key-features">Key Features</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">🎯 Why pyCC</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#the-pycc-approach-a-hybrid-framework">💡 The pyCC Approach: A Hybrid Framework</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#formalism">📝 Formalism</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#key-features">✨ Key Features</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
@@ -61,8 +62,9 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Example1_training_function.html">Example1: Discovering a 1D function</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Example2_2nd_order_EDO.html">Example2: Discovering a 2nd order EDO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example1_training_function.html">Example 1: 1D function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example2_2nd_order_EDO.html">Example 2: 2nd-order EDO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example3_3rd_order_EDO.html">Example 3: 3rd-order EDO</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
 <ul>
@@ -93,7 +95,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Why pyCC</li>
+      <li class="breadcrumb-item active">🎯 Why pyCC</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/why_pycc.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -104,10 +106,35 @@
            <div itemprop="articleBody">
              
   <section id="why-pycc">
-<h1>Why pyCC<a class="headerlink" href="#why-pycc" title="Link to this heading"></a></h1>
+<h1>🎯 Why pyCC<a class="headerlink" href="#why-pycc" title="Link to this heading"></a></h1>
 <p><strong>pyCC.id</strong> is a Python library for discovering interpretable, nonlinear dynamical systems from data. It is built on the concept of <strong>Characteristic Curves (CCs)</strong> and is designed to be highly customizable and user-friendly.</p>
-<section id="motivation-the-core-idea">
-<h2>Motivation: The Core Idea<a class="headerlink" href="#motivation-the-core-idea" title="Link to this heading"></a></h2>
+<p>The core problem <strong>pyCC</strong> aims to solve is a difficult choice often forced by other system identification tools:</p>
+<ol class="arabic simple">
+<li><p><strong>Black-Box Models (e.g., Neural ODEs):</strong>
+These methods are incredibly powerful and can fit complex dynamics with high accuracy. However, their internal workings are opaque, providing little to no physical insight. The result is a model that can <em>predict</em> but cannot <em>explain</em>.</p></li>
+<li><p><strong>Interpretable 'Library' Methods (e.g., SINDy, SR):</strong></p>
+<ul class="simple">
+<li><p>SINDy (Sparse Identification of Nonlinear Dynamics) is highly interpretable and computationally efficient. Its primary modeling assumption is that the dynamics can be sparsely represented in a <strong>pre-defined library of candidate functions</strong> (e.g., polynomials, trigonometric functions). This is highly effective if the true terms are in the library, but it can struggle if the underlying function is not (or cannot be well-approximated by) a sparse combination of these candidates.</p></li>
+<li><p>Pure Symbolic Regression (SR) is also highly interpretable and is generally more flexible than SINDy. It builds functions from a library of basic operators (e.g., +, *, sin, cos). While this allows it to discover analytical expressions, applying it directly to a full, high-dimensional, and often noisy differential equation, can be computationally challenging.</p></li>
+<li><p>Additionally, both methods can be sensitive to hyperparameter tuning. Different settings can easily lead to different resulting models.</p></li>
+</ul>
+</li>
+</ol>
+<p><strong>pyCC</strong> is designed to fill the 'gap' between these approaches. It is designed to find models that are both accurate and interpretable by not forcing this 'all-or-nothing' choice.</p>
+<section id="the-pycc-approach-a-hybrid-framework">
+<h2>💡 The pyCC Approach: A Hybrid Framework<a class="headerlink" href="#the-pycc-approach-a-hybrid-framework" title="Link to this heading"></a></h2>
+<p>The core idea of pyCC is to separate the known parts of a system equations from the unknown parts. It assumes the overall structure of the differential equations is known, but the specific forms of some nonlinear functions (the Characteristic Curves, or <code class="docutils literal notranslate"><span class="pre">fi</span></code>) and possibly some parameters (<code class="docutils literal notranslate"><span class="pre">ai</span></code>) are not.</p>
+<p><strong>pyCC</strong> solves this by providing a flexible, multi-stage framework:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Discover the Dynamics (No Bias): Instead of guessing a library of functions, you can first use a powerful, non-biased approximator. The method=’NN’ uses a neural network to learn the numerical shape of these unknown <code class="docutils literal notranslate"><span class="pre">fi</span></code> functions directly from the data.</p></li>
+<li><p>Enforce Physical Knowledge: pyCC allows you to add crucial domain knowledge. The constraints parameter (e.g., ‘f1 odd’, ‘f2(0)=0’) forces the model to obey physical constraints, dramatically reducing the search space and leading to more realistic solutions. Also, the possibility of adding multiple equations to the total loss functions offers a easy way to add physical quantities that are conserved throughout the motion (constants of motion).</p></li>
+<li><p>Achieve Interpretability (Post-processing): <strong>pyCC</strong> library offers a easy form to find interpretable analytical expressions from the functions <code class="docutils literal notranslate"><span class="pre">fi</span></code> identified, (e.g. from the ‘NN’ fit).</p></li>
+</ul>
+</div></blockquote>
+</section>
+<section id="formalism">
+<h2>📝 Formalism<a class="headerlink" href="#formalism" title="Link to this heading"></a></h2>
 <p>System identification (also known as equation discovery) is the process of finding the underlying governing equations of a system from observational data. 🔬 For many physical systems, the dynamics can be described by a set of first-order ordinary differential equations (ODEs):</p>
 <div class="math notranslate nohighlight">
 \[\frac{d\mathbf{x}}{dt} = \mathbf{F}(\mathbf{x}, t)\]</div>
@@ -127,14 +154,14 @@
 <p>The goal of <strong>pyCC</strong> is to discover the optimal functions <span class="math notranslate nohighlight">\(\{\mathbf{f}\}\)</span> and parameters <span class="math notranslate nohighlight">\(\mathbf{a}\)</span> that best fit the observed data based on a predefined model structure <span class="math notranslate nohighlight">\(\mathbf{G}\)</span>.</p>
 </section>
 <section id="key-features">
-<h2>Key Features<a class="headerlink" href="#key-features" title="Link to this heading"></a></h2>
+<h2>✨ Key Features<a class="headerlink" href="#key-features" title="Link to this heading"></a></h2>
 <ul>
 <li><p><strong>Interpretable Models</strong>: Decomposes complex dynamics into simpler, physically meaningful functions.</p></li>
 <li><p><strong>Flexible Function Parametrization</strong>: Supports various techniques to model the characteristic curves, including:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p>Neural Networks (NN-CC) — Compatible with multicore CPUs and GPUs from both NVIDIA (CUDA) and Intel (XPU) architectures.</p></li>
-<li><p>Polynomials (Poly-CC) — Using polynomial expansion basis functions for comparison.</p></li>
+<li><p>Polynomials (Poly-CC) — Using polynomial basis functions for comparison.</p></li>
 <li><p>Symbolic Regression (SymbR-CC) — Parallelized for multicore CPU execution, using the internal parallelization features of PySR.</p></li>
 </ul>
 </div></blockquote>

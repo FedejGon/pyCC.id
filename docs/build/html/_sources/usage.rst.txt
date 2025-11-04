@@ -1,12 +1,14 @@
 =====
 Usage
-===== 
-    
-Import the package into your Python environment. This example shows:
+=====  
+**First time? We recommend starting with our Google Colab Notebook!** 
+https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s
 
-1. How to simulate a stick-slip second order system using ``pycc.simulate()``
-2. How to train the NN-CC method to identify the model using ``pycc.train()``
-3. How to simulate the identified model using ``pycc.simulate()``
+The following example shows:
+
+1. How to simulate a stick-slip second order system using ``pycc.simulate()`` and generate the input database.
+2. How to identify the model (train) using the NN-CC method ``pycc.train()``
+3. How to simulate the identified model ``pycc.simulate()``
 
 .. code-block:: python
 

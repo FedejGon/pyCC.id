@@ -1,0 +1,268 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pycc.post_processing() &mdash; pyCC.id 0.1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=01f34227"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="API Reference" href="api.html" />
+    <link rel="prev" title="pycc.simulate()" href="functions_simulate.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            pyCC.id
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">User guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="why_pycc.html">Why pyCC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Functions:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="functions_train.html">pycc.train()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions_simulate.html">pycc.simulate()</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">pycc.post_processing()</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#symbolic-regression-method-symbr"><strong>Symbolic Regression (method='SymbR')</strong></a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API Reference</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="practical_tips.html">Practical Tips</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="links.html">Community &amp; Useful Links</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">pyCC.id</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">pycc.post_processing()</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/functions_postprocessing.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="pycc-post-processing">
+<h1>pycc.post_processing()<a class="headerlink" href="#pycc-post-processing" title="Link to this heading"></a></h1>
+<hr class="docutils" />
+<section id="symbolic-regression-method-symbr">
+<h2><strong>Symbolic Regression (method='SymbR')</strong><a class="headerlink" href="#symbolic-regression-method-symbr" title="Link to this heading"></a></h2>
+<p>This is a standalone utility function designed for a common post-processing workflow: converting the numerical characteristic curves (<code class="docutils literal notranslate"><span class="pre">evals</span></code>) from a 'NN', 'Poly' or other model into explicit symbolic expressions <em>before</em> running a simulation.</p>
+<p>While <code class="docutils literal notranslate"><span class="pre">pycc.simulate(method='SymbR')</span></code> can do this on-the-fly, this function allows you to:
+1.  Run the symbolic regression fit as a separate, explicit step.
+2.  Inspect, analyze, and save the discovered symbolic functions.
+3.  Receive plots of the fits to validate their quality.
+4.  Get a <code class="docutils literal notranslate"><span class="pre">models</span></code> dictionary that can be fed into <code class="docutils literal notranslate"><span class="pre">pycc.simulate(method='SymbR')</span></code> for a standard symbolic simulation.</p>
+<p><strong>Function Parameters</strong></p>
+<p>This function is called as <code class="docutils literal notranslate"><span class="pre">pycc.post_processing(equations,</span> <span class="pre">method='SymbR',</span> <span class="pre">params)</span></code>.</p>
+<ul>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">equations</span></code>: (<em>list[str]</em>)</dt><dd><p>The list of system equation strings (e.g., <code class="docutils literal notranslate"><span class="pre">['x1_dot</span> <span class="pre">=</span> <span class="pre">x2',</span> <span class="pre">'x2_dot</span> <span class="pre">=</span> <span class="pre">F_ext</span> <span class="pre">-</span> <span class="pre">f1(x2)</span> <span class="pre">-</span> <span class="pre">f2(x1)']</span></code>). This is used to automatically find the names of the functions to fit (e.g., <code class="docutils literal notranslate"><span class="pre">'f1'</span></code>, <code class="docutils literal notranslate"><span class="pre">'f2'</span></code>).</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">params</span></code>: (<em>dict</em>)</dt><dd><p>A dictionary containing the following keys:</p>
+<ul>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'evals'</span></code>: (<em>list, required</em>)</dt><dd><p>The <cite>evals</cite> flat list (e.g., <code class="docutils literal notranslate"><span class="pre">[x_f1,</span> <span class="pre">y_f1,</span> <span class="pre">x_f2,</span> <span class="pre">y_f2,</span> <span class="pre">...]</span></code>) returned from a <code class="docutils literal notranslate"><span class="pre">pycc.train()</span></code> run (e.g., from <cite>method=’NN’</cite>).</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">'pysr'</span></code>: (<em>dict, required</em>)</dt><dd><p>A dictionary of keyword arguments that are passed directly to the <code class="docutils literal notranslate"><span class="pre">PySRRegressor</span></code>. This is the primary way to control the symbolic regression process. See the <a class="reference external" href="https://astroautomata.com/PySR/api/">PySR documentation</a> for all options.</p>
+<p><strong>Example:</strong></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pysr_settings</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;niterations&#39;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
+    <span class="s1">&#39;populations&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="s1">&#39;binary_operators&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;+&quot;</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">],</span>
+    <span class="s1">&#39;unary_operators&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tanh&quot;</span><span class="p">,</span> <span class="s2">&quot;sin&quot;</span><span class="p">,</span> <span class="s2">&quot;cos&quot;</span><span class="p">],</span>
+    <span class="s1">&#39;maxsize&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="s1">&#39;verbosity&#39;</span><span class="p">:</span> <span class="mi">0</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'plot'</span></code>: (<em>bool, optional</em>)</dt><dd><p>If <code class="docutils literal notranslate"><span class="pre">True</span></code>, the function will display a Matplotlib plot for each function, showing the original <code class="docutils literal notranslate"><span class="pre">evals</span></code> data points and the resulting symbolic fit. <strong>Default: True</strong>.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p><strong>Return Value</strong></p>
+<ul>
+<li><dl>
+<dt><code class="docutils literal notranslate"><span class="pre">models_sr</span></code>: (<em>dict</em>)</dt><dd><p>A dictionary containing the symbolic regression results, formatted to be used directly by the simulation function. Its structure is:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s1">&#39;f1&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;expr&#39;</span><span class="p">:</span> <span class="s1">&#39;0.5*x0 + 0.1*x0**3&#39;</span><span class="p">,</span>  <span class="c1"># The symbolic expression</span>
+        <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">callable_function</span><span class="o">&gt;</span><span class="p">,</span>  <span class="c1"># A python function of the expression</span>
+        <span class="s1">&#39;pysr_model&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">PySRRegressor</span> <span class="nb">object</span><span class="o">&gt;</span> <span class="c1"># The full trained model</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;f2&#39;</span><span class="p">:</span> <span class="p">{</span> <span class="o">...</span> <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>This dictionary can be passed directly to <code class="docutils literal notranslate"><span class="pre">pycc.simulate</span></code> as the <code class="docutils literal notranslate"><span class="pre">'models'</span></code> parameter.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p><strong>Workflow Example</strong></p>
+<p>Here is the complete workflow:
+1.  <strong>Train</strong> a model (like ‘NN’) to get numerical <cite>evals</cite>.
+2.  <strong>Post-process</strong> the <cite>evals</cite> with <cite>post_processing_SymbR</cite> to get symbolic <cite>models_sr</cite>.
+3.  <strong>Simulate</strong> using the new <cite>models_sr</cite> with <cite>method=’SymbR’</cite>.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pycc</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="c1"># --- Assume &#39;eqs&#39;, &#39;df_data&#39;, &#39;t_span&#39;, &#39;y0&#39;, etc. are defined ---</span>
+
+<span class="c1"># --- 1. Train an NN model to get &#39;evals&#39; ---</span>
+
+<span class="n">nn_params</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">2000</span><span class="p">,</span> <span class="s1">&#39;lr&#39;</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">,</span> <span class="o">...</span><span class="p">}</span>
+<span class="n">models_nn</span><span class="p">,</span> <span class="n">evals_nn</span><span class="p">,</span> <span class="n">coefs_nn</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">df_data</span><span class="p">,</span>
+                                          <span class="n">eqs</span><span class="p">,</span>
+                                          <span class="n">method</span><span class="o">=</span><span class="s1">&#39;NN&#39;</span><span class="p">,</span>
+                                          <span class="n">params</span><span class="o">=</span><span class="n">nn_params</span><span class="p">)</span>
+
+<span class="c1"># --- 2. Post-process &#39;evals_nn&#39; to get symbolic models ---</span>
+
+<span class="c1"># Define settings for the new PySR fit</span>
+<span class="n">pysr_settings</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;niterations&#39;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
+    <span class="s1">&#39;populations&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="s1">&#39;binary_operators&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;unary_operators&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;tanh&#39;</span><span class="p">,</span> <span class="s1">&#39;sin&#39;</span><span class="p">,</span><span class="s1">&#39;cos&#39;</span><span class="p">],</span>
+    <span class="s1">&#39;maxsize&#39;</span><span class="p">:</span> <span class="mi">20</span>
+<span class="p">}</span>
+
+<span class="c1"># Define the &#39;params&#39; dictionary for the post-processing function</span>
+<span class="n">post_process_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;evals&#39;</span><span class="p">:</span> <span class="n">evals_nn</span><span class="p">,</span>
+    <span class="s1">&#39;pysr&#39;</span><span class="p">:</span> <span class="n">pysr_settings</span><span class="p">,</span>
+    <span class="s1">&#39;plot&#39;</span><span class="p">:</span> <span class="kc">True</span>  <span class="c1"># This will show the plots of the fits</span>
+<span class="p">}</span>
+
+<span class="c1"># Run the post-processing</span>
+<span class="c1"># This will print the fits and show plots</span>
+<span class="n">models_sr</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">post_processing</span><span class="p">(</span><span class="n">eqs</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;SymbR&#39;</span><span class="p">,</span> <span class="n">post_process_params</span><span class="p">)</span>
+
+<span class="c1"># `models_sr` now contains the symbolic functions</span>
+
+<span class="c1"># --- 3. Simulate using the new symbolic models ---</span>
+
+<span class="c1"># Assume &#39;F_ext_func&#39;, &#39;t_eval&#39;, &#39;y0&#39; are defined</span>
+
+<span class="n">sim_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;models&#39;</span><span class="p">:</span> <span class="n">models_sr</span><span class="p">,</span>         <span class="c1"># Use the new symbolic models</span>
+    <span class="s1">&#39;obtained_coefs&#39;</span><span class="p">:</span> <span class="n">coefs_nn</span><span class="p">,</span> <span class="c1"># Use the scalars from the NN fit</span>
+    <span class="s1">&#39;local_funcs&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;F_ext&#39;</span><span class="p">:</span> <span class="n">F_ext_func</span><span class="p">},</span>
+    <span class="s1">&#39;t_span&#39;</span><span class="p">:</span> <span class="n">t_span</span><span class="p">,</span>
+    <span class="s1">&#39;y0&#39;</span><span class="p">:</span> <span class="n">y0</span><span class="p">,</span>
+    <span class="s1">&#39;t_eval&#39;</span><span class="p">:</span> <span class="n">t_eval</span>
+<span class="p">}</span>
+
+<span class="c1"># Simulate using the standard &#39;SymbR&#39; method</span>
+<span class="n">sol</span><span class="p">,</span> <span class="n">derivs</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">eqs</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;SymbR&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">sim_params</span><span class="p">)</span>
+</pre></div>
+</div>
+<hr style="border: none; border-top: 4px dashed #bbb;">
+<hr style="border: none; border-top: 4px solid #bbb; width: 50%; margin: 20px auto;">
+<hr style="border: none; border-top: 4px dashed #bbb;"></section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="functions_simulate.html" class="btn btn-neutral float-left" title="pycc.simulate()" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="api.html" class="btn btn-neutral float-right" title="API Reference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Federico J. Gonzalez.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

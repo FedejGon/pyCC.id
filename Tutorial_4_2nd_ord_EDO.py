@@ -479,7 +479,7 @@ params_NN_simul = {
     'check_nan': True
 }
 
-sol = pycc.simulate(equations, method='NN', params=params_NN_simul)
+sol,_ = pycc.simulate(equations, method='NN', params=params_NN_simul)
 print("Integration success:", sol.success)
 
 time_sim=sol.t

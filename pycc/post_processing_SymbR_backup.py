@@ -1,8 +1,8 @@
-# process_sr.py
+# process_sr.py (or whatever you've named it)
 
 import re
 import warnings
-from typing import Dict, Any, List, Callable, Tuple  # Added Tuple
+from typing import Dict, Any, List, Callable
 
 import numpy as np
 import sympy as sp
@@ -83,7 +83,7 @@ def _create_callable_from_model(expr_str: str, model: PySRRegressor) -> Callable
             
         return model_fallback
 
-def post_processing_SymbR(equations: List[str], params: Dict[str, Any]) -> Tuple[Dict[str, Any], List[np.ndarray]]:
+def post_processing_SymbR(equations: List[str], params: Dict[str, Any]):
     """
     Fits Symbolic Regression models to evaluated data points.
     
@@ -96,15 +96,10 @@ def post_processing_SymbR(equations: List[str], params: Dict[str, Any]) -> Tuple
             - 'evals' (List): The data, structured as [x1, y1, x2, y2, ...].
             - 'pysr' (Dict): A dictionary of parameters to pass to PySRRegressor.
             - 'plot' (bool, optional): If True, shows plots of the fits. Defaults to True.
-            - 'n_eval' (int, optional): Number of points to use for the new evaluation
-              of the symbolic functions. Defaults to 200.
 
     Returns:
-        Tuple[Dict[str, Any], List[np.ndarray]]:
-        - models_sr: A dictionary structured like {'f1': {...}, 'f2': {...}}, ready to be used
-          as the 'models' parameter in the simulation function.
-        - evals_sr: A flat list [x_new_f1, y_new_f1, x_new_f2, y_new_f2, ...] containing
-          the newly fitted symbolic functions evaluated at `n_eval` points.
+        A dictionary structured like {'f1': {...}, 'f2': {...}}, ready to be used
+        as the 'models' parameter in the simulation function.
     """
     # --- 1. Unpack parameters from the params dictionary ---
     evals = params.get('evals')
@@ -113,7 +108,6 @@ def post_processing_SymbR(equations: List[str], params: Dict[str, Any]) -> Tuple
         
     pysr_params = params.get('pysr', {})
     plot_fits = params.get('plot', True)
-    n_eval = params.get('n_eval', 200) # New parameter for eval points
 
     # --- 2. Automatically find function names from the equation strings ---
     all_eq_str = " ".join(equations)
@@ -125,8 +119,6 @@ def post_processing_SymbR(equations: List[str], params: Dict[str, Any]) -> Tuple
 
     # --- 3. Loop through each function, run PySR, and store results ---
     models_sr = {}
-    evals_sr = []  # Initialize empty list for new evals
-    
     for i, f_name in enumerate(function_names):
         x_vals, y_vals = evals[2 * i], evals[2 * i + 1]
         
@@ -151,26 +143,13 @@ def post_processing_SymbR(equations: List[str], params: Dict[str, Any]) -> Tuple
             "pysr_model": model,  # Store the full model for later inspection
         }
 
-        # --- 4. Generate new evals and plot results ---
-        
-        # Create a smooth x-axis for evaluation, spanning the original data range
-        x_new = np.linspace(np.min(x_vals), np.max(x_vals), n_eval)
-        # Evaluate the new symbolic function
-        y_new = callable_func(x_new)
-        
-        # Append to the new evals list
-        evals_sr.append(x_new)
-        evals_sr.append(y_new)
-
-        # Plot the results if requested
+        # --- 4. Plot the results if requested ---
         if plot_fits:
             # Simplify the expression for the plot legend
             simplified_expr_str = _simplify_expression(expr_str)
             plt.figure(figsize=(6, 6))
-            # Plot original data points
-            plt.plot(x_vals, y_vals, 'o', markersize=4, label=f"{f_name} evals (data)")
-            # Plot the new, smooth symbolic function
-            plt.plot(x_new, y_new, "-", linewidth=2, label=f"SR Fit: {simplified_expr_str}")
+            plt.plot(x_vals, y_vals, 'o', markersize=4, label=f"{f_name} evals")
+            plt.plot(x_vals, callable_func(x_vals), "-", linewidth=2, label=f"SR Fit: {simplified_expr_str}")
             plt.xlabel("x")
             plt.ylabel(f_name)
             plt.title(f"Symbolic Regression Fit for {f_name}")
@@ -178,4 +157,4 @@ def post_processing_SymbR(equations: List[str], params: Dict[str, Any]) -> Tuple
             plt.grid(True, linestyle='--', alpha=0.6)
             plt.show()
 
-    return models_sr, evals_sr
+    return models_sr

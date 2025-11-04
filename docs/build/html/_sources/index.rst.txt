@@ -17,12 +17,15 @@ documentation for details.
    
    why_pycc   
    installation
+   usage
    
 .. toctree::
    :maxdepth: 2
-   :caption: Selected functions:
+   :caption: Functions:
    
-   selected_functions
+   functions_train
+   functions_simulate
+   functions_postprocessing
    
 .. toctree::
    :maxdepth: 2

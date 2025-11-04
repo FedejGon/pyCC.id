@@ -1,15 +1,16 @@
-
-
+============
+pycc.train()
+============
+ 
 This section provides a detailed reference for the core functions in the ``pycc`` library.
 
-pycc.train()
-==========
+
 
 This is the main function for identifying system dynamics from data. It acts as a manager that calls a specific training method based on the ``method`` parameter.
 
 .. autofunction:: pycc.train
    :noindex:
- 
+  
 
 **Example Usage:**
 
@@ -67,6 +68,8 @@ Training methods return a tuple of three variables: ``(models, evals, obtained_p
 
 Below are the details and available ``params`` for each training method.
 
+-----
+
 **Neural Network (method=\'NN\')**
 ----------------------------------
 
@@ -77,7 +80,9 @@ This method uses a physics-informed neural network to learn the unknown function
 * ``'layers':`` (*int, optional*)
     The number of hidden layers for each neural network. **Default: 3**.
 * ``'lr':`` (*float, optional*)
-    The learning rate for the Adam optimizer. **Default: 1e-3**.
+    The learning rate for the Adam optimizer for the neural networks. **Default: 1e-3**.
+* ``'scalar_lr':`` (*float, optional*)
+    Specifies a separate learning rate for the Adam optimizer to use *only* for the scalar parameters. The code creates two distinct optimizers: one for the neural network models (using ``'lr'``) and one for the scalars (using ``'scalar_lr'``). This allows the user to train the scalar coefficients at a different rate than the ``'fi'`` functions. **Default:** same value as ``'lr'``.
 * ``'epochs':`` (*int, optional*) 
     The maximum number of training iterations. **Default: 1000**.
 * ``'error_threshold':`` (*float, optional*)
@@ -89,7 +94,9 @@ This method uses a physics-informed neural network to learn the unknown function
 * ``'eq_weights':`` (*list[float], optional*)
     A list of weights to apply to the loss function of each equation. The length of the list must match the number of equations. If not provided, all equations are weighted equally. **Default: \'None\'**.
 * ``'weight_loss_param':`` (*float, optional*)
-    A regularization factor for an L2 penalty on the identified scalar parameters (``a_i``). A small value helps prevent these parameters from growing too large. **Default: 1e-3**.
+    A weight factor for the identified scalar parameters (``ai``). A small value helps prevent these parameters from growing too large during training, and a big value increase the importance of ``ai`` parameters over ``fi`` functions. **Default: 1e-3**.
+* ``'initial_params':`` (*dict, optional*)
+    An array containing the scalar parameters (e.g., ``'a1'``, ``'a2'``,...) and their desired initial floating-point values. Example: \'initial_params\': {\'a1\': 1.5, \'a4\': 2.0}. **Default: 1.0** for all parameters. 
 * ``'n_eval':`` (*int, optional*)
     The number of points to evaluate for generating the final characteristic curves in the ``evals`` output, i.e. the number of point to evaluate the obtained ``'fi'`` functions. **Default: 200**.
 * ``'constraints':`` (*list[dict], optional*)
@@ -149,6 +156,7 @@ This method uses a physics-informed neural network to learn the unknown function
 
     models, evals, coefs = pycc.train(df, eqs, method='NN', params=nn_params)
 
+-----
 
 **Symbolic Regression (method=\'SymbR\')**
 -----------------------------------------
@@ -201,6 +209,7 @@ The ``params`` dictionary for this method can contain the following keys:
 
     models, evals, coefs = pycc.train(df, eqs, method='SymbR', params=symbr_params)
 
+-----
 
 **Polynomial (method=\'Poly\')**
 --------------------------------
@@ -260,13 +269,13 @@ The ``params`` dictionary for this method can contain the following keys:
     models, evals, coefs = pycc.train(df, eqs, method='Poly', params=poly_params)
 
 
---------------------------------------------------------------------------------
 
-pycc.simulate()
-==========
 
-.. autofunction:: pycc.simulate
-   :noindex:
+.. raw:: html
+
+   <hr style="border: none; border-top: 4px dashed #bbb;">
+   <hr style="border: none; border-top: 4px solid #bbb; width: 50%; margin: 20px auto;">
+   <hr style="border: none; border-top: 4px dashed #bbb;">
 
 
 

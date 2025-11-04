@@ -108,7 +108,8 @@
 1.  Run the symbolic regression fit as a separate, explicit step.
 2.  Inspect, analyze, and save the discovered symbolic functions.
 3.  Receive plots of the fits to validate their quality.
-4.  Get a <code class="docutils literal notranslate"><span class="pre">models</span></code> dictionary that can be fed into <code class="docutils literal notranslate"><span class="pre">pycc.simulate(method='SymbR')</span></code> for a standard symbolic simulation.</p>
+4.  Get a <code class="docutils literal notranslate"><span class="pre">models</span></code> dictionary that can be fed into <code class="docutils literal notranslate"><span class="pre">pycc.simulate(method='SymbR')</span></code>.
+5.  Get a new, clean <code class="docutils literal notranslate"><span class="pre">evals_sr</span></code> list based on the <em>symbolic</em> fit, which can be used for fast interpolation-based simulation.</p>
 <p><strong>Function Parameters</strong></p>
 <p>This function is called as <code class="docutils literal notranslate"><span class="pre">pycc.post_processing(equations,</span> <span class="pre">method='SymbR',</span> <span class="pre">params)</span></code>.</p>
 <ul>
@@ -146,12 +147,18 @@
 </dd>
 </dl>
 </li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">'n_eval'</span></code>: (<em>int, optional</em>)</dt><dd><p>The number of points to use for generating the new, smooth characteristic curves in the <code class="docutils literal notranslate"><span class="pre">evals_sr</span></code> output. <strong>Default: 200</strong>.</p>
+</dd>
+</dl>
+</li>
 </ul>
 </dd>
 </dl>
 </li>
 </ul>
 <p><strong>Return Value</strong></p>
+<p>This function returns a tuple of two variables: <code class="docutils literal notranslate"><span class="pre">(models_sr,</span> <span class="pre">evals_sr)</span></code>.</p>
 <ul>
 <li><dl>
 <dt><code class="docutils literal notranslate"><span class="pre">models_sr</span></code>: (<em>dict</em>)</dt><dd><p>A dictionary containing the symbolic regression results, formatted to be used directly by the simulation function. Its structure is:</p>
@@ -169,12 +176,17 @@
 </dd>
 </dl>
 </li>
+<li><dl class="simple">
+<dt><code class="docutils literal notranslate"><span class="pre">evals_sr</span></code>: (<em>list</em>)</dt><dd><p>A new, flat list of NumPy arrays <code class="docutils literal notranslate"><span class="pre">[x_f1_new,</span> <span class="pre">y_f1_new,</span> <span class="pre">x_f2_new,</span> <span class="pre">y_f2_new,</span> <span class="pre">...]</span></code>. This list contains the <em>discovered symbolic functions</em> evaluated at <code class="docutils literal notranslate"><span class="pre">n_eval</span></code> points over their original domain. This is useful for plotting or for use with <code class="docutils literal notranslate"><span class="pre">pycc.simulate(method='Interp')</span></code>.</p>
+</dd>
+</dl>
+</li>
 </ul>
 <p><strong>Workflow Example</strong></p>
 <p>Here is the complete workflow:
 1.  <strong>Train</strong> a model (like ‘NN’) to get numerical <cite>evals</cite>.
 2.  <strong>Post-process</strong> the <cite>evals</cite> with <cite>post_processing_SymbR</cite> to get symbolic <cite>models_sr</cite>.
-3.  <strong>Simulate</strong> using the new <cite>models_sr</cite> with <cite>method=’SymbR’</cite>.</p>
+3.  <strong>Simulate</strong> using either the new <cite>models_sr</cite> (symbolic) or <cite>evals_sr</cite> (interpolation).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pycc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 
@@ -204,18 +216,21 @@
     <span class="s1">&#39;evals&#39;</span><span class="p">:</span> <span class="n">evals_nn</span><span class="p">,</span>
     <span class="s1">&#39;pysr&#39;</span><span class="p">:</span> <span class="n">pysr_settings</span><span class="p">,</span>
     <span class="s1">&#39;plot&#39;</span><span class="p">:</span> <span class="kc">True</span>  <span class="c1"># This will show the plots of the fits</span>
+    <span class="s1">&#39;n_eval&#39;</span><span class="p">:</span> <span class="mi">200</span>   <span class="c1"># Generate 200 points for the new evals_sr</span>
 <span class="p">}</span>
 
 <span class="c1"># Run the post-processing</span>
 <span class="c1"># This will print the fits and show plots</span>
-<span class="n">models_sr</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">post_processing</span><span class="p">(</span><span class="n">eqs</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;SymbR&#39;</span><span class="p">,</span> <span class="n">post_process_params</span><span class="p">)</span>
+<span class="n">models_sr</span><span class="p">,</span> <span class="n">evals_sr</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">post_processing</span><span class="p">(</span><span class="n">eqs</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;SymbR&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">post_process_params</span><span class="p">)</span>
 
 <span class="c1"># `models_sr` now contains the symbolic functions</span>
+<span class="c1"># `evals_sr` now contains the smooth curves from those functions</span>
 
 <span class="c1"># --- 3. Simulate using the new symbolic models ---</span>
 
 <span class="c1"># Assume &#39;F_ext_func&#39;, &#39;t_eval&#39;, &#39;y0&#39; are defined</span>
 
+<span class="c1"># Option A: Simulate using the standard &#39;SymbR&#39; method</span>
 <span class="n">sim_params</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;models&#39;</span><span class="p">:</span> <span class="n">models_sr</span><span class="p">,</span>         <span class="c1"># Use the new symbolic models</span>
     <span class="s1">&#39;obtained_coefs&#39;</span><span class="p">:</span> <span class="n">coefs_nn</span><span class="p">,</span> <span class="c1"># Use the scalars from the NN fit</span>
@@ -224,9 +239,21 @@
     <span class="s1">&#39;y0&#39;</span><span class="p">:</span> <span class="n">y0</span><span class="p">,</span>
     <span class="s1">&#39;t_eval&#39;</span><span class="p">:</span> <span class="n">t_eval</span>
 <span class="p">}</span>
-
-<span class="c1"># Simulate using the standard &#39;SymbR&#39; method</span>
 <span class="n">sol</span><span class="p">,</span> <span class="n">derivs</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">eqs</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;SymbR&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">sim_params</span><span class="p">)</span>
+
+<span class="c1"># Option B (Faster): Simulate by interpolating the new symbolic evals</span>
+<span class="n">sim_params_interp</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;evals&#39;</span><span class="p">:</span> <span class="n">evals_sr</span><span class="p">,</span>           <span class="c1"># Use the new symbolic evals</span>
+    <span class="s1">&#39;obtained_coefs&#39;</span><span class="p">:</span> <span class="n">coefs_nn</span><span class="p">,</span>  <span class="c1"># ai coefficients obtained from training method</span>
+    <span class="s1">&#39;local_funcs&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;F_ext&#39;</span><span class="p">:</span> <span class="n">F_ext_func</span><span class="p">},</span>
+    <span class="s1">&#39;t_span&#39;</span><span class="p">:</span> <span class="n">t_span</span><span class="p">,</span>
+    <span class="s1">&#39;y0&#39;</span><span class="p">:</span> <span class="n">y0</span><span class="p">,</span>
+    <span class="s1">&#39;t_eval&#39;</span><span class="p">:</span> <span class="n">t_eval</span><span class="p">,</span>
+    <span class="s1">&#39;interp_method&#39;</span><span class="p">:</span> <span class="s1">&#39;pchip&#39;</span>
+<span class="p">}</span>
+<span class="n">sol_interp</span><span class="p">,</span> <span class="n">derivs_interp</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">eqs</span><span class="p">,</span>
+                                          <span class="n">method</span><span class="o">=</span><span class="s1">&#39;Interp&#39;</span><span class="p">,</span>
+                                          <span class="n">params</span><span class="o">=</span><span class="n">sim_params_interp</span><span class="p">)</span>
 </pre></div>
 </div>
 <hr style="border: none; border-top: 4px dashed #bbb;">

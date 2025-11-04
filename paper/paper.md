@@ -23,7 +23,7 @@ Data-driven system identification often forces a choice between two extremes. On
 
 
 
-`pyCC.id` fills the gap between these approaches with a hybrid "grey-box" framework. Its core assumption is that the dynamics, $\mathbf{F}(\mathbf{x}, t)$, can be decomposed into a user-defined model structure $\mathbf{G}$ built from simpler, interpretable components: a set of unknown one-dimensional functions $\{\mathbf{f}\}$ (the characteristic curves, e.g., $f_i(x_1)$) and a set of scalar parameters $\mathbf{a}$.
+`pyCC.id` fills the gap between these approaches with a hybrid "grey-box" framework. Its core assumption is that the dynamics, $\mathbf{F}(\mathbf{x}, t)$, can be decomposed into a user-defined model structure $\mathbf{G}$ built from simpler, interpretable components: a set of unknown one-dimensional functions $\{\mathbf{f}\}$ (the characteristic curves, e.g., $f_i$(x)) and a set of scalar parameters $\mathbf{a}$.
 
 
 Instead of guessing a library for the full dynamics, a user can first employ a powerful, non-biased approximator (e.g., a neural network) to learn the numerical shape of the unknown 1D functions `fi`. Crucially, physical knowledge (like symmetries or conservation laws) can be enforced as constraints. In a second stage, symbolic regression can be applied to this learned function to find a simple, interpretable analytical expression.

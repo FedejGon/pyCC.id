@@ -121,7 +121,7 @@ def post_processing_SymbR(equations: List[str], params: Dict[str, Any]) -> Tuple
     function_names = sorted(list(set(re.findall(r'f\d+', all_eq_str))))
     
     if len(evals) // 2 != len(function_names):
-        raise ValueError(f"Found {len(function_names)} function names but data for {len(evals)//2} functions.")
+        raise ValueError(rf"Found {len(function_names)} function names but data for {len(evals)//2} functions.")
 
     # --- 3. Loop through each function, run PySR, and store results ---
     models_sr = {}

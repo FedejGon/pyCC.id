@@ -31,7 +31,9 @@ documentation for details.
    :maxdepth: 2
    :caption: Examples:  
    
-   api   
+   Example1_training_function  
+   Example2_2nd_order_EDO
+   Example3_3rd_order_EDO
 
 .. toctree::
    :maxdepth: 2   

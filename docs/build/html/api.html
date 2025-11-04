@@ -20,7 +20,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Practical Tips" href="practical_tips.html" />
-    <link rel="prev" title="pycc.train()" href="selected_functions.html" /> 
+    <link rel="prev" title="pycc.post_processing()" href="functions_postprocessing.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -46,31 +46,22 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="why_pycc.html">Why pyCC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="installation.html#usage">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Selected functions:</span></p>
+<p class="caption" role="heading"><span class="caption-text">Functions:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="selected_functions.html">pycc.train()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="selected_functions.html#pycc-simulate">pycc.simulate()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions_train.html">pycc.train()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions_simulate.html">pycc.simulate()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="functions_postprocessing.html">pycc.post_processing()</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#pycc-train">pycc.train</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#pycc.train"><code class="docutils literal notranslate"><span class="pre">train()</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="#method-specific-details"><strong>Method-Specific Details</strong></a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#pycc.train_NN_hybrid"><code class="docutils literal notranslate"><span class="pre">train_NN_hybrid()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pycc.train_SymbR"><code class="docutils literal notranslate"><span class="pre">train_SymbR()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pycc.train_polynomial"><code class="docutils literal notranslate"><span class="pre">train_polynomial()</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#pycc.train_polynomial_linear"><code class="docutils literal notranslate"><span class="pre">train_polynomial_linear()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#method-specific-details"><strong>Method-Specific Details</strong></a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#pycc-simulate">pycc.simulate</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#pycc.simulate"><code class="docutils literal notranslate"><span class="pre">simulate()</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#pycc-simulate">pycc.simulate</a></li>
 </ul>
 </li>
 </ul>
@@ -118,53 +109,6 @@
 <section id="pycc-train">
 <h2>pycc.train<a class="headerlink" href="#pycc-train" title="Link to this heading"></a></h2>
 <p>This is the main function for identifying system dynamics from data. It acts as a manager that calls a specific training method based on the <code class="docutils literal notranslate"><span class="pre">method</span></code> parameter.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="pycc.train">
-<span class="sig-prename descclassname"><span class="pre">pycc.</span></span><span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">equations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'NN'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pycc/train_manager.html#train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pycc.train" title="Link to this definition"></a></dt>
-<dd><p>Trains a model to identify the system dynamics from data.</p>
-<p>This function acts as a dispatcher, selecting the appropriate training
-method based on the <cite>method</cite> argument. It passes the data, equations,
-and hyperparameters to the selected specialized training function.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The input data.</p></li>
-<li><p><strong>equations</strong> (<em>str</em><em> or </em><em>list</em><em>[</em><em>str</em><em>]</em>) – A string or list of strings defining the system equations.
-It defines the equations we want to fit with a given df.
-The user can include functions and parameters defined by f_i and a_j, respectively
-(i,j=0,1,…). It can also include time dependent functions, which must be
-defined in the df.</p></li>
-<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – The system identification method to use.
-Options: ‘NN’, ‘Poly’, ‘SymbR’. <strong>Default: ‘NN’</strong>.</p></li>
-<li><p><strong>params</strong> (<em>dict</em><em>, </em><em>optional</em>) – A dictionary of hyperparameters for the training process.
-See the notes below for method-specific parameters.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>ValueError</strong> – If an unknown <cite>method</cite> is specified.</p>
-</dd>
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>A tuple containing the trained models, plotting results, and identified scalar parameters.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>tuple(dict, list, dict)</p>
-</dd>
-</dl>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>The <cite>params</cite> dictionary can contain different keys depending on the
-selected <cite>method</cite>. For method=’NN’<a href="#id1"><span class="problematic" id="id2">`</span></a>:</p>
-<ul class="simple">
-<li><p><strong>‘neurons’</strong> (<em>int</em>): Number of neurons in each hidden layer. Default: 100.</p></li>
-<li><p><strong>‘layers’</strong> (<em>int</em>): Number of hidden layers in the neural network. Default: 3.</p></li>
-<li><p><strong>‘lr’</strong> (<em>float</em>): Learning rate for the optimizer. Default: 1e-3.</p></li>
-<li><p><strong>‘epochs’</strong> (<em>int</em>): Number of training epochs. Default: 1000.</p></li>
-<li><p><strong>‘device’</strong> (<em>str</em>): The computing device (‘cpu’, ‘cuda’, ‘xpu’, ‘automatic’). Default: ‘automatic’.</p></li>
-<li><p>… and other ..</p></li>
-</ul>
-</div>
-</dd></dl>
-
 <br><section id="method-specific-details">
 <h3><strong>Method-Specific Details</strong><a class="headerlink" href="#method-specific-details" title="Link to this heading"></a></h3>
 <p>Below are the details and required <code class="docutils literal notranslate"><span class="pre">params</span></code> for each available training method.</p>
@@ -196,11 +140,6 @@ selected <cite>method</cite>. For method=’NN’<a href="#id1"><span class="pro
 </div>
 <p><strong>Underlying Function:</strong></p>
 <p>This method is implemented by the following function, which contains detailed documentation on all available hyperparameters in the <code class="docutils literal notranslate"><span class="pre">params</span></code> dictionary.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="pycc.train_NN_hybrid">
-<span class="sig-prename descclassname"><span class="pre">pycc.</span></span><span class="sig-name descname"><span class="pre">train_NN_hybrid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycc.train_NN_hybrid" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 <p>—</p>
 <p>### Symbolic Regression Method (<cite>method=’SymbR’</cite>)</p>
 <p>This method uses Symbolic Regression (via PySR) to find a simple mathematical expression for the unknown functions. It’s excellent for discovering interpretable models.</p>
@@ -219,24 +158,6 @@ selected <cite>method</cite>. For method=’NN’<a href="#id1"><span class="pro
 </pre></div>
 </div>
 <p><strong>Underlying Function:</strong></p>
-<dl class="py function">
-<dt class="sig sig-object py" id="pycc.train_SymbR">
-<span class="sig-prename descclassname"><span class="pre">pycc.</span></span><span class="sig-name descname"><span class="pre">train_SymbR</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycc.train_SymbR" title="Link to this definition"></a></dt>
-<dd><p>train_SymbR.py</p>
-<p>Iterative symbolic-regression fitter for functions f1(x), f2(x_dot), …
-Given a list of algebraic equations like</p>
-<blockquote>
-<div><p>‘x_ddot + f1(x_dot) + f2(x) - F_ext = 0’</p>
-</div></blockquote>
-<p>and possibly additional equations, this script fits each f_i using PySR
-in an alternating / Gauss-Seidel style loop: at each iteration we isolate one
-f_i from one equation (sympy), evaluate the target using current estimates
-of the other f_j’s and then fit a PySR model mapping the function’s variable
--&gt; f_i(variable).</p>
-<p>Returns: models (dict), evals (list: x_plot, y_plot pairs for each f), scalar_coefs (empty dict)</p>
-<p>Requirements: numpy, pandas, sympy, pysr</p>
-</dd></dl>
-
 <p>—</p>
 <p>### Polynomial Method (<cite>method=’Poly’</cite>)</p>
 <p>This method fits a polynomial of a specified degree to the unknown functions. It is a fast and simple baseline method.</p>
@@ -251,34 +172,16 @@ of the other f_j’s and then fit a PySR model mapping the function’s variable
 </pre></div>
 </div>
 <p><strong>Underlying Function:</strong></p>
-<dl class="py function">
-<dt class="sig sig-object py" id="pycc.train_polynomial">
-<span class="sig-prename descclassname"><span class="pre">pycc.</span></span><span class="sig-name descname"><span class="pre">train_polynomial</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycc.train_polynomial" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 <p>—</p>
 <p>### Linear Polynomial Method (<cite>method=’Poly_linear’</cite>)</p>
 <p>This is a specialized version of the polynomial method that performs a linear regression, which is even faster and useful for systems known to be linear.</p>
 <p><strong>Underlying Function:</strong></p>
-<dl class="py function">
-<dt class="sig sig-object py" id="pycc.train_polynomial_linear">
-<span class="sig-prename descclassname"><span class="pre">pycc.</span></span><span class="sig-name descname"><span class="pre">train_polynomial_linear</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pycc.train_polynomial_linear" title="Link to this definition"></a></dt>
-<dd></dd></dl>
-
 <hr class="docutils" />
 </section>
 </section>
 <section id="pycc-simulate">
 <span id="simulate-api"></span><h2>pycc.simulate<a class="headerlink" href="#pycc-simulate" title="Link to this heading"></a></h2>
 <p>This is the main function for simulating system dynamics. It can integrate known differential equations.</p>
-<dl class="py function">
-<dt class="sig sig-object py" id="pycc.simulate">
-<span class="sig-prename descclassname"><span class="pre">pycc.</span></span><span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Theoretical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pycc/simulate_manager.html#simulate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pycc.simulate" title="Link to this definition"></a></dt>
-<dd><p>Manager to select simulation method.
-method: ‘Theoretical’, ‘NN’, ‘Poly’, ‘SymbReg’, etc.
-params: dict with simulation parameters (t_span, y0, noise, etc.)</p>
-</dd></dl>
-
 <p>### Theoretical Method (<cite>method=’Theoretical’</cite>)</p>
 <p>This method uses a standard ODE solver (<code class="docutils literal notranslate"><span class="pre">scipy.integrate.solve_ivp</span></code>) to integrate a set of user-defined differential equations. This is useful for generating ground-truth data.</p>
 <p><strong>Example Usage:</strong></p>
@@ -315,7 +218,7 @@ params: dict with simulation parameters (t_span, y0, noise, etc.)</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="selected_functions.html" class="btn btn-neutral float-left" title="pycc.train()" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="functions_postprocessing.html" class="btn btn-neutral float-left" title="pycc.post_processing()" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="practical_tips.html" class="btn btn-neutral float-right" title="Practical Tips" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

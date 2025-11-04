@@ -160,7 +160,8 @@ pysr_settings = {
 post_process_params = {
     'evals': evals,
     'pysr': pysr_settings,
-    'plot': True  # This will show the plots of the fits
+    'plot': True,  # This will show the plots of the fits
+    'n_eval': 200,
 }
 
 # Run the post-processing

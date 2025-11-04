@@ -6,15 +6,12 @@ This section provides a detailed reference for the core functions in the ``pycc`
 
 --------------------------------------------------------------------------------
 
-.. automodule:: pycc
-   :noindex:
 
 pycc.train
 ==========
 
 This is the main function for identifying system dynamics from data. It acts as a manager that calls a specific training method based on the ``method`` parameter.
 
-.. autofunction:: train
 
 .. raw:: html
 

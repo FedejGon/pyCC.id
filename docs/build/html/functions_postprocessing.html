@@ -64,6 +64,8 @@
 <p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="practical_tips.html">Practical Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="practical_tips.html#workflow-1">Workflow 1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="practical_tips.html#workflow-2">Workflow 2</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Links:</span></p>
 <ul>
@@ -215,8 +217,8 @@
 <span class="n">post_process_params</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;evals&#39;</span><span class="p">:</span> <span class="n">evals_nn</span><span class="p">,</span>
     <span class="s1">&#39;pysr&#39;</span><span class="p">:</span> <span class="n">pysr_settings</span><span class="p">,</span>
-    <span class="s1">&#39;plot&#39;</span><span class="p">:</span> <span class="kc">True</span>  <span class="c1"># This will show the plots of the fits</span>
-    <span class="s1">&#39;n_eval&#39;</span><span class="p">:</span> <span class="mi">200</span>   <span class="c1"># Generate 200 points for the new evals_sr</span>
+    <span class="s1">&#39;plot&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># This will show the plots of the fits</span>
+    <span class="s1">&#39;n_eval&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>   <span class="c1"># Generate 200 points for the new evals_sr</span>
 <span class="p">}</span>
 
 <span class="c1"># Run the post-processing</span>
@@ -237,7 +239,7 @@
     <span class="s1">&#39;local_funcs&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;F_ext&#39;</span><span class="p">:</span> <span class="n">F_ext_func</span><span class="p">},</span>
     <span class="s1">&#39;t_span&#39;</span><span class="p">:</span> <span class="n">t_span</span><span class="p">,</span>
     <span class="s1">&#39;y0&#39;</span><span class="p">:</span> <span class="n">y0</span><span class="p">,</span>
-    <span class="s1">&#39;t_eval&#39;</span><span class="p">:</span> <span class="n">t_eval</span>
+    <span class="s1">&#39;t_eval&#39;</span><span class="p">:</span> <span class="n">t_eval</span><span class="p">,</span>
 <span class="p">}</span>
 <span class="n">sol</span><span class="p">,</span> <span class="n">derivs</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">eqs</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;SymbR&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">sim_params</span><span class="p">)</span>
 

@@ -1,6 +1,6 @@
 =======================
 Community & Useful Links
-=======================
+=======================  
 
 * **GitHub Repository**: `https://github.com/FedejGon/pyCC.id <https://github.com/FedejGon/pyCC.id>`_
 * **Report Issues (Bugs)**: `https://github.com/FedejGon/pyCC.id/issues <https://github.com/FedejGon/pyCC.id/issues>`_

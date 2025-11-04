@@ -1,7 +1,7 @@
 =====
 Usage
-=====
-  
+===== 
+    
 Import the package into your Python environment. This example shows:
 
 1. How to simulate a stick-slip second order system using ``pycc.simulate()``

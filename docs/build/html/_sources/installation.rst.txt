@@ -1,6 +1,6 @@
 ============
 Installation
-============
+============ 
 
 ---------------------------------
 Installation with pip (Recommended)

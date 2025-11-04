@@ -116,8 +116,8 @@ Here is the complete workflow:
     post_process_params = {
         'evals': evals_nn,
         'pysr': pysr_settings,
-        'plot': True  # This will show the plots of the fits
-        'n_eval': 200   # Generate 200 points for the new evals_sr
+        'plot': True,  # This will show the plots of the fits
+        'n_eval': 200,   # Generate 200 points for the new evals_sr
     }
     
     # Run the post-processing
@@ -138,7 +138,7 @@ Here is the complete workflow:
         'local_funcs': {'F_ext': F_ext_func},
         't_span': t_span,
         'y0': y0,
-        't_eval': t_eval
+        't_eval': t_eval,
     }
     sol, derivs = pycc.simulate(eqs, method='SymbR', params=sim_params)    
     

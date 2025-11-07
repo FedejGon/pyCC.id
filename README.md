@@ -295,7 +295,7 @@ plt.show()
 ## 📚  Tutorials
 **First time? We recommend starting with our Google Colab Notebook** [![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)!
 
-Additionally, various tutorials and examples are available in the *Tutorials* folder. You can download or copy these files to your local machine or a cluster, and execute them directly, for example:
+Additionally, various tutorials and examples are available in the *Tutorials* folder. You can download or copy these files to your local machine or cluster, and execute them directly, for example:
 ```bash
 python Tutorial1.py
 ```

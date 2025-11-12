@@ -17,23 +17,37 @@ date: 5 November 2025
 bibliography: paper.bib
 ---
 
-# Summary
 
-Data-driven system identification often forces a choice between two extremes. On one side, **black-box models** (like Neural ODEs) can fit complex dynamics with high accuracy, but their internal workings are opaque, providing prediction without physical explanation. On the other side, **interpretable 'library' methods** (like SINDy [@Brunton2016] or pure Symbolic Regression [@Cranmer2023PySR]) find simple equations, but their success depends on the true dynamics being sparsely represented in a pre-defined library of candidate functions or the correct selection of hyperparameters. A small modification of input hyperparameters typically yield to different identified models. 
+### Summary
+
+`pyCC.id` is a Python package for data-driven system identification that provides a flexible "grey-box" framework for discovering interpretable, nonlinear governing equations from time-series data. It is designed to bridge the gap between opaque black-box models (e.g., Neural ODEs) and restrictive, library-dependent methods (e.g., SINDy [@Brunton2016]).
+
+The core philosophy of `pyCC.id` is to decompose a complex dynamical system, $d\mathbf{x}/dt = \mathbf{F}(\mathbf{x}, t)$, into a user-defined model structure, $\mathbf{G}$. This structure explicitly separates measured inputs (like system state $\mathbf{x}$ and external forces) from the unknown model components. These components are: (1) a set of unknown one-dimensional **Characteristic Curves** ($\{\mathbf{f}\}$), which capture the system's underlying nonlinearities (such as stiffness or damping), and (2) a set of unknown scalar parameters ($\mathbf{a}$).
+
+The package offers a flexible, multi-backend approach to identify these unknown components. Users can model the characteristic curves $\{\mathbf{f}\}$ using powerful non-biased approximators like neural networks (NN-CC, via `PyTorch` [@Paszke2019pytorch]), simple polynomial basis functions (Poly-CC), or discover analytical expressions directly using symbolic regression (SymbR-CC, via `PySR` [@Cranmer2023PySR]). This framework allows the user to provide physical prior knowledge as constraints (e.g., symmetries, conservation laws), guiding the discovery process toward physically consistent models for experts in engineering, physics, and biology.
 
 
 
-`pyCC.id` fills the gap between these approaches with a hybrid "grey-box" framework. Its core assumption is that the dynamics, $\mathbf{F}(\mathbf{x}, t)$, can be decomposed into a user-defined model structure $\mathbf{G}$ built from simpler, interpretable components: a set of unknown one-dimensional functions $\{\mathbf{f}\}$ (the characteristic curves, e.g., $f_i$(x)) and a set of scalar parameters $\mathbf{a}$.
+### Statement of Need
+
+Researchers in science and engineering often face a trade-off in system identification. **Black-box models**, such as standard Neural ODEs, can achieve high predictive accuracy but are opaque, offering little physical insight. Conversely, **interpretable "white-box" methods**, like SINDy [@Brunton2016] or pure Symbolic Regression [@Cranmer2023PySR], aim to find simple analytical equations. However, their success often depends on the true dynamics being sparsely represented in a pre-defined library of candidate functions or, in the case of SR, can be computationally challenging and highly sensitive to hyperparameter tuning when applied to full, complex systems.
+
+`pyCC.id` is built to fill this "grey-box" gap, targeting domain experts who possess partial physical knowledge of their system (i.e., the model structure $\mathbf{G}$) but need to discover the specific functional forms of its components (the characteristic curves $\{\mathbf{f}\}$). It addresses the need for a tool that can leverage powerful, non-biased function approximators (like neural networks) within a physically constrained, interpretable framework, rather than forcing an all-or-nothing choice between accuracy and interpretability.
 
 
-Instead of guessing a library for the full dynamics, a user can first employ a powerful, non-biased approximator (e.g., a neural network) to learn the numerical shape of the unknown 1D functions `fi`. Crucially, physical knowledge (like symmetries or conservation laws) can be enforced as constraints. In a second stage, symbolic regression can be applied to this learned function to find a simple, interpretable analytical expression.
- 
-This framework builds upon a methodology first developed for first-order systems using a polynomial approach [@Gonzalez2023; @Gonzalez2024] and later extended to second-order systems using neural networks [@Gonzalez2025nody; @Gonzalez2025arxiv]. The pyCC.id package generalizes this work, providing a flexible tool applicable to a wider range of higher-order systems.
- 
 
-The package provides a practical tool for domain experts in engineering, physics, and biology to translate complex time-series data into simple, interpretable governing equations.
+### Comparison to other packages
 
-# Formalism
+`pyCC.id` integrates concepts from several existing tools but applies them within a unique, structured framework:
+
+* **SINDy (e.g., `pysindy`)**: SINDy [@Brunton2016] excels when the true dynamics are a sparse combination of terms from a user-provided candidate library. `pyCC.id` differs by not relying on a pre-defined library for the full dynamics. Instead, its NN-CC backend learns the shape of unknown 1D functions, which can then be analyzed, offering flexibility when the underlying functions (e.g., complex friction or stiffness) are not easily represented by simple library terms.
+
+* **Symbolic Regression (e.g., `PySR`)**: While `pyCC.id` uses `PySR` [@Cranmer2023PySR] as a backend (SymbR-CC) and a post-processing tool, its application is distinct. Rather than applying SR directly to the full, high-dimensional derivative data (a computationally difficult task), `pyCC.id`'s primary workflow first isolates the unknown components as simple 1D functions (using NN-CC) and *then* applies SR to these much simpler, cleaner 1D curves to find their analytical forms.
+
+* **Black-Box Neural ODEs**: Standard Neural ODE packages learn the entire derivative function $\mathbf{F}$ as a single, monolithic neural network. `pyCC.id` employs a "grey-box" approach, using `PyTorch` [@Paszke2019pytorch] to model only the specific, interpretable 1D components $\{\mathbf{f}\}$ within a user-defined physical structure $\mathbf{G}$, making the resulting model inherently interpretable.
+
+
+### Formalism
 
 For many physical systems, the dynamics are described by a set of first-order ordinary differential equations (ODEs):
 
@@ -51,7 +65,7 @@ Where $\mathbf{x}$ and $\mathbf{F}_{ext}(t)$ are the measured inputs (system sta
 
 
 
-# Features
+### Features
 
 `pyCC.id` is designed to be a flexible and high-performance tool for researchers and practitioners. Its key features include:
 
@@ -68,9 +82,19 @@ Where $\mathbf{x}$ and $\mathbf{F}_{ext}(t)$ are the measured inputs (system sta
 
 
 
-# Acknowledgements
+### Acknowledgements
 
 This work was partially supported by CONICET (Consejo Nacional de Investigaciones Científicas y Técnicas, Argentina) under Project PIP 1679.
+
+### Mentions of scholarly publications
+
+The `pyCC.id` package serves as a generalized implementation of the hybrid identification methodology introduced for first-order systems in [@Gonzalez2023] and [@Gonzalez2024], and later extended to second-order systems using neural networks in [@Gonzalez2025nody] and [@Gonzalez2025arxiv].
+
+
+### Key References
+
+The software archive is available at: [https://github.com/FedejGon/pyCC.id](https://github.com/FedejGon/pyCC.id)
+
 
 
 # References

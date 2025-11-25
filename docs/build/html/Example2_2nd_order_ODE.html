@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Practical Tips &mdash; pyCC.id 0.1.0 documentation</title>
+  <title>Example 2: 2nd-order ODE &mdash; pyCC.id 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
@@ -16,12 +16,11 @@
       <script src="_static/documentation_options.js?v=01f34227"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
-      <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Community &amp; Useful Links" href="links.html" />
-    <link rel="prev" title="Example 2: 1st-order ODE, f in denominator" href="Example4_1st_order_ODE_denominator.html" /> 
+    <link rel="next" title="Example 3: 3rd-order ODE" href="Example3_3rd_order_ODE.html" />
+    <link rel="prev" title="Example 1: Function y=f(x)" href="Example1_training_function.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -56,21 +55,17 @@
 <li class="toctree-l1"><a class="reference internal" href="functions_postprocessing.html">pycc.post_processing()</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Example1_training_function.html">Example 1: Function y=f(x)</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Example2_2nd_order_ODE.html">Example 2: 2nd-order ODE</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Example 2: 2nd-order ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Example3_3rd_order_ODE.html">Example 3: 3rd-order ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Example4_1st_order_ODE_denominator.html">Example 2: 1st-order ODE, f in denominator</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
-<ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Practical Tips</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#nn-cc-the-core-method">NN-CC: The Core Method</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#alternative-methods-poly-cc-and-symbr-cc">Alternative Methods: Poly-CC and SymbR-CC</a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="#workflow-1">Workflow 1</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#workflow-2">Workflow 2</a></li>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="practical_tips.html">Practical Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="practical_tips.html#workflow-1">Workflow 1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="practical_tips.html#workflow-2">Workflow 2</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Links:</span></p>
 <ul>
@@ -95,9 +90,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Practical Tips</li>
+      <li class="breadcrumb-item active">Example 2: 2nd-order ODE</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="_sources/practical_tips.rst.txt" rel="nofollow"> View page source</a>
+            <a href="_sources/Example2_2nd_order_ODE.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -105,48 +100,10 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="practical-tips">
-<h1>Practical Tips<a class="headerlink" href="#practical-tips" title="Link to this heading"></a></h1>
-<section id="nn-cc-the-core-method">
-<h2>NN-CC: The Core Method<a class="headerlink" href="#nn-cc-the-core-method" title="Link to this heading"></a></h2>
-<p>The primary and most flexible identification method in <code class="docutils literal notranslate"><span class="pre">pyCC</span></code> is <strong>NN-CC</strong> (Neural Network - Characteristic Curves). This method uses neural networks to approximate the unknown functions <span class="math notranslate nohighlight">\(\{\mathbf{f}\}\)</span> and can simultaneously identify unknown scalar parameters <span class="math notranslate nohighlight">\(\mathbf{a}\)</span> as part of a hybrid model.</p>
-<p>A key strategy for improving the accuracy and physical consistency of the identified model is to <strong>incorporate prior physical knowledge</strong>. This is a core strength of <code class="docutils literal notranslate"><span class="pre">pyCC</span></code>.</p>
-<p>You can incorporate this information during training using the <code class="docutils literal notranslate"><span class="pre">constraints</span></code> variable. For example, if you know a restoring force <span class="math notranslate nohighlight">\(f_2(x_1)\)</span> must be an odd function (e.g., <span class="math notranslate nohighlight">\(f_2(-x_1) = -f_2(x_1)\)</span>) and must pass through the point (1,2.5), you can specify this with:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">constraints</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f2 odd&#39;</span><span class="p">},</span>
-    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f2(1)=2.5&#39;</span><span class="p">},</span>
-<span class="p">]</span>
-</pre></div>
-</div>
-<p>Adding constraints like <strong>symmetries</strong> (odd/even) or <strong>known values</strong> (e.g., <span class="math notranslate nohighlight">\(f(0)=0\)</span>) significantly aids the discovery process, reduces the space of possible solutions, and leads to more robust and physically-grounded results.</p>
-<p>Additionally, a powerful workflow (named as Workflow 2 in the following) is shown to apply <strong>Symbolic Regression as a post-processing step</strong> in order to obtain analytical expressions from a previously identified model, which can be obtained, e.g., from NN-CC method. This has been found to be highly useful not only for discovering a final, simple <strong>analytical expressions</strong> for the functions but also for <strong>reducing potential overfitting</strong> that might be present in the raw NN fitting.</p>
-</section>
-<section id="alternative-methods-poly-cc-and-symbr-cc">
-<h2>Alternative Methods: Poly-CC and SymbR-CC<a class="headerlink" href="#alternative-methods-poly-cc-and-symbr-cc" title="Link to this heading"></a></h2>
-<p>While NN-CC is the core method, <code class="docutils literal notranslate"><span class="pre">pyCC</span></code> also provides other approaches for comparison and specific use cases:</p>
-<ul class="simple">
-<li><p><strong>Poly-CC (Polynomials)</strong>: This method uses polynomial basis functions (e.g., <span class="math notranslate nohighlight">\(f(x) = c_1 x + c_2 x^2 + ...\)</span>) to model the characteristic curves. It is less flexible than NN-CC but can be useful for simple systems or for establishing a baseline identification. This is the recommended method for parametric modeling, where only parameters</p></li>
-<li><p><strong>SymbR-CC (Symbolic Regression)</strong>: This method, which internally uses the <code class="docutils literal notranslate"><span class="pre">pySR</span></code> library, attempts to find an explicit symbolic mathematical expression for the characteristic curves (e.g., <span class="math notranslate nohighlight">\(f(x) = 0.5 \tanh(500x)\)</span>). It is computationally more demanding than NN-CC.</p></li>
-</ul>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>Performing simulations with SymbR-CC is often slow, as it requires to evaluate the analytical expressions for the functions at every time step. Aternatively, you can simulate the system using the <code class="docutils literal notranslate"><span class="pre">Interp</span></code> method and using as input the <code class="docutils literal notranslate"><span class="pre">evals</span></code> variable obtained from SymbR-CC. The simulation using interpolation is much faster than analytical evaluation.</p>
-</div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Be cautious with complex model structures (<span class="math notranslate nohighlight">\(\mathbf{G}\)</span>), in particular when trying to identify expressions that contain functions in the denominators. It is recommended to rewrite the system equations to move the functions to the numerator during the identification stage and then redefining them as a set of first-order equations during the simulation stage. More information is given in the Example 4 of the documentation.</p>
-</div>
-</section>
-</section>
-<section id="workflow-1">
-<h1>Workflow 1<a class="headerlink" href="#workflow-1" title="Link to this heading"></a></h1>
-<p>Here, we show a recommended workflow to simulate a theoretical EDO, train a NN-CC model, and simulate the identified model.</p>
-<p>Specifically, this workflow shows:</p>
-<ol class="arabic simple">
-<li><p>How to simulate a stick-slip second order system using <code class="docutils literal notranslate"><span class="pre">pycc.simulate()</span></code></p></li>
-<li><p>How to train the NN-CC method to identify the model using <code class="docutils literal notranslate"><span class="pre">pycc.train()</span></code></p></li>
-<li><p>How to simulate the identified model using <code class="docutils literal notranslate"><span class="pre">pycc.simulate()</span></code></p></li>
-</ol>
+  <section id="example-2-2nd-order-ode">
+<h1>Example 2: 2nd-order ODE<a class="headerlink" href="#example-2-2nd-order-ode" title="Link to this heading"></a></h1>
+<p>This example presents the application of pyCC to a family of second order systems called as <cite>velocity-dependent friction models with external force</cite> (which is a generalized Rayleigh-type nonlinear oscillation with velocity-dependent friction and external forcing)</p>
+<p>second order stick-slip system.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pycc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
@@ -272,19 +229,10 @@
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;x(t)&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-</pre></div>
-</div>
-</section>
-<section id="workflow-2">
-<h1>Workflow 2<a class="headerlink" href="#workflow-2" title="Link to this heading"></a></h1>
-<p>Here, we present a recommended workflow for performing post-processing using 'evals' from a previously trained NN-CC model.</p>
-<p>Specifically, suppose steps 1 and 2 are the same as in Workflow 1, we modify step 3 and add step 4 as follows:</p>
-<ol class="arabic simple" start="3">
-<li><p>Perform post-processing of the identified models using <code class="docutils literal notranslate"><span class="pre">pycc.post_processing()</span></code></p></li>
-<li><p>Simulate the identified model using <code class="docutils literal notranslate"><span class="pre">pycc.simulate()</span></code>. We recommend using interpolation (method='Interp') instead of directly using the full analytical functions (method='SymbR') to reduce computation time. If higher precision is required, you can increase 'n_eval' in step 3</p></li>
-</ol>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">##############################################</span>
-<span class="c1"># 3) Post-processing the identified models with SymbR [pycc.post_processing()]</span>
+
+
+<span class="c1">##############################################</span>
+<span class="c1"># 4) Post-processing the identified models with SymbR [pycc.post_processing()]</span>
 
 <span class="c1">### Simulation using the NN models</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;simulation with NN simul&quot;</span><span class="p">)</span>
@@ -309,7 +257,7 @@
 <span class="n">models_sr</span><span class="p">,</span><span class="n">evals_sr</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">post_processing</span><span class="p">(</span><span class="n">eqs</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;SymbR&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">post_process_params</span><span class="p">)</span>
 
 <span class="c1">##############################################</span>
-<span class="c1"># 4) Simulate the post-processed model using interpolation</span>
+<span class="c1"># 5) Simulate the post-processed model using interpolation</span>
 <span class="n">params_sim_interp</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;evals&#39;</span><span class="p">:</span> <span class="n">evals_sr</span><span class="p">,</span>          <span class="c1"># Use the NN&#39;s characteristic curves</span>
     <span class="s1">&#39;obtained_coefs&#39;</span><span class="p">:</span> <span class="n">obtained_coefs</span><span class="p">,</span>  <span class="c1"># Use the scalars from the NN fit</span>
@@ -341,8 +289,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Example4_1st_order_ODE_denominator.html" class="btn btn-neutral float-left" title="Example 2: 1st-order ODE, f in denominator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="links.html" class="btn btn-neutral float-right" title="Community &amp; Useful Links" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Example1_training_function.html" class="btn btn-neutral float-left" title="Example 1: Function y=f(x)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Example3_3rd_order_ODE.html" class="btn btn-neutral float-right" title="Example 3: 3rd-order ODE" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

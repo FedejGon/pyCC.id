@@ -1,0 +1,201 @@
+\hypertarget{summary}{%
+\section{Summary}\label{summary}}
+
+\texttt{pyCC.id} is a Python package for data-driven system
+identification that provides a flexible ``grey-box'' framework for
+discovering interpretable, nonlinear governing equations from
+time-series data. It is designed to bridge the gap between opaque
+black-box models (e.g., Neural ODEs) and restrictive, library-dependent
+methods (e.g., SINDy \autocite{Brunton2016}).
+
+The core philosophy of \texttt{pyCC.id} is to decompose a complex
+dynamical system, \(d\mathbf{x}/dt = \mathbf{F}(\mathbf{x}, t)\), into a
+user-defined model structure, \(\mathbf{G}\). This structure explicitly
+separates measured inputs (like system state \(\mathbf{x}\) and external
+forces) from the unknown model components. These components are: (1) a
+set of unknown one-dimensional \textbf{Characteristic Curves}
+(\(\{\mathbf{f}\}\)), which capture the system's underlying
+nonlinearities (such as stiffness or damping), and (2) a set of unknown
+scalar parameters (\(\mathbf{a}\)).
+
+The package offers a flexible, multi-backend approach to identify these
+unknown components. Users can model the characteristic curves
+\(\{\mathbf{f}\}\) using powerful non-biased approximators like neural
+networks (NN-CC, via \texttt{PyTorch} \autocite{Paszke2019pytorch}),
+simple polynomial basis functions (Poly-CC), or discover analytical
+expressions directly using symbolic regression (SymbR-CC, via
+\texttt{PySR} \autocite{Cranmer2023PySR}). This framework allows the
+user to provide physical prior knowledge as constraints (e.g.,
+symmetries, conservation laws), guiding the discovery process toward
+physically consistent models for experts in engineering, physics, and
+biology.
+
+\hypertarget{statement-of-need}{%
+\section{Statement of Need}\label{statement-of-need}}
+
+Researchers in science and engineering often face a trade-off in system
+identification. \textbf{Black-box models}, such as standard Neural ODEs,
+can achieve high predictive accuracy but are opaque, offering little
+physical insight. Conversely, \textbf{interpretable ``white-box''
+methods}, like SINDy \autocite{Brunton2016} or pure Symbolic Regression
+\autocite{Cranmer2023PySR}, aim to find simple analytical equations.
+However, their success often depends on the true dynamics being sparsely
+represented in a pre-defined library of candidate functions or, in the
+case of SR, can be computationally challenging and highly sensitive to
+hyperparameter tuning when applied to full, complex systems.
+
+\texttt{pyCC.id} is built to fill this ``grey-box'' gap, targeting
+domain experts who possess partial physical knowledge of their system
+(i.e., the model structure \(\mathbf{G}\)) but need to discover the
+specific functional forms of its components (the characteristic curves
+\(\{\mathbf{f}\}\)). It addresses the need for a tool that can leverage
+powerful, non-biased function approximators (like neural networks)
+within a physically constrained, interpretable framework, rather than
+forcing an all-or-nothing choice between accuracy and interpretability.
+
+\hypertarget{comparison-to-other-packages}{%
+\section{Comparison to other
+packages}\label{comparison-to-other-packages}}
+
+\texttt{pyCC.id} integrates concepts from several existing tools but
+applies them within a unique, structured framework:
+
+\begin{itemize}
+\item
+  \textbf{SINDy (e.g., \texttt{pysindy})}: SINDy \autocite{Brunton2016}
+  excels when the true dynamics are a sparse combination of terms from a
+  user-provided candidate library. \texttt{pyCC.id} differs by not
+  relying on a pre-defined library for the full dynamics. Instead, its
+  NN-CC backend learns the shape of unknown 1D functions, which can then
+  be analyzed, offering flexibility when the underlying functions (e.g.,
+  complex friction or stiffness) are not easily represented by simple
+  library terms.
+\item
+  \textbf{Symbolic Regression (e.g., \texttt{PySR})}: While
+  \texttt{pyCC.id} uses \texttt{PySR} \autocite{Cranmer2023PySR} as a
+  backend (SymbR-CC) and a post-processing tool, its application is
+  distinct. Rather than applying SR directly to the full,
+  high-dimensional derivative data (a computationally difficult task),
+  \texttt{pyCC.id}'s primary workflow first isolates the unknown
+  components as simple 1D functions (using NN-CC) and \emph{then}
+  applies SR to these much simpler, cleaner 1D curves to find their
+  analytical forms.
+\item
+  \textbf{Black-Box Neural ODEs}: Standard Neural ODE packages learn the
+  entire derivative function \(\mathbf{F}\) as a single, monolithic
+  neural network. \texttt{pyCC.id} employs a ``grey-box'' approach,
+  using \texttt{PyTorch} \autocite{Paszke2019pytorch} to model only the
+  specific, interpretable 1D components \(\{\mathbf{f}\}\) within a
+  user-defined physical structure \(\mathbf{G}\), making the resulting
+  model inherently interpretable.
+\end{itemize}
+
+\hypertarget{formalism}{%
+\section{Formalism}\label{formalism}}
+
+For many physical systems, the dynamics are described by a set of
+first-order ordinary differential equations (ODEs):
+
+\[
+\frac{d\mathbf{x}}{dt} = \mathbf{F}(\mathbf{x}, t)
+\]
+
+Here, \(\mathbf{x}(t)\) is the system state vector, but the function
+\(\mathbf{F}\) is often a complex ``black box,'' making it difficult to
+gain physical insight. The core philosophy of \texttt{pyCC.id} is to
+decompose this complex function \(\mathbf{F}\) into a combination of
+simpler, interpretable building blocks. We express this decomposition
+as:
+
+\[
+\frac{d\mathbf{x}}{dt} = \mathbf{G}(\mathbf{x}, \mathbf{F}_{ext}(t); \{\mathbf{f}\}, \mathbf{a})
+\]
+
+Where \(\mathbf{x}\) and \(\mathbf{F}_{ext}(t)\) are the measured inputs
+(system state and external forces). The goal is to find the model
+components: \(\{\mathbf{f}\}\), a set of unknown 1D
+\textbf{Characteristic Curves} (e.g., nonlinear stiffness or damping
+functions), and \(\mathbf{a}\), a vector of unknown scalar parameters.
+The user proposes the \textbf{model structure} \(\mathbf{G}\), which
+defines how these components are combined. \texttt{pyCC.id} is a Python
+package that discovers the optimal functions \(\{\mathbf{f}\}\) and
+parameters \(\mathbf{a}\) that best fit the observed data.
+
+\hypertarget{features}{%
+\section{Features}\label{features}}
+
+\texttt{pyCC.id} is designed to be a flexible and high-performance tool
+for researchers and practitioners. Its key features include:
+
+\begin{itemize}
+\tightlist
+\item
+  \textbf{Interpretable Models}: Decomposes complex, high-dimensional
+  dynamics into a set of simple, 1D characteristic curves that often
+  have direct physical meaning (e.g., stiffness, damping).
+\item
+  \textbf{Flexible Function Parametrization}: Supports multiple backends
+  for modeling the characteristic curves, allowing users to choose the
+  right tool for their problem:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \textbf{Neural Networks (NN-CC)}: Uses \texttt{PyTorch}
+    \autocite{Paszke2019pytorch} for high-performance, non-biased
+    function approximation.
+  \item
+    \textbf{Polynomials (Poly-CC)}: Provides a simple baseline using
+    polynomial basis functions.
+  \item
+    \textbf{Symbolic Regression (SymbR-CC)}: Uses \texttt{PySR}
+    \autocite{Cranmer2023PySR} to discover analytical expressions
+    directly.
+  \end{itemize}
+\item
+  \textbf{Physics-Informed Discovery}: Allows users to inject domain
+  knowledge as constraints during training (e.g.,
+  \texttt{\textquotesingle{}f1\ odd\textquotesingle{}},
+  \texttt{\textquotesingle{}f2(0)=0\textquotesingle{}}) or by defining
+  conserved quantities in the loss function. This leads to more robust
+  and physically consistent models.
+\item
+  \textbf{Hardware Acceleration}: Natively supports multicore CPUs and
+  GPUs from both NVIDIA (\texttt{cuda}) and Intel (\texttt{xpu} via
+  \texttt{intel-extension-for-pytorch}) for accelerating neural network
+  training.
+\item
+  \textbf{Built-in Simulator}: Includes a versatile ODE simulator
+  (\texttt{pycc.simulate}) compatible with all identified model types
+  for validation and analysis.
+\item
+  \textbf{Comprehensive Documentation}: Provides a Google Colab notebook
+  for a quick start, as well as a full gallery of tutorials and examples
+  in the repository.
+\end{itemize}
+
+\hypertarget{acknowledgements}{%
+\section{Acknowledgements}\label{acknowledgements}}
+
+This work was partially supported by CONICET (Consejo Nacional de
+Investigaciones Científicas y Técnicas, Argentina) under Project PIP
+1679.
+
+\hypertarget{mentions-of-scholarly-publications}{%
+\section{Mentions of scholarly
+publications}\label{mentions-of-scholarly-publications}}
+
+The \texttt{pyCC.id} package serves as a generalized implementation of
+the hybrid identification methodology introduced for first-order systems
+in \autocite{Gonzalez2023} and \autocite{Gonzalez2024}, and later
+extended to second-order systems using neural networks in
+\autocite{Gonzalez2025nody} and \autocite{Gonzalez2025arxiv}.
+
+\hypertarget{key-references}{%
+\section{Key References}\label{key-references}}
+
+The software archive is available at:
+\url{https://github.com/FedejGon/pyCC.id}
+
+\hypertarget{references}{%
+\section{References}\label{references}}

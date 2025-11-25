@@ -1,5 +1,5 @@
 =====
-Example 1: 1D function
+Example 1: Function y=f(x)
 =====
 
 .. code-block:: python

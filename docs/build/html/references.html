@@ -55,7 +55,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Example1_training_function.html">Example 1: 1D function</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example1_training_function.html">Example 1: Function y=f(x)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Example2_2nd_order_EDO.html">Example 2: 2nd-order EDO</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Example3_3rd_order_EDO.html">Example 3: 3rd-order EDO</a></li>
 </ul>
@@ -106,27 +106,39 @@
 <h1>References<a class="headerlink" href="#references" title="Link to this heading"></a></h1>
 <section id="how-to-cite">
 <h2>How to Cite<a class="headerlink" href="#how-to-cite" title="Link to this heading"></a></h2>
-<p>General reference to this package:
-<strong>Gonzalez2025code</strong></p>
-<dl class="simple">
-<dt>In case of using the <strong>NN-CC</strong> method, additionally cite:</dt><dd><ul class="simple">
-<li><p>Gonzalez, F. J. and Lara, L. P. “<a class="reference external" href="https://doi.org/10.1007/s11071-025-11744-6">Interpretable neural network system identification method for two families of second-order systems based on characteristic curves</a>.” Nonlinear Dyn. (2025)</p></li>
+<p>In case of using this pycc package, please cite [1] (Gonzalez2025pycc).
+Furthermore:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>If using the <strong>NN-CC</strong> method, additionally cite [2] and [3] (Gonzalez2025eaai,Gonzalez2025nody)</p></li>
+<li><p>If using the <strong>Poly-CC</strong> method, additionally cite [4] and [5] (Gonzalez2023,Gonzalez2024)</p></li>
+<li><p>If using <strong>post-SR</strong> and/or <strong>SymbReg-CC</strong> methods, additionally cite [2] and [6] (Gonzalez2025eaai,cranmer2023)</p></li>
 </ul>
-</dd>
-<dt>In case of using the <strong>Poly-CC</strong> method, additionally cite:</dt><dd><ul class="simple">
-<li><p>Gonzalez, F.J. “<a class="reference external" href="https://doi.org/10.1038/s41598-023-29151-5">Determination of the characteristic curves of a nonlinear first order system from fourier analysis</a>.” Sci. Rep., vol. 13, 1955, (2023).</p></li>
-<li><p>Gonzalez, F.J. “<a class="reference external" href="https://doi.org/10.1007/s11071-024-09890-4">System identification based on characteristic curves: a mathematical connection between power series and Fourier analysis for first-order nonlinear systems</a>.” Nonlinear Dyn. 112, 16167–16197 (2024).</p></li>
-</ul>
-</dd>
-<dt>In case of using <strong>post-SR</strong> and/or <strong>SymbReg-CC</strong> methods, additionally cite:</dt><dd><ul class="simple">
-<li><p>Cranmer, M. “<a class="reference external" href="https://doi.org/10.48550/arXiv.2305.01582">Interpretable Machine Learning for Science with PySR and SymbolicRegression.jl</a>.” arXiv preprint arXiv:2305.01582 (2023).</p></li>
-</ul>
-</dd>
-</dl>
+</div></blockquote>
+<p>[1] Gonzalez, F. J. Arxiv joss arxiv (2025)</p>
+<p>[2] Gonzalez, F. J. <cite>Symmetry-guided neural network system identification using interpretable characteristic curves and post-symbolic regression</cite>. Arxiv eaai (2025)</p>
+<p>[3] Gonzalez, F. J. and Lara, L. P. “<a class="reference external" href="https://doi.org/10.1007/s11071-025-11744-6">Interpretable neural network system identification method for two families of second-order systems based on characteristic curves</a>.” Nonlinear Dyn. (2025)</p>
+<p>[4] Gonzalez, F.J. “<a class="reference external" href="https://doi.org/10.1038/s41598-023-29151-5">Determination of the characteristic curves of a nonlinear first order system from fourier analysis</a>.” Sci. Rep., vol. 13, 1955, (2023).</p>
+<p>[5] Gonzalez, F.J. “<a class="reference external" href="https://doi.org/10.1007/s11071-024-09890-4">System identification based on characteristic curves: a mathematical connection between power series and Fourier analysis for first-order nonlinear systems</a>.” Nonlinear Dyn. 112, 16167–16197 (2024).</p>
+<p>[6] Cranmer, M. “<a class="reference external" href="https://doi.org/10.48550/arXiv.2305.01582">Interpretable Machine Learning for Science with PySR and SymbolicRegression.jl</a>.” arXiv preprint arXiv:2305.01582 (2023).</p>
 </section>
 <section id="bibtex">
 <h2>BibTeX<a class="headerlink" href="#bibtex" title="Link to this heading"></a></h2>
-<div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span class="nc">@article</span><span class="p">{</span><span class="nl">Gonzalez2023</span><span class="p">,</span>
+<div class="highlight-bibtex notranslate"><div class="highlight"><pre><span></span><span class="nc">@article</span><span class="p">{</span><span class="nl">Gonzalez2025nody</span><span class="p">,</span>
+<span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Interpretable neural network system identification method for two families of second-order systems based on characteristic curves}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Gonzalez,  Federico J. and  Lara, Luis P. }</span><span class="p">,</span>
+<span class="w">  </span><span class="na">doi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{10.1007/s11071-025-11744-6}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">volume</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">issn</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">number</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">journal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Nonlinear Dyn.}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">publisher</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Springer Science and Business Media LLC}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2025}</span><span class="p">,</span>
+<span class="w">  </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">sep</span><span class="p">,</span>
+<span class="w">  </span><span class="na">pages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{}</span>
+<span class="p">}</span>
+
+<span class="nc">@article</span><span class="p">{</span><span class="nl">Gonzalez2023</span><span class="p">,</span>
 <span class="w">  </span><span class="na">title</span><span class="w">     </span><span class="p">=</span><span class="w"> </span><span class="s">{Determination of the characteristic curves of a nonlinear first order system from Fourier analysis}</span><span class="p">,</span>
 <span class="w">  </span><span class="na">author</span><span class="w">    </span><span class="p">=</span><span class="w"> </span><span class="s">{Gonzalez, Federico J.}</span><span class="p">,</span>
 <span class="w">  </span><span class="na">journal</span><span class="w">   </span><span class="p">=</span><span class="w"> </span><span class="s">{Sci. Rep.}</span><span class="p">,</span>
@@ -152,20 +164,6 @@
 <span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2024}</span><span class="p">,</span>
 <span class="w">  </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">jul</span><span class="p">,</span>
 <span class="w">  </span><span class="na">pages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{16167–16197}</span>
-<span class="p">}</span>
-
-<span class="nc">@article</span><span class="p">{</span><span class="nl">Gonzalez2025nody</span><span class="p">,</span>
-<span class="w">  </span><span class="na">title</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Interpretable neural network system identification method for two families of second-order systems based on characteristic curves}</span><span class="p">,</span>
-<span class="w">  </span><span class="na">author</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Gonzalez,  Federico J. and  Lara, Luis P. }</span><span class="p">,</span>
-<span class="w">  </span><span class="na">doi</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{10.1007/s11071-025-11744-6}</span><span class="p">,</span>
-<span class="w">  </span><span class="na">volume</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{}</span><span class="p">,</span>
-<span class="w">  </span><span class="na">issn</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{}</span><span class="p">,</span>
-<span class="w">  </span><span class="na">number</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{}</span><span class="p">,</span>
-<span class="w">  </span><span class="na">journal</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Nonlinear Dyn.}</span><span class="p">,</span>
-<span class="w">  </span><span class="na">publisher</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{Springer Science and Business Media LLC}</span><span class="p">,</span>
-<span class="w">  </span><span class="na">year</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{2025}</span><span class="p">,</span>
-<span class="w">  </span><span class="na">month</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="nv">sep</span><span class="p">,</span>
-<span class="w">  </span><span class="na">pages</span><span class="w"> </span><span class="p">=</span><span class="w"> </span><span class="s">{}</span>
 <span class="p">}</span>
 
 <span class="nc">@article</span><span class="p">{</span><span class="nl">Cranmer2023PySR</span><span class="p">,</span>

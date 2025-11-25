@@ -11,7 +11,7 @@ The primary and most flexible identification method in ``pyCC`` is **NN-CC** (Ne
 
 A key strategy for improving the accuracy and physical consistency of the identified model is to **incorporate prior physical knowledge**. This is a core strength of ``pyCC``.
 
-You can incorporate this information during training using the ``constraints`` variable. For example, if you know a restoring force :math:`f_2(x_1)` must be an odd function (e.g., :math:`f_2(-x_1) = -f_2(x_1)`) and must pass through the point (1,2.5), you can specify this by:
+You can incorporate this information during training using the ``constraints`` variable. For example, if you know a restoring force :math:`f_2(x_1)` must be an odd function (e.g., :math:`f_2(-x_1) = -f_2(x_1)`) and must pass through the point (1,2.5), you can specify this with:
 
 .. code-block:: python
 
@@ -22,7 +22,7 @@ You can incorporate this information during training using the ``constraints`` v
 
 Adding constraints like **symmetries** (odd/even) or **known values** (e.g., :math:`f(0)=0`) significantly aids the discovery process, reduces the space of possible solutions, and leads to more robust and physically-grounded results.
 
-Additionally, a powerful workflow (Workflow 2) is to apply **Symbolic Regression as a post-processing step** to the characteristic curves :math:`\{\mathbf{f}\}` obtained, e.g., from a trained NN-CC model. This has been found to be highly useful not only for discovering a final, simple **analytical expressions** for the functions but also for **reducing potential overfitting** that might be present in the raw NN fitting.
+Additionally, a powerful workflow (named as Workflow 2 in the following) is shown to apply **Symbolic Regression as a post-processing step** in order to obtain analytical expressions from a previously identified model, which can be obtained, e.g., from NN-CC method. This has been found to be highly useful not only for discovering a final, simple **analytical expressions** for the functions but also for **reducing potential overfitting** that might be present in the raw NN fitting.
 
 -----------------------------------------------
 Alternative Methods: Poly-CC and SymbR-CC
@@ -30,15 +30,19 @@ Alternative Methods: Poly-CC and SymbR-CC
 
 While NN-CC is the core method, ``pyCC`` also provides other approaches for comparison and specific use cases:
 
-* **Poly-CC (Polynomials)**: This method uses polynomial basis functions (e.g., :math:`f(x) = c_1 x + c_2 x^2 + ...`) to model the characteristic curves. It is less flexible than NN-CC but can be useful for simple systems or for establishing a baseline identification.
+* **Poly-CC (Polynomials)**: This method uses polynomial basis functions (e.g., :math:`f(x) = c_1 x + c_2 x^2 + ...`) to model the characteristic curves. It is less flexible than NN-CC but can be useful for simple systems or for establishing a baseline identification. This is the recommended method for parametric modeling, where only parameters  
 
-* **SymbR-CC (Symbolic Regression)**: This method, which leverages the ``pySR`` library, attempts to find an explicit symbolic mathematical expression for the characteristic curves (e.g., :math:`f(x) = 0.5 \tanh(500x)`).
+* **SymbR-CC (Symbolic Regression)**: This method, which internally uses the ``pySR`` library, attempts to find an explicit symbolic mathematical expression for the characteristic curves (e.g., :math:`f(x) = 0.5 \tanh(500x)`). It is computationally more demanding than NN-CC.
+
+.. note::
+   Performing simulations with SymbR-CC is often slow, as it requires to evaluate the analytical expressions for the functions at every time step. Aternatively, you can simulate the system using the ``Interp`` method and using as input the ``evals`` variable obtained from SymbR-CC. The simulation using interpolation is much faster than analytical evaluation.  
 
 .. warning::
-   Be cautious when using SymbR-CC with complex model structures (:math:`\mathbf{G}`). Symbolic regression can struggle or fail if the proposed equation involves complex operations. For example, it may have issues if an unknown function :math:`f(x)` is located in the **denominator** of an expression or inside another complex function. It performs best when the unknown functions are combined in simpler, additive, or multiplicative ways.
+   Be cautious with complex model structures (:math:`\mathbf{G}`), in particular when trying to identify expressions that contain functions in the denominators. It is recommended to rewrite the system equations to move the functions to the numerator during the identification stage and then redefining them as a set of first-order equations during the simulation stage. More information is given in the Example 4 of the documentation.
    
-.. note::
-   Often, performing simulations with SymbR-CC is slow, as it requires to evaluate the analytical expressions for the functions at every time step. Aternatively, you can simulate the system using the ``Interp`` method and using as input the ``evals`` variable obtained from SymbR-CC. The simulation using interpolation is much faster than analytical evaluation.  
+   
+   
+
    
    
    

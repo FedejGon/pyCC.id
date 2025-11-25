@@ -32,9 +32,10 @@ documentation for details.
    :caption: Examples:  
    
    Example1_training_function  
-   Example2_2nd_order_EDO
-   Example3_3rd_order_EDO
-
+   Example2_2nd_order_ODE
+   Example3_3rd_order_ODE
+   Example4_1st_order_ODE_denominator
+   
 .. toctree::
    :maxdepth: 2   
    :caption: Tips:

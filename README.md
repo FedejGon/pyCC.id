@@ -8,7 +8,7 @@
 **pyCC.id** is a Python library for discovering interpretable, nonlinear dynamical systems from data. It is built on the concept of **Characteristic Curves (CCs)** and is designed to be highly customizable and user-friendly.
 
 
-| **colab demo** | **Forums** | **Paper** | 
+| **colab demo** | **Forums** | **Paper** |
 |:---:|:---:|:---:|
 |[![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)|[![Discussions](https://img.shields.io/badge/discussions-github-informational)](https://github.com/FedejGon/pyCC.id/discussions)|[![Paper](https://img.shields.io/badge/arXiv-2305.01582-b31b1b)](https://arxiv.org/)||
 
@@ -46,7 +46,7 @@ where:
 
 * **$\mathbf{G}$** represents a proposed **model structure**. It defines the template that dictates how the building blocks (the functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$) are combined with the state $\mathbf{x}$ to compute the system evolution. This structure can be an arbitrary user-defined function.
 
-The goal of **pyCC** is to discover the optimal functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$ that best fit the observed data based on a predefined model structure $\mathbf{G}$. 
+The goal of **pyCC** is to discover the optimal functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$ that best fit the observed data based on a predefined model structure $\mathbf{G}$.
 
 ---
 
@@ -57,7 +57,7 @@ The goal of **pyCC** is to discover the optimal functions $\\{\mathbf{f}\\}$ and
     * Neural Networks (NN-CC) — Compatible with multicore CPUs and GPUs from both NVIDIA (CUDA) and Intel (XPU) architectures. GPU acceleration on Intel devices is enabled through the intel_extension_for_pytorch.
     * Polynomials (Poly-CC) — Using polynomial expansion basis functions for comparison.
     * Symbolic Regression (SymbR-CC)  —  Parallelized for multicore CPU execution, using the internal parallelization features of PySR.
-* **Physics-Informed Discovery**: Incorporate known physical constraints, such as symmetries (e.g., even and odd functions) or conservation laws, to guide the discovery process and ensure robust, physically consistent models. 
+* **Physics-Informed Discovery**: Incorporate known physical constraints, such as symmetries (e.g., even and odd functions) or conservation laws, to guide the discovery process and ensure robust, physically consistent models.
 * **Built-in Simulator**: Includes a module for simulating higher-order and coupled ODEs, fully compatible with all identification methodologies.
 * **User-Focused Design**: Offers an API that is both easy to use for standard problems and highly customizable for advanced research.
 
@@ -125,7 +125,7 @@ $$
 Here, we identify the function $f_1(\dot{x})$ and the parameters $a_4$ and $a_5$ simultaneously.
 
 
-## 📥  Installation with pip (Recommended) 
+## 📥  Installation with pip (Recommended)
 
 ### Installation for users
 Some features in PyCC include using the Symbolic Regression (pySR) package. Thus we recommend installing this package first. To install both packages use:  
@@ -151,7 +151,7 @@ import matplotlib.pyplot as plt
 
 # This example shows:
 # 1) how to simulate a stick-slip second order system using pycc.simulate()
-# 2) how to train the NN-CC method to identify the model [pycc.train()] 
+# 2) how to train the NN-CC method to identify the model [pycc.train()]
 # 3) how to simulate the identified model [pycc.simulate()]
 
 ##############################################
@@ -200,7 +200,7 @@ df = pd.DataFrame({
 })
 
 ##############################################
-# 2) how to train the NN-CC method to identify the model [pycc.train()] 
+# 2) how to train the NN-CC method to identify the model [pycc.train()]
 # 2a) propose equations to use for identification (fi functions and ai parameters).
 eqs = [
      'x1_dot = x2', #*exp(a1-2.0)',
@@ -224,7 +224,7 @@ params_NN = {
     'weight_loss_param': 1e-3,
     'constraints': constraints,
 }
-# 2d) train/fit/identify the model 
+# 2d) train/fit/identify the model
 models, evals, obtained_coefs = pycc.train(df, eqs,method='NN', params=params_NN)
 
 # plotting obtained functions f1 and f2
@@ -255,7 +255,7 @@ if obtained_coefs:
 
 ### Simulation using the NN models
 print("simulation with NN simul")
-# 3a) define simulation parameters 
+# 3a) define simulation parameters
 params_NN_simul = {
     'models': models,
     'obtained_coefs': obtained_coefs,
@@ -263,7 +263,7 @@ params_NN_simul = {
     't_span':t_span,
     'y0': y0,   
     't_eval': t_eval,
-    'method': 'LSODA',  # solve_ivp 
+    'method': 'LSODA',  # solve_ivp
     'atol': 1e-8,
     'rtol': 1e-6,
     'check_nan': True
@@ -318,10 +318,10 @@ General reference to this package:
 
 In case of using NN-CC method, additionally cite:
   - Gonzalez, F. J. and Lara, L. P. "[Interpretable neural network system identification method for two families of second-order systems based on characteristic curves](https://doi.org/10.1007/s11071-025-11744-6)." Nonlinear Dyn. (2025)
-  
-In case of using Poly-CC method, additionally cite: 
+
+In case of using Poly-CC method, additionally cite:
   - Gonzalez, F.J. "[Determination of the characteristic curves of a nonlinear first order system from fourier analysis](https://doi.org/10.1038/s41598-023-29151-5)." Sci. Rep., vol. 13, 1955, (2023).
-  - Gonzalez, F.J. "[System identification based on characteristic curves: a mathematical connection between power series and Fourier analysis for first-order nonlinear systems](https://doi.org/10.1007/s11071-024-09890-4)." Nonlinear Dyn. 112, 16167–16197 (2024). 
+  - Gonzalez, F.J. "[System identification based on characteristic curves: a mathematical connection between power series and Fourier analysis for first-order nonlinear systems](https://doi.org/10.1007/s11071-024-09890-4)." Nonlinear Dyn. 112, 16167–16197 (2024).
 
 In case of using post-SR and/or SymbReg-CC methods, additionally cite:
   - Cranmer, M. "[Interpretable Machine Learning for Science with PySR and SymbolicRegression.jl](https://doi.org/10.48550/arXiv.2305.01582)." arXiv preprint arXiv:2305.01582 (2023).
@@ -349,7 +349,6 @@ In case of using post-SR and/or SymbReg-CC methods, additionally cite:
   author = {{F. J. Gonzalez}},
   volume = {112},
   issn = {1573-269X},
-  url = {},
   doi = {10.1007/s11071-024-09890-4},
   number = {18},
   journal = {Nonlinear Dyn.},
@@ -360,34 +359,33 @@ In case of using post-SR and/or SymbReg-CC methods, additionally cite:
 }
 
 @article{Gonzalez2025nody,
-  title = {Interpretable neural network system identification method for two families of second-order systems based on characteristic curves},
-  author = {Gonzalez,  Federico J. and  Lara, Luis P. },
-  doi = {10.1007/s11071-025-11744-6},
-  volume = {},
-  issn = {},
-  number = {},
+  title = {{Interpretable neural network system identification method for two families of second-order systems based on characteristic curves}},
+  volume = {113},
+  ISSN = {1573-269X},
+  DOI = {10.1007/s11071-025-11744-6},
+  number = {24},
   journal = {Nonlinear Dyn.},
   publisher = {Springer Science and Business Media LLC},
+  author = {Gonzalez,  Federico J. and Lara,  Luis P.},
   year = {2025},
   month = sep,
-  pages = {}
+  pages = {33063–33086}
 }
 
+
 @article{Cranmer2023PySR,
-  title={Interpretable Machine Learning for Science with PySR and SymbolicRegression.jl}, 
+  title={Interpretable Machine Learning for Science with PySR and SymbolicRegression.jl},
   author={Miles Cranmer},
   journal={arXiv preprint arXiv:2305.01582},      
   year={2023},
   eprint={2305.01582},
-  url={https://arxiv.org/abs/2305.01582}, 
+  url={https://arxiv.org/abs/2305.01582},
 }
 ```
 
 
 ### 🤝 We are open to collaborations and adding new possible features.
-Please share your [![Ideas](https://img.shields.io/badge/ideas-github-informational)](https://github.com/FedejGon/pyCC.id/discussions/categories/ideas) or reach out for a possible collaboration to: 
- - Federico J. Gonzalez: fgonzalez@ifir-conicet.gov.ar 
+Please share your [![Ideas](https://img.shields.io/badge/ideas-github-informational)](https://github.com/FedejGon/pyCC.id/discussions/categories/ideas) or reach out for a possible collaboration to:
+ - Federico J. Gonzalez: fgonzalez@ifir-conicet.gov.ar
 
 🐞 For **Issues** or **bugs**, add new [![Issues](https://img.shields.io/badge/issue-github-informational)](https://github.com/FedejGon/pyCC.id/issues).   
-
-

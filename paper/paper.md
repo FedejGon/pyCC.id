@@ -13,7 +13,7 @@ authors:
 affiliations:
   - name: Institute of Physics Rosario. Blvd. 27 de Febrero 210 Bis, S2000EKF Rosario, Santa Fe, Argentina.
     index: 1
-date: 5 November 2025
+date: 25 November 2025
 bibliography: paper.bib
 ---
 
@@ -24,7 +24,7 @@ bibliography: paper.bib
 
 The core philosophy of `pyCC.id` is to decompose a complex dynamical system, $d\mathbf{x}/dt = \mathbf{F}(\mathbf{x}, t)$, into a user-defined model structure, $\mathbf{G}$. This structure explicitly separates measured inputs (like system state $\mathbf{x}$ and external forces) from the unknown model components.  These components are: (1) a set of unknown one-dimensional functions ($\{\mathbf{f}\}$) referred to as **Characteristic Curves** (CCs), which capture the underlying system nonlinearities (such as stiffness or damping), and (2) a set of unknown scalar parameters ($\mathbf{a}$).
 
-The package offers a flexible, multi-backend approach to identify these unknown functions and scalar parameters. Users can model the characteristic curves $\{\mathbf{f}\}$ using powerful non-biased approximators like neural networks (NN-CC, via `PyTorch` [@Paszke2019pytorch], and compatible with both CPU and GPU devices), simple polynomial basis functions (Poly-CC), or discover analytical expressions directly using symbolic regression (SymbR-CC, via `PySR` [@Cranmer2023PySR]). This framework allows the user to provide physical prior knowledge as constraints (e.g., symmetries, conservation laws), guiding the discovery process toward physically consistent models for experts in engineering, physics, and biology.
+The package offers a flexible, multi-backend approach to identify these unknown functions and scalar parameters. Users can model the characteristic curves $\{\mathbf{f}\}$ using powerful non-biased approximators like neural networks (NN-CC, via `PyTorch` [@Paszke2019pytorch], and compatible with both CPU and GPU devices), simple polynomial basis functions (Poly-CC), or discover analytical expressions directly using symbolic regression (SymbR-CC, via `PySR` [@Cranmer2023PySR]). A distinctive feature of this framework is that physical prior knowledge (e.g., symmetries, conservation laws) can be easily and directly incorporated as constraints, guiding the discovery process toward physically consistent models for experts in engineering, physics, and biology.
 
 
 # Statement of Need
@@ -45,6 +45,7 @@ Researchers in science and engineering often face a trade-off in system identifi
 
 * **Black-Box Neural ODEs**: Standard Neural ODE packages learn the entire derivative function $\mathbf{F}$ as a single, monolithic neural network. `pyCC.id` employs a "grey-box" approach, using `PyTorch` [@Paszke2019pytorch] to model only the specific, interpretable 1D components $\{\mathbf{f}\}$ within a user-defined physical structure $\mathbf{G}$, making the resulting model inherently interpretable.
 
+* **Physics-Informed Neural Networks** (PINNs)[@Raissi2019] represent a powerful approach to simulate systems (e.g., PDEs), and the incorporation of constraints into the loss function during the neural network training. While excellent for solving or parameterizing known or partially-known governing equations, they are typically less suited for the explicit discovery of the functional form of complex, coupled system components, which often remains a black-box function within the network itself.
 
 # Formalism
 

@@ -9,5 +9,8 @@ dist/
 
 .ipynb*/
 
+pycc.id.egg-info/
+
+tests/__pycache_
 
 bash_install_and_submit.sh

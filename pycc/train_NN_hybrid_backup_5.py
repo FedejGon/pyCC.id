@@ -33,34 +33,20 @@ elif hasattr(torch, "xpu") and torch.xpu.is_available():
 else:
     print("GPU not available")
     
+
 # --- 1) Define NN model class ---
 class NNModel(nn.Module):
-    def __init__(self, neurons=100, layers=3, activation='relu'):
+    def __init__(self, neurons=100, layers=3):
         super().__init__()
         self.input_layer = nn.Linear(1, neurons)
         self.hidden_layers = nn.ModuleList([nn.Linear(neurons, neurons) for _ in range(layers)])
         self.output_layer = nn.Linear(neurons, 1) 
-        self.activation_name = activation.lower()
-        
-        # Verify the function exists in torch.nn.functional
-        if not hasattr(torch.nn.functional, self.activation_name):
-            raise ValueError(f"Activation function '{activation}' not found in torch.nn.functional")
-
-    def apply_act(self, x):
-        # specific handling for rrelu which needs the training flag
-        if self.activation_name == 'rrelu':
-            return torch.nn.functional.rrelu(x, training=self.training)
-        
-        # Generic handling for relu, tanh, sigmoid, etc.
-        func = getattr(torch.nn.functional, self.activation_name)
-        return func(x)
-
     def forward(self, x):
-        x = self.apply_act(self.input_layer(x))
+        x = torch.relu(self.input_layer(x))
         for layer in self.hidden_layers:
-            x = self.apply_act(layer(x))
+            x = torch.relu(layer(x))
         return self.output_layer(x)
-                
+        
 # --- 2) Parse equation, detect f_i ---
 def parse_functions(equation_str):
     # regex to find all f\d+(\w+)
@@ -329,7 +315,6 @@ def train_NN_hybrid(df, equation_str, params=None):
     # Extract hyperparameters with defaults
     neurons = params.get('neurons', 100)
     layers = params.get('layers', 3)
-    activation_name = params.get('activation', 'relu') # <--- ADD THIS LINE
     lr = params.get('lr', 1e-3)
     scalar_lr = params.get('scalar_lr', lr)
     epochs = params.get('epochs', 1000)
@@ -375,8 +360,8 @@ def train_NN_hybrid(df, equation_str, params=None):
             param_names_set.add(p)
     param_names = sorted(param_names_set)
     # create models and scalar params
-    #models = {f_name: NNModel(neurons,layers) for f_name, _ in func_order}
-    models = {f_name: NNModel(neurons, layers, activation=activation_name) for f_name, _ in func_order} 
+    models = {f_name: NNModel(neurons,layers) for f_name, _ in func_order}
+    
     
 #    #working original    
 #    scalar_params = {name: nn.Parameter(torch.tensor(1.0, dtype=torch.float32)) for name in param_names}

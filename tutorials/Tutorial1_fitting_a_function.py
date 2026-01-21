@@ -75,7 +75,7 @@ params_SymbR = {
     'verbosity': 0
   },
   'N_fit_points': 200,
-  'max_iterations': 15,
+  'max_iterations': 5,
 }
 
 models, evals , scalar_coefs = pycc.train(
@@ -116,6 +116,7 @@ parameters_NN = {
     'neurons': 100,
     'lr': 1e-4,
     'epochs': 10000,
+    'activation':'tanh',
     'error_threshold': 1e-6,
     'extrapolation': None,
     'weight_loss_param': 1e1,

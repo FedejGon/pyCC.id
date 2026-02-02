@@ -13,13 +13,14 @@ Thus we recommend installing this package first. To install both packages use:
 
 .. code-block:: bash
 
+   pip install numpy scipy matplotlib torch
    pip install pysr
    pip install pycc.id
 
 In Google Colab notebook and Jupiter notebook, add ! at the beginning of the lines as follows 
 
 .. code-block:: bash
-
+   !pip install numpy scipy matplotlib torch
    !pip install pysr
    !pip install pycc.id
 

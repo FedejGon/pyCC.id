@@ -2,9 +2,15 @@
 ✏️ pyCC
 ======== 
 
-**pyCC** is a user-friendly Python library for data-driven equation discovery.
+**pyCC** is a user-friendly Python library for data-driven equation discovery, designed to bridge the gap between "black-box" and "white-box" modeling paradigms, while facilitating practical applications in science and engineering. 
 
-It is designed to address the critical challenges of **identifiability**, **physical consistency**, and **interpretability**. Its **modular** structure allows practitioners to benefit from **universal approximators**, such as Neural Networks, in a **transparent** way for system identification.
+The workflow of this library is designed to mirror the standard scientific process of hypothesis testing and validation. By using standard Python syntax, practitioners can define, test, and refine hypothesized model structures in a modular way that aligns with how research is conducted in practice. The library provides high-level abstractions that automatically manage the underlying optimization and backpropagation processes, enabling users to focus on validating their hypotheses and interpreting the results. 
+
+The core strength of **pyCC** lies in its **identifiability**, **physical consistency**, and **interpretability**. Its **transparent** and **modular** architecture allows practitioners to benefit from powerful approximation tools the power of **universal approximators**, such as Neural Networks, within a structured framework specifically tailored for reliable system identification
+(for more details, please refer to arXiv:2601.21720).
+
+.. 
+   Users can define the model structure using standard Python syntax, allowing for a seamless transition from a theoretical hypothesis to a trained model. By providing high-level abstractions, the library handles the underlying optimization and backpropagation, letting the researcher focus on interpreting the resulting models rather than managing the implementation details. 
 
 
 ===========
@@ -117,75 +123,80 @@ Crucially, this approach maintains **transparency**. While NNs are often regarde
    :scale: 150%
    :align: center
 
-*Figure 1: The pyCC workflow. (a-c) A model structure is proposed based on a physical hypothesis. (d-f) The chosen solver (NN, SR, etc.) optimizes the CCs to minimize error. (g) The resulting curves are inspected for physical validity. Adapted from arXiv:2601.21720*
+*Figure 1: The pyCC workflow. (a-c) A hypothesized model structure is proposed. (d-f) A representation for the CCs is selected (via NN, SymbReg, etc.), and optional constraints are defined to be minimized jointly with the data loss term. (g-j) The resulting curves are inspected for physical validity and forward simulations are performed with the obtained models. Adapted from arXiv:2601.21720*
 
 The workflow proceeds in three main stages:
 
 **1. Hypothesis & Setup (a-c)**
-   The process begins with raw experimental or synthetic data **(a)**. The practitioner selects the relevant state variables (e.g., position :math:`x`, velocity :math:`\dot{x}`, and external force :math:`F_{ext}`) **(b)**. Crucially, instead of assuming a "black box," a **Structural Skeleton** is proposed **(c)**. For example, one might hypothesize a second-order oscillator structure: :math:`\ddot{x} + f_1(\dot{x}) + f_2(x) = F_{ext}`.
+   The process begins with raw experimental or synthetic data **(a)**. The practitioner selects the relevant state variables (e.g., position :math:`x`, velocity :math:`\dot{x}`, and external force :math:`F_{ext}`) **(b)**. Crucially, instead of assuming a "black box," a **Structural Skeleton** is proposed **(c)**. For example, one might hypothesize a second-order oscillator structure: :math:`\ddot{x} + f_1(\dot{x}) + f_2(x) = F_{ext}(t)`.
 
 **2. Physics-Informed Optimization (d-f)**
    The library constructs a loss function **(d)** to fit the data. An important feature of **pyCC** is the ability to inject **prior physical knowledge** or **hypotheses** **(e)** directly into this stage.  
    
    * *Example:* If you hypothesize that the friction curve should be symmetric, you can enforce this constraint—for example, by stating that :math:`f_1(\dot{x})` must be an odd function.
    
-   The optimizer **(f)** (e.g., Adam for Neural Networks or LASSO for sparse regression) finds the functions that best satisfy both the data and these physical constraints. 
+   The optimizer **(f)** (e.g., Adam/AdamW for Neural Networks) finds the functions that best satisfy both the data and these physical constraints. 
    
    * **Inner Loop:** If the obtained loss function after optimization is not sufficiently small, it suggests the hypothesized structural skeleton cannot capture the physics. The workflow returns to **(c)** to propose a different model family.
    
 **3. Discovery & Validation (g-j)**
    The output is not just a prediction, but the **CCs** themselves **(g)**. 
 
-    * **Interpretability & The Middle Loop:** You can plot the CCs to visually inspect the physics—for a second-order example, :math:`f_1` (damping) and :math:`f_2` (stiffness).
-      * *Consistency Check:* If the learned CCs look unphysical or vary significantly across different datasets (lack of invariance), the hypothesis is rejected. This triggers the **Middle Loop**, returning to model selection **(c)**.
+    * **Interpretability & The Middle Loop:** You can plot the CCs to visually inspect the physics. For instance, for the second-order example mentioned above, :math:`f_1` represents a damping force and :math:`f_2` a stiffness force.
+      
+    * **Consistency Check:** If the learned CCs look unphysical or vary significantly across different datasets (lack of invariance), the hypothesis is rejected. This triggers the **Middle Loop**, returning to model selection **(c)**.
 
-   * **Post-Processing (h):** Optionally, these CCs can be fed into a Symbolic Regression tool to recover analytical equations (e.g., finding that :math:`f_2(x) \approx kx + \beta x^3`). **pyCC** provides a built-in interface that calls **PySR** to perform this translation automatically.
+   * **Post-Processing (h):** Optionally, these CCs can be fed into a Symbolic Regression tool to recover analytical equations (e.g., finding that :math:`f_2(x) \approx kx + \beta x^3`). **pyCC** provides a built-in interface that calls **PySR** code to perform this translation automatically.
      
    * **Validation (i-j):** Validation extends beyond verifying the shape of the CCs; the final rigorous test is provided by **forward simulations**. The model is tested against new initial conditions or external forces to ensure it generalizes to unseen data or unexplored regions of the phase space. If these simulations fail to adequately reproduce the system dynamics, the process returns to the model selection stage **(c)** (via the **Outer Loop**) to revise the structural hypothesis and/or constraints.
    
 
 ------------------------
-🔬 Application of the workflow to a second order system
+🔬 Application example to a second order system
 ------------------------
 
 
-To illustrate the practical application of the workflow, consider the task of identifying a generic nonlinear oscillator.
-
-The practitioner starts by hypothesizing a **second-order structural skeleton**:
+To illustrate the application of the workflow, consider the task of identifying a second-order witha a velocity-dependent friction force and external driving force. The practitioner starts by hypothesizing a **second-order structural skeleton**:
 
 .. math::
 
     \ddot{x} + f_1(\dot{x}) + f_2(x) = F_{ext}(t)
 
-This equation implies that the system is governed by two distinct, additive mechanisms:
-1. A **damping force** :math:`f_1` that depends solely on velocity.
-2. A **restoring force** :math:`f_2` that depends solely on position.
+This equation implies that the system is governed by two CCs: 
+i) A **damping force** :math:`f_1` that depends solely on velocity.
+ii) A **restoring force** :math:`f_2` that depends solely on position.
 
-**Figure 2** illustrates how this hypothesis is translated into the **pyCC** computational architecture (specifically for the NN-CC implementation).
+**Figure 2** illustrates how this hypothesis is translated into the **pyCC** internal architecture. In this example, we parameterize the CCs as Neural Networks (thus the method is referred to as NN-CC), but other parameterizations are available. 
+
+The package handles the structural implementation automatically, allowing the practitioner to focus solely on defining the hypothesized equation (see `Usage` tab).
 
 .. image:: _static/Fig2_model_veloc.png
    :alt: Neural Network architecture for a second-order system, showing two parallel branches summing to the output.
    :width: 80%
    :align: center
 
-*Figure 2: The architecture for a second-order system. Two independent neural networks (*:math:`\text{NN}_1` *and*:math:`\text{NN}_2` *) approximate the unknown CCs.*:math:`\text{NN}_1` *sees only velocity, and*:math:`\text{NN}_2` *sees only position. Their outputs are summed to match the hypothetized structure.*
+*Figure 2: The architecture for a second-order system. Two independent neural networks (*:math:`\text{NN}_1` *and*:math:`\text{NN}_2` *) approximate the unknown CCs.*:math:`\,\text{NN}_1` *sees only velocity, and*:math:`\,\text{NN}_2` *sees only position. Their outputs are summed to match the hypothetized structure.*
+
+
 
 **Why this architecture matters:**
 
-Instead of feeding all state variables into a single "black box" network, the architecture is **physically modularized**:
+Crucially, this architecture enforces the properties of uniqueness, interpretability, and physical consistency mentioned above. Instead of feeding all state variables into a single `black box` network, the system is physically modularized:
 
-* **Module A:** A dedicated estimator (e.g., a Neural Network) receives *only* the velocity :math:`\dot{x}` to learn the shape of :math:`f_1`.
-* **Module B:** A separate estimator receives *only* the position :math:`x` to learn the shape of :math:`f_2`.
+* Estimator for:math:`\,f_1` : A dedicated estimator (e.g., a Neural Network) receives *only* the velocity :math:`\dot{x}` to learn the shape of :math:`f_1`.
+* Estimator for:math:`\,f_2` : A separate estimator receives *only* the position :math:`x` to learn the shape of :math:`f_2`.
 
-Their outputs are summed to reconstruct the total internal force, which is then compared against the measured data to compute the loss. 
+.. 
+   Their outputs are summed to reconstruct the total internal force, which is then compared against the measured data to compute the loss. 
 
-This design strictly enforces the independence of the physical mechanisms. Even if the training data contains complex transient behaviors, the model **cannot** learn spurious cross-terms (like :math:`x\dot{x}`) because no single module has access to both variables simultaneously. This architectural constraint is what guarantees that the resulting curves remain physically consistent and interpretable.
-
-
+By strictly segregating variables, this design inherently eliminates the possibility of learning spurious cross-terms, such as :math:`x\dot{x}`, which are often incorrectly captured from noisy data.  
+Furthermore, the uniqueness of this equation structure ensures that physical laws are correctly identified even when using noisy data that might otherwise produce inconsistent results.
 
 
 
 .. 
+   Furthermore, the proposed equation structure possesses specific uniqueness properties that ensure the identifiability of the physical laws, even when the model is trained on complex noise data that would otherwise lead to non-physical or uninterpretable curves.
+   This design strictly enforces the independence of the physical mechanisms and has  uniqueness properties. Even if the training data contains complex transient behaviors, the model **cannot** learn spurious cross-terms (like :math:`x\dot{x}`) because no single module has access to both variables simultaneously. This architectural constraint is what guarantees that the resulting curves remain physically consistent and interpretable.
    The formalism assumes the overall structure of the differential equations is known (or hypothesized), but the specific forms of the nonlinear functions (the Characteristic Curves, or :math:`f_i`) are unknown.
    This approach offers three distinct advantages detailed in the underlying research:
     The core idea of pyCC is to separate the known parts of a system equations from the unknown parts. It assumes the overall structure of the differential equations is known, but the specific forms of some nonlinear functions (the Characteristic Curves, or ``fi``) and possibly some parameters (``ai``) are not.
@@ -200,49 +211,56 @@ This design strictly enforces the independence of the physical mechanisms. Even 
 📝 Formalism
 ------------------------
 
-Equation discovery (which can be considered as a subfield of system identification) is the process of finding the underlying governing equations of a system from observational data. For many physical systems, the dynamics can be described by a set of first-order ordinary differential equations (ODEs):
-
-
-
-.. math::
-
-   \frac{d\mathbf{x}}{dt} = \mathbf{F}(\mathbf{x}, t)
-
-Here, :math:`\mathbf{x}(t)` is the vector of the system's state variables (like position, velocity, etc.). The problem is that the function :math:`\mathbf{F}` can be incredibly complex and act like a "black box," making it difficult to gain physical insight.
-
-The core philosophy of **pyCC.id** is to break down this complex function :math:`\mathbf{F}` into a combination of simpler, **interpretable building blocks**. This approach mirrors how a scientist or practitioner would construct a model: by considering different functions and parameters for modeling phenomena like stiffness, damping, or external forces.
-
-We express this decomposition as:
+Equation discovery (which can be considered as a subfield of system identification) is the process of finding the underlying governing equations of a system from observational data. 
+A wide variety of systems (ranging form physical and engeneering to biological, chemical, economic and social), the dynamics can be described by a set of first-order ordinary differential equations (ODEs):
 
 .. math::
+   \frac{d\mathbf{x}}{dt} = \mathbf{F}(\mathbf{x}, t) \, ,
 
+where :math:`\mathbf{x}=\mathbf{x}(t)` is the state vector containing the dynamical variables (e.g., position, velocity). 
+The explicit time-dependence can always be considered as external driving forces :math:`\mathbf{F}_{ext}(t)` , giving the equation:
+
+.. math::
+   \frac{d\mathbf{x}}{dt} = \mathbf{F}(\mathbf{x}, \mathbf{F}_{ext}(t))
+
+Identifying the global function :math:`\mathbf{F}` directly often results in "black-box" models that often lack physical insight and lead to ambigueties under noise or other experimental conditions. **pyCC.id** avoids this by decomposing :math:`\mathbf{F}` into **interpretable building blocks**, mimicking the way a scientist builds a model by isolating phenomena like stiffness or damping beforehand. 
+ 
+.. 
+   The problem is that trying to identify the function :math:`\mathbf{F}` can be incredibly complex and act like a "black box," making it difficult to gain physical insight. The core philosophy of **pyCC.id** is to break down this complex function :math:`\mathbf{F}` into a combination of simpler, **interpretable building blocks**. This approach mirrors how a scientist or practitioner would construct a model: by considering different functions and parameters for modeling phenomena like stiffness, damping forces.      
+ 
+Mathematically, we express this decomposition as:
+
+.. math::
    \frac{d\mathbf{x}}{dt} = \mathbf{G}(\mathbf{x}, \mathbf{F}_{ext}(t); \{\mathbf{f}\}, \mathbf{a})
 
 where:
 
-* **Inputs**: :math:`\mathbf{x}` and :math:`\mathbf{F}_{ext}(t)`. These are the quantities you measure or control. :math:`\mathbf{x}` is the dynamical variable or **state** of the system; and :math:`\mathbf{F}_{ext}(t)` is a set of known, time-dependent **external forces**.
+* :math:`\mathbf{G}` represents a user-defined **model structure** or **template** that dictates how the building blocks (the functions :math:`\{\mathbf{f}\}` and parameters :math:`\mathbf{a}`) are combined to satisfy the proposed equation. 
 
-* **Model Components (Unknowns)**: The components to the right of the semicolon (`;`) are the unknowns the model seeks to find.
+* :math:`\mathbf{x}` and :math:`\mathbf{F}_{ext}(t)` are the **inputs** for the modeling step. These are the quantities that define the database used for training the models. :math:`\mathbf{x}` is the dynamical variable or **state** of the system; and :math:`\mathbf{F}_{ext}(t)` is a set of time-dependent **external forces**.
 
-* :math:`\{\mathbf{f}\}`: A set of **unknown functions**, which we call the **Characteristic Curves**. In this approach, each function in this set depends on only a *single state variable* :math:`x_i`. This makes them interpretable (for example, one function could represent a nonlinear spring force, while another one an aerodynamic drag).
+* ``;`` : The parameters to the right of the semicolon (`;`) are the unknowns to find. 
 
-* :math:`\mathbf{a}`: A vector of **unknown scalar parameters**, such as mass, damping coefficients, or other physical constants.
+* :math:`\{\mathbf{f}\}` is a set of **unknown functions** to be discovered (CCs). Each function depends on only a *single* state variable :math:`x_i`. 
 
-* :math:`\mathbf{G}`: A proposed **model structure**. It defines the template that dictates how the building blocks (the functions :math:`\{\mathbf{f}\}` and parameters :math:`\mathbf{a}`) are combined with the state :math:`\mathbf{x}` to compute the system evolution. This structure can be an arbitrary user-defined function.
+* :math:`\mathbf{a}`: A set of **unknown scalar parameters** to be discovered, such as mass or other physical coefficients.
 
-The goal of **pyCC** is to discover the optimal functions :math:`\{\mathbf{f}\}` and parameters :math:`\mathbf{a}` that best fit the observed data based on a predefined model structure :math:`\mathbf{G}`.
+
+The goal of **pyCC** is to discover the optimal functions :math:`\{\mathbf{f}\}` and parameters :math:`\mathbf{a}` that best fit the observed data based on a predefined model structure :math:`\mathbf{G}`. 
+
+
 
 ------------
 ✨ Key Features
 ------------
 
 * **Interpretable Models**: Decomposes complex dynamics into simpler, physically meaningful functions.
-* **Flexible Function Parametrization**: Supports various techniques to model the characteristic curves, including:
+* **Flexible Function Parametrization**: Supports various techniques to model the CCs, including:
 
-    * Neural Networks (NN-CC) — Compatible with multicore CPUs and GPUs from both NVIDIA (CUDA) and Intel (XPU) architectures.
-    * Polynomials (Poly-CC) — Using polynomial basis functions for comparison.
-    * Symbolic Regression (SymbR-CC) — Parallelized for multicore CPU execution, using the internal parallelization features of PySR.
+    * **Neural networks (NN-CC)** : Utilizes NNs to parameterize the CCs; compatible with multicore CPUs and GPUs from both NVIDIA (CUDA) and Intel (XPU) architectures via PyTorch.
+    * **Polynomials (Poly-CC)** : Utilizes polynomial basis functions to parameterize the CCs. 
+    * **Symbolic regression (SymbR-CC)** : Utilizes symbolic regreesion to parameterize the CCs; parallelized for multicore CPU execution using the internal parallelization features of the PySR package.
 
-* **Physics-Informed Discovery**: Incorporate known physical constraints, such as symmetries (e.g., even and odd functions) or conservation laws, to guide the discovery process and ensure robust, physically consistent models.
-* **Built-in Simulator**: Includes a user-friendly module for simulating ODEs , fully compatible with all identification methodologies. 
-* **User-Focused Design**: Offers an API that is both easy to use for standard problems and highly customizable for advanced research.
+* **Physics-informed discovery**: Incorporate known physical constraints, such as symmetries (e.g., even and odd functions) or aditional conservation laws, to guide the discovery process and ensure robust, physically consistent models. 
+* **Interface with standard simulators**: Includes an interface with ``scipy.integrate.solve_ivp``, which is is the standard Python tool within the SciPy library used to numerically solve initial value problems (IVPs) for ordinary differential equations (ODEs). This module is fully compatible with all identification methodologies. 
+* **User-focused design**: Offers an API that is both easy to use and highly customizable for advanced research. 

@@ -2,11 +2,14 @@ from setuptools import setup, find_packages
 
 setup(
     name='pycc.id',
-    version='0.5.5',
+    version='0.5.6',
     packages=find_packages(),
     install_requires=[
         'torch',
-        'numpy'
+        'numpy',
+        'scipy', 
+        'matplotlib',
+        'pysr',
     ],
     author='Federico J. Gonzalez',
     description='Library to system identification using CC',

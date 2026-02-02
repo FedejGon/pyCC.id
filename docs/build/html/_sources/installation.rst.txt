@@ -16,7 +16,7 @@ Thus we recommend installing this package first. To install both packages use:
    pip install pysr
    pip install pycc.id
 
-In Google Colab notebook and Jupiter notebook, add ! at the beginning of the lines
+In Google Colab notebook and Jupiter notebook, add ! at the beginning of the lines as follows 
 
 .. code-block:: bash
 
@@ -25,9 +25,9 @@ In Google Colab notebook and Jupiter notebook, add ! at the beginning of the lin
 
 .. note::
 
-   This code and its documentation are continuously being improved with new features.
-   If you encounter any problems, it might be because you're using an older version of pyCC.id.
-   In that case, update the code using: (sometimes you need to run it two times)
+   This code and its documentation in this stage are continuously being improved with new features.
+   If you encounter any problems, it could be because you're using an older version of pyCC.id.
+   In that case, we advise to upgrade the code with the command: (sometimes you need to run it two times)
 
    .. code-block:: bash
 

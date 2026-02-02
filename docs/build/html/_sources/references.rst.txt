@@ -1,21 +1,22 @@
 ==========
-References
+How to cite this package
 ==========
  
-How to Cite
+References
 -----------
 
-In case of using this pycc package, please cite [1] (Gonzalez2025pycc). 
+In case of using this pycc package, please cite [1] (Gonzalez2026pycc). 
+
 Furthermore:
-  * If using the **NN-CC** method, additionally cite [2] and [3] (Gonzalez2025eaai,Gonzalez2025nody)
+  * If using the **NN-CC** method, please cite [2] and [3] (Gonzalez2026,Gonzalez2025)
 
-  * If using the **Poly-CC** method, additionally cite [4] and [5] (Gonzalez2023,Gonzalez2024)
+  * If using the **Poly-CC** method, please cite [4] and [5] (Gonzalez2023,Gonzalez2024)
 
-  * If using **post-SR** and/or **SymbReg-CC** methods, additionally cite [2] and [6] (Gonzalez2025eaai,cranmer2023)
+  * If using **post-SR** and/or **SymbReg-CC** methods, please cite [2] and [6] (Gonzalez2026,Cranmer2023)
 
 [1] Gonzalez, F. J. Arxiv joss arxiv (2025)
 
-[2] Gonzalez, F. J. `Symmetry-guided neural network system identification using interpretable characteristic curves and post-symbolic regression`. Arxiv eaai (2025)
+[2] Gonzalez, F. J. "`Integrating prior knowledge in equation discovery: Interpretable symmetry-informed neural networks and symbolic regression via characteristic curves <https://doi.org/10.48550/arXiv.2601.21720>`_." arXiv preprint arXiv:2601.21720 (2026)
 
 [3] Gonzalez, F. J. and Lara, L. P. "`Interpretable neural network system identification method for two families of second-order systems based on characteristic curves <https://doi.org/10.1007/s11071-025-11744-6>`_." Nonlinear Dyn. (2025)
 
@@ -33,19 +34,29 @@ BibTeX
 
 .. code-block:: bibtex
 
-   @article{Gonzalez2025nody,
-     title = {Interpretable neural network system identification method for two families of second-order systems based on characteristic curves},
-     author = {Gonzalez,  Federico J. and  Lara, Luis P. },
-     doi = {10.1007/s11071-025-11744-6},
-     volume = {},
-     issn = {},
-     number = {},
+   @article{Gonzalez2026,
+     title={Integrating prior knowledge in equation discovery: Interpretable symmetry-informed neural networks and symbolic regression via characteristic curves},  
+     author={Gonzalez, Federico J.},
+     journal={arXiv preprint arXiv:2601.21720},      
+     year={2026},
+     eprint={2601.21720},
+     url={https://arxiv.org/abs/2601.21720}, 
+   }
+
+   @article{Gonzalez2025,
+     title = {{Interpretable neural network system identification method for two families of second-order systems based on characteristic curves}},
+     author = {Gonzalez,  Federico J. and Lara,  Luis P.},
+     volume = {113},
+     ISSN = {1573-269X},
+     DOI = {10.1007/s11071-025-11744-6},
+     number = {24},
      journal = {Nonlinear Dyn.},
      publisher = {Springer Science and Business Media LLC},
      year = {2025},
      month = sep,
-     pages = {}
+     pages = {33063–33086}
    }
+
 
    @article{Gonzalez2023,
      title     = {Determination of the characteristic curves of a nonlinear first order system from Fourier analysis},
@@ -75,7 +86,7 @@ BibTeX
      pages = {16167–16197}
    }
    
-   @article{Cranmer2023PySR,
+   @article{Cranmer2023,
      title={Interpretable Machine Learning for Science with PySR and SymbolicRegression.jl},  
      author={Miles Cranmer},
      journal={arXiv preprint arXiv:2305.01582},      

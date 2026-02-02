@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🎯 Why pyCC &mdash; pyCC.id 0.1.0 documentation</title>
+  <title>✏️ pyCC &mdash; pyCC.id 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
@@ -45,8 +45,14 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">User guide:</span></p>
 <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">🎯 Why pyCC</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#the-pycc-approach-a-hybrid-framework">💡 The pyCC Approach: A Hybrid Framework</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">✏️ pyCC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#why-pycc">🎯 Why pyCC</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#i-identifiability">i) Identifiability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#ii-physical-consistency">ii) Physical consistency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#iii-interpretability">iii) Interpretability</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#iv-modularity-universality-and-transparency">iv) Modularity, Universality and Transparency</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-pycc-approach-a-schematic-workflow">💡 The pyCC approach: A schematic workflow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#application-of-the-workflow-to-a-second-order-system">🔬 Application of the workflow to a second order system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#formalism">📝 Formalism</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#key-features">✨ Key Features</a></li>
 </ul>
@@ -62,9 +68,10 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Example1_training_function.html">Example 1: 1D function</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Example2_2nd_order_EDO.html">Example 2: 2nd-order EDO</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Example3_3rd_order_EDO.html">Example 3: 3rd-order EDO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example1_training_function.html">Example 1: Function y=f(x)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example2_2nd_order_ODE.html">Example 2: 2nd-order ODE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example3_3rd_order_ODE.html">Example 3: 3rd-order ODE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example4_1st_order_ODE_denominator.html">Example 4: 1st-order ODE with f in denominator</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
 <ul>
@@ -78,7 +85,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">References:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">How to cite this package</a></li>
 </ul>
 
         </div>
@@ -95,7 +102,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">🎯 Why pyCC</li>
+      <li class="breadcrumb-item active">✏️ pyCC</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/why_pycc.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -105,37 +112,103 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="why-pycc">
+  <section id="pycc">
+<h1>✏️ pyCC<a class="headerlink" href="#pycc" title="Link to this heading"></a></h1>
+<p><strong>pyCC</strong> is a user-friendly Python library for data-driven equation discovery.</p>
+<p>It is designed to address the critical challenges of <strong>identifiability</strong>, <strong>physical consistency</strong>, and <strong>interpretability</strong>. Its <strong>modular</strong> structure allows practitioners to benefit from <strong>universal approximators</strong>, such as Neural Networks, in a <strong>transparent</strong> way for system identification.</p>
+</section>
+<section id="why-pycc">
 <h1>🎯 Why pyCC<a class="headerlink" href="#why-pycc" title="Link to this heading"></a></h1>
-<p><strong>pyCC.id</strong> is a Python library for discovering interpretable, nonlinear dynamical systems from data. It is built on the concept of <strong>Characteristic Curves (CCs)</strong> and is designed to be highly customizable and user-friendly.</p>
-<p>The core problem <strong>pyCC</strong> aims to solve is a difficult choice often forced by other system identification tools:</p>
-<ol class="arabic simple">
-<li><p><strong>Black-Box Models (e.g., Neural ODEs):</strong>
-These methods are incredibly powerful and can fit complex dynamics with high accuracy. However, their internal workings are opaque, providing little to no physical insight. The result is a model that can <em>predict</em> but cannot <em>explain</em>.</p></li>
-<li><p><strong>Interpretable 'Library' Methods (e.g., SINDy, SR):</strong></p>
+<section id="i-identifiability">
+<h2>i) Identifiability<a class="headerlink" href="#i-identifiability" title="Link to this heading"></a></h2>
+<p>When inferring dynamical equations from real experiments (often with finite sampling or noisy data) multiple distinct mathematical models can fit the observations with comparable accuracy. This leads to <strong>ambiguity in model selection</strong>, also referred to as the <strong>identifiability challenge</strong>. This issue is intrinsically connected to the <strong>ill-posed nature of the inverse problem</strong>.</p>
+<p><strong>pyCC</strong> addresses this issue by injecting <strong>prior physical knowledge</strong> or <strong>hypotheses</strong> into the discovery process by defining a structural ‘skeleton’.</p>
+<p>The choice of the structural skeleton directly affects identifiability: some equation forms admit unique decompositions, whereas others may lead to non-identifiable or ambiguous representations.  When the hypothetized model structure possess uniqueness properties, <strong>pyCC</strong> provides a formal framework to assess whether the proposed equation is consistent with the data. This enables the rigorous validation or elimination of hypothesized models, thereby shedding light to the identifiability challenge.</p>
+</section>
+<section id="ii-physical-consistency">
+<h2>ii) Physical consistency<a class="headerlink" href="#ii-physical-consistency" title="Link to this heading"></a></h2>
+<p>To define physically motivated model structures, the formalism of <strong>Characteristic Curves (CCs)</strong> is ideal.</p>
+<p>This formalism is based on a decomposition of high-dimensional, multivalued dynamics into modular, <strong>univariate functions</strong> referred to as CCs. In this view, each CC represents a constitutive relation of an independent physical element (e.g., a specific spring or a specific damper).</p>
+<p>By enforcing this decomposition, we define model structures that, apart from having uniqueness properties, yield functions that possess inherent physical meaning. This assures <strong>physical consistency</strong>: the learned model is not just a curve fit, but a collection of distinct physical mechanisms.</p>
+</section>
+<section id="iii-interpretability">
+<h2>iii) Interpretability<a class="headerlink" href="#iii-interpretability" title="Link to this heading"></a></h2>
+<p>The use of CCs allows the practitioner to ‘visualize’ the model simply by plotting the univariate curves. This offers a visual tool that significantly enhances <strong>interpretability</strong>.
+This has a simple but profound implication: the objective shifts from finding precise parameter values that represent the CCs to finding the <strong>shape</strong> of the functions themselves.</p>
 <ul class="simple">
-<li><p>SINDy (Sparse Identification of Nonlinear Dynamics) is highly interpretable and computationally efficient. Its primary modeling assumption is that the dynamics can be sparsely represented in a <strong>pre-defined library of candidate functions</strong> (e.g., polynomials, trigonometric functions). This is highly effective if the true terms are in the library, but it can struggle if the underlying function is not (or cannot be well-approximated by) a sparse combination of these candidates.</p></li>
-<li><p>Pure Symbolic Regression (SR) is also highly interpretable and is generally more flexible than SINDy. It builds functions from a library of basic operators (e.g., +, *, sin, cos). While this allows it to discover analytical expressions, applying it directly to a full, high-dimensional, and often noisy differential equation, can be computationally challenging.</p></li>
-<li><p>Additionally, both methods can be sensitive to hyperparameter tuning. Different settings can easily lead to different resulting models.</p></li>
+<li><p><strong>Traditional approach:</strong> “Find the coefficients <span class="math notranslate nohighlight">\(k\)</span> and <span class="math notranslate nohighlight">\(c\)</span> assuming linear dynamics.”</p></li>
+<li><p><strong>pyCC approach:</strong> “Find the <em>shapes</em> of the stiffness and damping curves.”</p></li>
 </ul>
-</li>
-</ol>
-<p><strong>pyCC</strong> is designed to fill the 'gap' between these approaches. It is designed to find models that are both accurate and interpretable by not forcing this 'all-or-nothing' choice.</p>
-<section id="the-pycc-approach-a-hybrid-framework">
-<h2>💡 The pyCC Approach: A Hybrid Framework<a class="headerlink" href="#the-pycc-approach-a-hybrid-framework" title="Link to this heading"></a></h2>
-<p>The core idea of pyCC is to separate the known parts of a system equations from the unknown parts. It assumes the overall structure of the differential equations is known, but the specific forms of some nonlinear functions (the Characteristic Curves, or <code class="docutils literal notranslate"><span class="pre">fi</span></code>) and possibly some parameters (<code class="docutils literal notranslate"><span class="pre">ai</span></code>) are not.</p>
-<p><strong>pyCC</strong> solves this by providing a flexible, multi-stage framework:</p>
+<p>If the stiffness curve comes out looking like a line, we know the system is linear. If it looks like a parabola, we know it is nonlinear. This visual insight allows for qualitative discovery before quantitative fitting.</p>
+</section>
+<section id="iv-modularity-universality-and-transparency">
+<h2>iv) Modularity, Universality and Transparency<a class="headerlink" href="#iv-modularity-universality-and-transparency" title="Link to this heading"></a></h2>
+<p>Since <strong>pyCC</strong> prioritizes the <strong>shape</strong> of the constitutive relations over their specific model coefficients, the specific <strong>parametric form</strong> of the curves (e.g., whether they are polynomial, exponential, or trigonometric) does not need to be postulated <em>a priori</em>. This flexibility unlocks a highly <strong>modular</strong> approach that can be implemented using different modeling paradigms.</p>
+<p>For example, we can parameterize the CCs using <strong>universal approximators</strong>, such as Neural Networks (NNs). This approach (refered to as NN-CC) is powerful because it allows the discovery of physical laws without bias: the model can adapt to any continuous shape and also discontinouous?, regardless of its complexity, provided that … enough layers neurons?</p>
+<p>Crucially, this approach maintains <strong>transparency</strong>. While NNs are often regarded as opaque “black boxes” in high-dimensional tasks, within <strong>pyCC</strong> they are restricted to learning <strong>univariate</strong> functions. A “black box” with a single input and single output is effectively transparent: it is simply a curve that can be plotted and visually inspected to interpret the underlying physics.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>The Core Philosophy:</strong> Instead of asking “What is the global equation?”, pyCC asks “Given this physical structure (e.g., a damped oscillator), what are the specific shapes of the stiffness and damping curves?” These curves are the constitutive relations of the system; once they are identified, the identification problem is effectively solved.</p>
+</div>
+</section>
+<section id="the-pycc-approach-a-schematic-workflow">
+<h2>💡 The pyCC approach: A schematic workflow<a class="headerlink" href="#the-pycc-approach-a-schematic-workflow" title="Link to this heading"></a></h2>
+<p><strong>pyCC</strong> frames discovery as a hypothesis-testing loop. The practitioner proposes a structure (e.g., “Is this a friction-based oscillator?”), and the library determines the optimal shapes of the internal functions in order to decide if the hypothetized structure is coherent with the data or should be modified.</p>
+<a class="reference internal image-reference" href="_images/Fig1_schematic.png"><img alt="description of the image for accessibility" class="align-center" src="_images/Fig1_schematic.png" style="width: 750.0px; height: 375.0px;" />
+</a>
+<p><em>Figure 1: The pyCC workflow. (a-c) A model structure is proposed based on a physical hypothesis. (d-f) The chosen solver (NN, SR, etc.) optimizes the CCs to minimize error. (g) The resulting curves are inspected for physical validity. Adapted from arXiv:2601.21720</em></p>
+<p>The workflow proceeds in three main stages:</p>
+<dl>
+<dt><strong>1. Hypothesis &amp; Setup (a-c)</strong></dt><dd><p>The process begins with raw experimental or synthetic data <strong>(a)</strong>. The practitioner selects the relevant state variables (e.g., position <span class="math notranslate nohighlight">\(x\)</span>, velocity <span class="math notranslate nohighlight">\(\dot{x}\)</span>, and external force <span class="math notranslate nohighlight">\(F_{ext}\)</span>) <strong>(b)</strong>. Crucially, instead of assuming a “black box,” a <strong>Structural Skeleton</strong> is proposed <strong>(c)</strong>. For example, one might hypothesize a second-order oscillator structure: <span class="math notranslate nohighlight">\(\ddot{x} + f_1(\dot{x}) + f_2(x) = F_{ext}\)</span>.</p>
+</dd>
+<dt><strong>2. Physics-Informed Optimization (d-f)</strong></dt><dd><p>The library constructs a loss function <strong>(d)</strong> to fit the data. An important feature of <strong>pyCC</strong> is the ability to inject <strong>prior physical knowledge</strong> or <strong>hypotheses</strong> <strong>(e)</strong> directly into this stage.</p>
+<ul class="simple">
+<li><p><em>Example:</em> If you hypothesize that the friction curve should be symmetric, you can enforce this constraint—for example, by stating that <span class="math notranslate nohighlight">\(f_1(\dot{x})\)</span> must be an odd function.</p></li>
+</ul>
+<p>The optimizer <strong>(f)</strong> (e.g., Adam for Neural Networks or LASSO for sparse regression) finds the functions that best satisfy both the data and these physical constraints.</p>
+<ul class="simple">
+<li><p><strong>Inner Loop:</strong> If the obtained loss function after optimization is not sufficiently small, it suggests the hypothesized structural skeleton cannot capture the physics. The workflow returns to <strong>(c)</strong> to propose a different model family.</p></li>
+</ul>
+</dd>
+<dt><strong>3. Discovery &amp; Validation (g-j)</strong></dt><dd><p>The output is not just a prediction, but the <strong>CCs</strong> themselves <strong>(g)</strong>.</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>Discover the Dynamics (No Bias): Instead of guessing a library of functions, you can first use a powerful, non-biased approximator. The method=’NN’ uses a neural network to learn the numerical shape of these unknown <code class="docutils literal notranslate"><span class="pre">fi</span></code> functions directly from the data.</p></li>
-<li><p>Enforce Physical Knowledge: pyCC allows you to add crucial domain knowledge. The constraints parameter (e.g., ‘f1 odd’, ‘f2(0)=0’) forces the model to obey physical constraints, dramatically reducing the search space and leading to more realistic solutions. Also, the possibility of adding multiple equations to the total loss functions offers a easy way to add physical quantities that are conserved throughout the motion (constants of motion).</p></li>
-<li><p>Achieve Interpretability (Post-processing): <strong>pyCC</strong> library offers a easy form to find interpretable analytical expressions from the functions <code class="docutils literal notranslate"><span class="pre">fi</span></code> identified, (e.g. from the ‘NN’ fit).</p></li>
+<li><p><strong>Interpretability &amp; The Middle Loop:</strong> You can plot the CCs to visually inspect the physics—for a second-order example, <span class="math notranslate nohighlight">\(f_1\)</span> (damping) and <span class="math notranslate nohighlight">\(f_2\)</span> (stiffness).
+* <em>Consistency Check:</em> If the learned CCs look unphysical or vary significantly across different datasets (lack of invariance), the hypothesis is rejected. This triggers the <strong>Middle Loop</strong>, returning to model selection <strong>(c)</strong>.</p></li>
 </ul>
 </div></blockquote>
+<ul class="simple">
+<li><p><strong>Post-Processing (h):</strong> Optionally, these CCs can be fed into a Symbolic Regression tool to recover analytical equations (e.g., finding that <span class="math notranslate nohighlight">\(f_2(x) \approx kx + \beta x^3\)</span>). <strong>pyCC</strong> provides a built-in interface that calls <strong>PySR</strong> to perform this translation automatically.</p></li>
+<li><p><strong>Validation (i-j):</strong> Validation extends beyond verifying the shape of the CCs; the final rigorous test is provided by <strong>forward simulations</strong>. The model is tested against new initial conditions or external forces to ensure it generalizes to unseen data or unexplored regions of the phase space. If these simulations fail to adequately reproduce the system dynamics, the process returns to the model selection stage <strong>(c)</strong> (via the <strong>Outer Loop</strong>) to revise the structural hypothesis and/or constraints.</p></li>
+</ul>
+</dd>
+</dl>
+</section>
+<section id="application-of-the-workflow-to-a-second-order-system">
+<h2>🔬 Application of the workflow to a second order system<a class="headerlink" href="#application-of-the-workflow-to-a-second-order-system" title="Link to this heading"></a></h2>
+<p>To illustrate the practical application of the workflow, consider the task of identifying a generic nonlinear oscillator.</p>
+<p>The practitioner starts by hypothesizing a <strong>second-order structural skeleton</strong>:</p>
+<div class="math notranslate nohighlight">
+\[\ddot{x} + f_1(\dot{x}) + f_2(x) = F_{ext}(t)\]</div>
+<p>This equation implies that the system is governed by two distinct, additive mechanisms:
+1. A <strong>damping force</strong> <span class="math notranslate nohighlight">\(f_1\)</span> that depends solely on velocity.
+2. A <strong>restoring force</strong> <span class="math notranslate nohighlight">\(f_2\)</span> that depends solely on position.</p>
+<p><strong>Figure 2</strong> illustrates how this hypothesis is translated into the <strong>pyCC</strong> computational architecture (specifically for the NN-CC implementation).</p>
+<a class="reference internal image-reference" href="_images/Fig2_model_veloc.png"><img alt="Neural Network architecture for a second-order system, showing two parallel branches summing to the output." class="align-center" src="_images/Fig2_model_veloc.png" style="width: 80%;" />
+</a>
+<p><em>Figure 2: The architecture for a second-order system. Two independent neural networks (</em><span class="math notranslate nohighlight">\(\text{NN}_1\)</span> <em>and</em><span class="math notranslate nohighlight">\(\text{NN}_2\)</span> <em>) approximate the unknown CCs.</em><span class="math notranslate nohighlight">\(\text{NN}_1\)</span> <em>sees only velocity, and</em><span class="math notranslate nohighlight">\(\text{NN}_2\)</span> <em>sees only position. Their outputs are summed to match the hypothetized structure.</em></p>
+<p><strong>Why this architecture matters:</strong></p>
+<p>Instead of feeding all state variables into a single “black box” network, the architecture is <strong>physically modularized</strong>:</p>
+<ul class="simple">
+<li><p><strong>Module A:</strong> A dedicated estimator (e.g., a Neural Network) receives <em>only</em> the velocity <span class="math notranslate nohighlight">\(\dot{x}\)</span> to learn the shape of <span class="math notranslate nohighlight">\(f_1\)</span>.</p></li>
+<li><p><strong>Module B:</strong> A separate estimator receives <em>only</em> the position <span class="math notranslate nohighlight">\(x\)</span> to learn the shape of <span class="math notranslate nohighlight">\(f_2\)</span>.</p></li>
+</ul>
+<p>Their outputs are summed to reconstruct the total internal force, which is then compared against the measured data to compute the loss.</p>
+<p>This design strictly enforces the independence of the physical mechanisms. Even if the training data contains complex transient behaviors, the model <strong>cannot</strong> learn spurious cross-terms (like <span class="math notranslate nohighlight">\(x\dot{x}\)</span>) because no single module has access to both variables simultaneously. This architectural constraint is what guarantees that the resulting curves remain physically consistent and interpretable.</p>
 </section>
 <section id="formalism">
 <h2>📝 Formalism<a class="headerlink" href="#formalism" title="Link to this heading"></a></h2>
-<p>System identification (also known as equation discovery) is the process of finding the underlying governing equations of a system from observational data. 🔬 For many physical systems, the dynamics can be described by a set of first-order ordinary differential equations (ODEs):</p>
+<p>Equation discovery (which can be considered as a subfield of system identification) is the process of finding the underlying governing equations of a system from observational data. For many physical systems, the dynamics can be described by a set of first-order ordinary differential equations (ODEs):</p>
 <div class="math notranslate nohighlight">
 \[\frac{d\mathbf{x}}{dt} = \mathbf{F}(\mathbf{x}, t)\]</div>
 <p>Here, <span class="math notranslate nohighlight">\(\mathbf{x}(t)\)</span> is the vector of the system’s state variables (like position, velocity, etc.). The problem is that the function <span class="math notranslate nohighlight">\(\mathbf{F}\)</span> can be incredibly complex and act like a “black box,” making it difficult to gain physical insight.</p>
@@ -167,7 +240,7 @@ These methods are incredibly powerful and can fit complex dynamics with high acc
 </div></blockquote>
 </li>
 <li><p><strong>Physics-Informed Discovery</strong>: Incorporate known physical constraints, such as symmetries (e.g., even and odd functions) or conservation laws, to guide the discovery process and ensure robust, physically consistent models.</p></li>
-<li><p><strong>Built-in Simulator</strong>: Includes a module for simulating higher-order and coupled ODEs, fully compatible with all identification methodologies.</p></li>
+<li><p><strong>Built-in Simulator</strong>: Includes a user-friendly module for simulating ODEs , fully compatible with all identification methodologies.</p></li>
 <li><p><strong>User-Focused Design</strong>: Offers an API that is both easy to use for standard problems and highly customizable for advanced research.</p></li>
 </ul>
 </section>

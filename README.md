@@ -86,7 +86,7 @@ $$
 This equation implies two CCs: a **damping force** $f_1(\dot{x})$ and a **restoring force** $f_2(x)$.
 
 <div align="center">
-<img src="_static/Fig2_model_veloc.png" width="70%" alt="Neural Network architecture for a second-order system">
+<img src="docs/source/_static/Fig2_model_veloc.png" width="70%" alt="Neural Network architecture for a second-order system">
 
 *Figure 2: The architecture for a second-order system. Two independent neural networks ($\text{NN}_1$ and $\text{NN}_2$) approximate the unknown CCs. $\text{NN}_1$ sees only velocity, and $\text{NN}_2$ sees only position.*
 </div>

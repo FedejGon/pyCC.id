@@ -61,14 +61,14 @@ The goal of **pyCC** is to discover the optimal functions $\\{\mathbf{f}\\}$ and
 <div align="center">
 <img src="docs/source/_static/Fig1_schematic.png" width="80%" alt="Schematic workflow of the CC-based formalism">
 
-*Figure 1: The pyCC workflow. (a-c) A hypothesized model structure is proposed. (d-f) A representation for the CCs is selected (via NN, SymbReg, etc.), and optional constraints are defined. (g-j) The resulting curves are inspected for physical validity and forward simulations are performed.*
+*Figure 1: The pyCC workflow. (a-c) A hypothesized model structure is proposed. (d-f) A representation for the CCs is selected (via NN, SymbReg, etc.), and optional constraints are defined. (g-j) The resulting curves are inspected for physical validity and forward simulations are performed. Edited from arXiv:2601.21720*
 </div>
 
 The workflow proceeds in three main stages:
 
 1.  **Hypothesis & Setup:** Select state variables and propose a **Structural Skeleton** (e.g., $\ddot{x} + f_1(\dot{x}) + f_2(x) = F_{ext}$).
-2.  **Physics-Informed Optimization:** The library constructs a loss function to fit the data, enforcing **prior physical knowledge** (e.g., symmetry constraints like "$f_1$ must be odd").
-3.  **Discovery & Validation:** The output is the **Characteristic Curves** themselves. These can be visually inspected for physical meaning, converted to analytic equations via Symbolic Regression, and validated via forward simulations.
+2.  **Physics-Informed Optimization:** The library constructs a loss function to fit the data, enforcing **prior physical knowledge** (e.g., symmetry constraints like \"$f_1$ must be odd\").
+3.  **Discovery & Validation:** The outputs are the **Characteristic Curves** themselves. These can be visually inspected for physical meaning, converted to analytic equations via Symbolic Regression, and validated via forward simulations. 
 
 ---
 

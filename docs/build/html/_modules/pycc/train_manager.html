@@ -39,12 +39,39 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../why_pycc.html">Why pyCC</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../selected_functions.html">Selected functions</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../selected_functions.html#pycc-train">pycc.train()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../selected_functions.html#pycc-simulate">pycc.simulate()</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
+              <p class="caption" role="heading"><span class="caption-text">User guide:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../why_pycc.html">✏️ pyCC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../why_pycc.html#why-pycc">🎯 Why pyCC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Functions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../functions_train.html">pycc.train()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions_simulate.html">pycc.simulate()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions_postprocessing.html">pycc.post_processing()</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Example1_training_function.html">Example 1: Function y=f(x)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Example2_2nd_order_ODE.html">Example 2: 2nd-order ODE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Example3_3rd_order_ODE.html">Example 3: 3rd-order ODE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Example4_1st_order_ODE_denominator.html">Example 4: 1st-order ODE with f in denominator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../practical_tips.html">Practical Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../practical_tips.html#workflow-1">Workflow 1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../practical_tips.html#workflow-2">Workflow 2</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../links.html">Community &amp; Useful Links</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">How to cite this package</a></li>
 </ul>
 
         </div>
@@ -80,10 +107,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.train_GP</span><span class="w"> </span><span class="kn">import</span> <span class="n">train_GP</span>
 
 <div class="viewcode-block" id="train">
-<a class="viewcode-back" href="../../selected_functions.html#pycc.train">[docs]</a>
+<a class="viewcode-back" href="../../functions_train.html#pycc.train">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">equations</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;NN&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Trains a model to identify the system dynamics from data.</span>
+<span class="sd">    Trains a model to identify system dynamics based on the provided data structure </span>
+<span class="sd">    (df) and equation structure (equations).</span>
 
 <span class="sd">    This function acts as a dispatcher, selecting the appropriate training</span>
 <span class="sd">    method based on the `method` argument. It passes the data, equations,</span>
@@ -118,7 +146,7 @@
 <span class="sd">        * **&#39;lr&#39;** (*float*): Learning rate for the optimizer. Default: 1e-3.</span>
 <span class="sd">        * **&#39;epochs&#39;** (*int*): Number of training epochs. Default: 1000.</span>
 <span class="sd">        * **&#39;device&#39;** (*str*): The computing device (&#39;cpu&#39;, &#39;cuda&#39;, &#39;xpu&#39;, &#39;automatic&#39;). Default: &#39;automatic&#39;.</span>
-<span class="sd">        * ... and other ..</span>
+<span class="sd">        * ... and others (see below) ..</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <span class="c1">#    .. seealso::</span>

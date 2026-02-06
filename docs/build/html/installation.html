@@ -49,7 +49,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#installation-with-pip-recommended">Installation with pip (Recommended)</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#installation-for-users">Installation for users</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#installation-for-developers-from-source">Installation for developers (from source)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#installation-from-source-for-developers">Installation from source (for developers)</a></li>
 </ul>
 </li>
 </ul>
@@ -116,32 +116,38 @@
 <h3>Installation for users<a class="headerlink" href="#installation-for-users" title="Link to this heading"></a></h3>
 <p>Some features in pyCC include using the Symbolic Regression (pySR) package.
 Thus we recommend installing this package first. To install both packages use:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>numpy<span class="w"> </span>scipy<span class="w"> </span>matplotlib<span class="w"> </span>torch
-pip<span class="w"> </span>install<span class="w"> </span>pysr
-pip<span class="w"> </span>install<span class="w"> </span>pycc.id
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pycc.id
 </pre></div>
 </div>
-<p>In Google Colab notebook and Jupiter notebook, add ! at the beginning of the lines as follows</p>
-<div class="admonition note">
-<p class="admonition-title">Note</p>
+<p>In Google Colab or Jupyter notebook, add ! at the beginning of the line as follows:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>!pip<span class="w"> </span>install<span class="w"> </span>pycc.id
+</pre></div>
+</div>
+<div class="admonition hint">
+<p class="admonition-title">Hint</p>
 <p>This code and its documentation in this stage are continuously being improved with new features.
-If you encounter any problems, it could be because you’re using an older version of pyCC.id.
+If you encounter any problems, it could be because you’re using an older version of pyCC.
 In that case, we advise to upgrade the code with the command: (sometimes you need to run it two times)</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>--upgrade<span class="w"> </span>pycc.id
-<span class="c1">#for colab and jupiter, add ! at the beginning</span>
+<span class="c1">#for colab and jupyter, add ! at the beginning</span>
 </pre></div>
 </div>
 </div>
-</section>
-<section id="installation-for-developers-from-source">
-<h3>Installation for developers (from source)<a class="headerlink" href="#installation-for-developers-from-source" title="Link to this heading"></a></h3>
-<p>Download or clone the repository and install with:</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+<p>Once installed, the pycc library can be imported with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>import<span class="w"> </span>pycc
 </pre></div>
 </div>
+<p>See the <cite>Usage</cite> and <cite>Examples</cite> tabs for examples and more information.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><strong>Initial import delay</strong>: The first time you run <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pycc</span></code>, it may take ∼3 minutes to set up dependencies. Subsequent imports will be fast.</p>
+<p><strong>First-time import</strong>: The first time you run <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pycc</span></code>, it may take ∼3 minutes to set up dependencies (including <code class="docutils literal notranslate"><span class="pre">torch</span></code>, <code class="docutils literal notranslate"><span class="pre">numpy</span></code>, <code class="docutils literal notranslate"><span class="pre">scipy</span></code>, <code class="docutils literal notranslate"><span class="pre">matplotlib</span></code>, and <code class="docutils literal notranslate"><span class="pre">pysr</span></code>). Subsequent imports will be nearly instantaneous.</p>
+</div>
+</section>
+<section id="installation-from-source-for-developers">
+<h3>Installation from source (for developers)<a class="headerlink" href="#installation-from-source-for-developers" title="Link to this heading"></a></h3>
+<p>Download or clone the repository and install locally with:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>-e<span class="w"> </span>.
+</pre></div>
 </div>
 <hr class="docutils" />
 </section>

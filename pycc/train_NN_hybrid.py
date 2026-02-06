@@ -329,8 +329,8 @@ def train_NN_hybrid(df, equation_str, params=None):
     # Extract hyperparameters with defaults
     neurons = params.get('neurons', 100)
     layers = params.get('layers', 3)
-    activation_name = params.get('activation', 'relu') # <--- ADD THIS LINE
-    lr = params.get('lr', 1e-3)
+    activation_name = params.get('activation', 'relu') 
+    lr = params.get('lr', 1e-4)
     scalar_lr = params.get('scalar_lr', lr)
     epochs = params.get('epochs', 1000)
     error_threshold = params.get('error_threshold', 1e-6)

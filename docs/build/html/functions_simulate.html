@@ -44,7 +44,8 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">User guide:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="why_pycc.html">🎯 Why pyCC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="why_pycc.html">✏️ pyCC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="why_pycc.html#why-pycc">🎯 Why pyCC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
 </ul>
@@ -52,20 +53,25 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="functions_train.html">pycc.train()</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">pycc.simulate()</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#neural-network-method-nn"><strong>Neural Network (method='NN')</strong></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#symbolic-regression-method-symbr"><strong>Symbolic Regression (method=’SymbR’)</strong></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#polynomial-method-poly"><strong>Polynomial (method='Poly')</strong></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#interpolation-method-interp"><strong>Interpolation (method=’Interp’)</strong></a></li>
-<li class="toctree-l2"><a class="reference internal" href="#theoretical-method-theoretical"><strong>Theoretical (method='Theoretical')</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#overview">Overview</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#method-specific-details"><strong>Method-Specific Details</strong></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#neural-network-method-nn"><strong>Neural Network (method='NN')</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#symbolic-regression-method-symbr"><strong>Symbolic Regression (method=’SymbR’)</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#polynomial-method-poly"><strong>Polynomial (method='Poly')</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#interpolation-method-interp"><strong>Interpolation (method=’Interp’)</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#theoretical-method-theoretical"><strong>Theoretical (method='Theoretical')</strong></a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="functions_postprocessing.html">pycc.post_processing()</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="Example1_training_function.html">Example 1: 1D function</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Example2_2nd_order_EDO.html">Example 2: 2nd-order EDO</a></li>
-<li class="toctree-l1"><a class="reference internal" href="Example3_3rd_order_EDO.html">Example 3: 3rd-order EDO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example1_training_function.html">Example 1: Function y=f(x)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example2_2nd_order_ODE.html">Example 2: 2nd-order ODE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example3_3rd_order_ODE.html">Example 3: 3rd-order ODE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example4_1st_order_ODE_denominator.html">Example 4: 1st-order ODE with f in denominator</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
 <ul>
@@ -79,7 +85,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">References:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">How to cite this package</a></li>
 </ul>
 
         </div>
@@ -108,8 +114,16 @@
              
   <section id="pycc-simulate">
 <h1>pycc.simulate()<a class="headerlink" href="#pycc-simulate" title="Link to this heading"></a></h1>
-<p>This is the main function for simulating the system dynamics over time. It acts as a manager that calls a specific simulation method based on the <code class="docutils literal notranslate"><span class="pre">method</span></code> parameter.</p>
-<p>This function is typically used <em>after</em> <code class="docutils literal notranslate"><span class="pre">pycc.train()</span></code> to integrate the identified equations of motion using the trained models. It can also be used in a standalone 'Theoretical' mode if all functions and parameters are already known.</p>
+<p>This section provides a detailed reference for the <code class="docutils literal notranslate"><span class="pre">pycc.simulate()</span></code> function</p>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">pycc.simulate()</span></code> function is responsible for integrating forward system dynamics over time. Like <code class="docutils literal notranslate"><span class="pre">pycc.train()</span></code>, it operates as a manager that dispatches the task to a specific simulation strategy based on the <code class="docutils literal notranslate"><span class="pre">method</span></code> argument.</p>
+<p><strong>Key Use Cases:</strong></p>
+<ol class="arabic simple">
+<li><p>Validation (Post-Training): After training a model (e.g., using <code class="docutils literal notranslate"><span class="pre">pycc.train(eqs,method='NN')</span></code>), you can use <code class="docutils literal notranslate"><span class="pre">pycc.simulate()</span></code> to integrate the discovered equations.</p></li>
+<li><p>Theoretical Simulation: You can use <code class="docutils literal notranslate"><span class="pre">method='Theoretical'</span></code> to simulate a ground-truth dynamics as shown in the <cite>Usage</cite> tab. This method can be used to generate the training datasets or to integrate the ground-truth equations forward under other initial conditions or external forces to validate and compare with the predictions of the identified models.</p></li>
+</ol>
+<p>Below, we show additional details about the inputs and outputs for the manager function:</p>
 <dl class="py function">
 <dt class="sig sig-object py">
 <span class="sig-prename descclassname"><span class="pre">pycc.</span></span><span class="sig-name descname"><span class="pre">simulate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">equations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Theoretical'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/pycc/simulate_manager.html#simulate"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
@@ -118,26 +132,91 @@ method: ‘Theoretical’, ‘NN’, ‘Poly’, ‘SymbReg’, etc.
 params: dict with simulation parameters (t_span, y0, noise, etc.)</p>
 </dd></dl>
 
-<p><strong>Example Usage (with trained NN model):</strong></p>
+<p><strong>Basic example usage</strong>: The following example demonstrates how to integrate forward ground-truth equations, then, we define the Database for training and train a model using <code class="docutils literal notranslate"><span class="pre">method='NN'</span></code>. After that, we integrate forward the obtained model with the same initial conditions that were used to generate the training dataset, and finally compare our predictions with the ground-truth forward integrations</p>
+<blockquote>
+<div><p>define a second-order system structure with unknown functions (f1​,f2​), and train a model using the Neural Network method (below we will .</p>
+</div></blockquote>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pycc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
 
-<span class="c1"># Assume &#39;models_nn&#39; and &#39;coefs_nn&#39; are the outputs from</span>
-<span class="c1"># pycc.train(..., method=&#39;NN&#39;)</span>
 
-<span class="c1"># Assume &#39;eqs&#39; is a list of equation strings:</span>
-<span class="c1"># eqs = [&#39;x1_dot = x2&#39;,</span>
-<span class="c1">#        &#39;x2_dot = F_ext - f1(x2) - f2(x1)&#39;]</span>
+<span class="c1">##############################################</span>
+<span class="c1"># Generating the theoretical data (could also be manually generated</span>
+<span class="c1">#                        with solve_ivp or experimentally measured)</span>
+<span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">;</span><span class="n">beta</span><span class="o">=</span><span class="mf">0.2</span><span class="p">;</span><span class="n">delta</span><span class="o">=</span><span class="mf">0.1</span><span class="p">;</span><span class="n">Omega</span><span class="o">=</span><span class="mf">1.0</span><span class="p">;</span>
+<span class="n">x0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span><span class="n">v0</span><span class="o">=</span><span class="mf">0.0</span><span class="p">;</span> <span class="n">y0</span><span class="o">=</span><span class="p">[</span><span class="n">x0</span><span class="p">,</span><span class="n">v0</span><span class="p">]</span> <span class="c1"># initial conditions</span>
+<span class="n">t_span</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">);</span> <span class="n">t_eval</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">*</span><span class="n">t_span</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">F1_th</span><span class="p">(</span><span class="n">x_dot</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">delta</span> <span class="o">*</span> <span class="n">x_dot</span> <span class="o">+</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="mi">500</span><span class="o">*</span><span class="n">x_dot</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">F2_th</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">3</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">F_ext</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Omega</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span>
+<span class="n">eqs_th</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;x1_dot = x2&#39;</span><span class="p">,</span>
+          <span class="s1">&#39;x2_dot = F_ext - f1(x2) - f2(x1)&#39;</span><span class="p">]</span>
+<span class="n">params_th</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;t_span&#39;</span><span class="p">:</span> <span class="n">t_span</span><span class="p">,</span>
+    <span class="s1">&#39;y0&#39;</span><span class="p">:</span> <span class="n">y0</span><span class="p">,</span>
+    <span class="s1">&#39;t_eval&#39;</span><span class="p">:</span> <span class="n">t_eval</span><span class="p">,</span>
+    <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;LSODA&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;local_funcs&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;f1&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">F1_th</span><span class="p">(</span><span class="n">t</span><span class="p">),</span><span class="s1">&#39;f2&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">F2_th</span><span class="p">(</span><span class="n">t</span><span class="p">),</span><span class="s1">&#39;F_ext&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">F_ext</span><span class="p">(</span><span class="n">t</span><span class="p">)}</span>
+<span class="p">}</span>
+<span class="n">sol</span><span class="p">,</span><span class="n">derivatives</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">eqs_th</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;Theoretical&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params_th</span><span class="p">)</span>
+<span class="n">time_data</span>    <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">t</span>
+<span class="n">x1_data</span>      <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">x2_data</span>      <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">x1_dot_data</span>  <span class="o">=</span> <span class="n">derivatives</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">x2_dot_data</span>  <span class="o">=</span> <span class="n">derivatives</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">F_ext_val</span>    <span class="o">=</span> <span class="n">F_ext</span><span class="p">(</span><span class="n">time_data</span><span class="p">)</span>
+<span class="c1">##############################################</span>
 
-<span class="c1"># Assume &#39;t_span&#39;, &#39;y0&#39;, &#39;t_eval&#39; are defined</span>
-<span class="c1"># and &#39;F_ext_func&#39; is a callable Python function:</span>
-<span class="c1"># def F_ext_func(t): return 1.0 * np.cos(0.5 * t)</span>
+<span class="c1">##############################################</span>
+<span class="c1"># Defining the database for training and the proposed equations</span>
+<span class="c1"># To this aim, we need to define a pandas DataFrame using the variables that will be used for training</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+    <span class="s1">&#39;x1&#39;</span><span class="p">:</span><span class="n">x1_data</span><span class="p">,</span>
+    <span class="s1">&#39;x2&#39;</span><span class="p">:</span><span class="n">x2_data</span><span class="p">,</span>
+    <span class="s1">&#39;x1_dot&#39;</span><span class="p">:</span><span class="n">x1_dot_data</span><span class="p">,</span>
+    <span class="s1">&#39;x2_dot&#39;</span><span class="p">:</span><span class="n">x2_dot_data</span><span class="p">,</span>
+    <span class="s1">&#39;F_ext&#39;</span><span class="p">:</span> <span class="n">F_ext_val</span>
+<span class="p">})</span>
+<span class="c1"># Now, we define the system structure we want to discover</span>
+<span class="n">eqs</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;x1_dot = x2&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;x2_dot = F_ext - f1(x2) - f2(x1)&#39;</span>
+<span class="p">]</span>
+<span class="c1">##############################################</span>
 
+<span class="c1">##############################################</span>
+<span class="c1"># Setting constraints and parameters, in this case we will use NN-CC method</span>
+<span class="n">constraints</span><span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f1 odd&#39;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f2 odd&#39;</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f2(0)=0&#39;</span><span class="p">},</span>
+<span class="p">]</span>
+<span class="n">nn_params</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;neurons&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="s1">&#39;layers&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s1">&#39;lr&#39;</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span>
+    <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">2000</span><span class="p">,</span>
+    <span class="s1">&#39;device&#39;</span><span class="p">:</span> <span class="s1">&#39;cpu&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;constraints&#39;</span><span class="p">:</span> <span class="n">constraints</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="c1">##############################################</span>
+<span class="c1"># Training the model</span>
+<span class="n">models</span><span class="p">,</span> <span class="n">evals</span><span class="p">,</span> <span class="n">coefs</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">eqs</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;NN&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">nn_params</span><span class="p">)</span>
+<span class="c1">##############################################</span>
+
+
+<span class="c1">##############################################</span>
+<span class="c1"># Forward integration with the obtained model:</span>
+<span class="c1"># Defining the simulation params using the obtained model</span>
 <span class="n">params_NN_simul</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;models&#39;</span><span class="p">:</span> <span class="n">models_nn</span><span class="p">,</span>
-    <span class="s1">&#39;obtained_coefs&#39;</span><span class="p">:</span> <span class="n">coefs_nn</span><span class="p">,</span>
-    <span class="s1">&#39;local_funcs&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;F_ext&#39;</span><span class="p">:</span> <span class="n">F_ext_func</span><span class="p">},</span>
+    <span class="s1">&#39;models&#39;</span><span class="p">:</span> <span class="n">models</span><span class="p">,</span>
+    <span class="s1">&#39;obtained_coefs&#39;</span><span class="p">:</span> <span class="n">coefs</span><span class="p">,</span>
+    <span class="s1">&#39;local_funcs&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;F_ext&#39;</span><span class="p">:</span> <span class="n">F_ext</span><span class="p">},</span>
     <span class="s1">&#39;t_span&#39;</span><span class="p">:</span> <span class="n">t_span</span><span class="p">,</span>
     <span class="s1">&#39;y0&#39;</span><span class="p">:</span> <span class="n">y0</span><span class="p">,</span>    <span class="c1"># e.g., [1.0, 0.0] for [x1(0), x2(0)]</span>
     <span class="s1">&#39;t_eval&#39;</span><span class="p">:</span> <span class="n">t_eval</span><span class="p">,</span>
@@ -146,38 +225,38 @@ params: dict with simulation parameters (t_span, y0, noise, etc.)</p>
     <span class="s1">&#39;rtol&#39;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">,</span>
     <span class="s1">&#39;check_nan&#39;</span><span class="p">:</span> <span class="kc">True</span>
 <span class="p">}</span>
-
-<span class="c1"># Simulate using the trained NN models</span>
+<span class="c1"># Simulating the obtained model</span>
 <span class="n">sol</span><span class="p">,</span> <span class="n">derivatives</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">eqs</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;NN&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params_NN_simul</span><span class="p">)</span>
-
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Integration success:&quot;</span><span class="p">,</span> <span class="n">sol</span><span class="o">.</span><span class="n">success</span><span class="p">)</span>
-
-<span class="c1"># Extract results</span>
+<span class="c1"># Extracting the results</span>
 <span class="n">time_sim</span> <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">t</span>
 <span class="n">x1_sim</span> <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># State variable x1(t)</span>
 <span class="n">x2_sim</span> <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>  <span class="c1"># State variable x2(t)</span>
-
-<span class="c1"># Derivatives are also returned</span>
+<span class="c1"># Derivatives can also be obtained if necessary</span>
 <span class="n">x1_dot_sim</span> <span class="o">=</span> <span class="n">derivatives</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># x1_dot(t)</span>
 <span class="n">x2_dot_sim</span> <span class="o">=</span> <span class="n">derivatives</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># x2_dot(t)</span>
+<span class="c1">##############################################</span>
 
-<span class="c1"># Plot solution (assuming &#39;time_data&#39;, &#39;x_data&#39; exist for comparison)</span>
+<span class="c1">##############################################</span>
+<span class="c1"># Compare the prediction with the ground-truth</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time_sim</span><span class="p">,</span> <span class="n">x1_sim</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;x(t) simulated&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time_data</span><span class="p">,</span> <span class="n">x_data</span><span class="p">,</span> <span class="s1">&#39;r--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;x(t) data&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time_sim</span><span class="p">,</span> <span class="n">x1_sim</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;identified model&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time_data</span><span class="p">,</span> <span class="n">x_data</span><span class="p">,</span> <span class="s1">&#39;r--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;ground-truth&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;x(t)&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Return Values</p>
-<p>Simulation methods return a tuple of two variables: <code class="docutils literal notranslate"><span class="pre">(solution,</span> <span class="pre">derivatives)</span></code>.</p>
+<p>Return Values of <code class="docutils literal notranslate"><span class="pre">pycc.simulate()</span></code></p>
+<p>All simulation methods return a tuple of two variables: <code class="docutils literal notranslate"><span class="pre">(solution,</span> <span class="pre">derivatives)</span></code>.</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">solution</span></code>: A <code class="docutils literal notranslate"><span class="pre">scipy.integrate.OdeSolution</span></code> object. This object contains the integration results, including the time points (<code class="docutils literal notranslate"><span class="pre">solution.t</span></code>) and the state variable values (<code class="docutils literal notranslate"><span class="pre">solution.y</span></code>). For a system with state <code class="docutils literal notranslate"><span class="pre">[x1,</span> <span class="pre">x2]</span></code>, <code class="docutils literal notranslate"><span class="pre">solution.y[0]</span></code> will be the array for <code class="docutils literal notranslate"><span class="pre">x1(t)</span></code> and <code class="docutils literal notranslate"><span class="pre">solution.y[1]</span></code> will be the array for <code class="docutils literal notranslate"><span class="pre">x2(t)</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">derivatives</span></code>: A NumPy array containing the time derivatives of the state variables, evaluated at each time step in <code class="docutils literal notranslate"><span class="pre">solution.t</span></code>. For a system with state <code class="docutils literal notranslate"><span class="pre">[x1,</span> <span class="pre">x2]</span></code>, <code class="docutils literal notranslate"><span class="pre">derivatives[0]</span></code> will be the array for <code class="docutils literal notranslate"><span class="pre">x1_dot(t)</span></code> and <code class="docutils literal notranslate"><span class="pre">derivatives[1]</span></code> will be the array for <code class="docutils literal notranslate"><span class="pre">x2_dot(t)</span></code>. This is useful for plotting or analysis without needing to re-calculate the derivatives.</p></li>
 </ul>
-<p><strong>Method-Specific Details</strong></p>
+</section>
+<section id="method-specific-details">
+<h2><strong>Method-Specific Details</strong><a class="headerlink" href="#method-specific-details" title="Link to this heading"></a></h2>
 <p>Below are the details and available <code class="docutils literal notranslate"><span class="pre">params</span></code> for each simulation method.</p>
 <p><strong>Common Parameters for All Methods:</strong></p>
 <p>All simulation methods accept the following keys in their <code class="docutils literal notranslate"><span class="pre">params</span></code> dictionary, which are passed to <code class="docutils literal notranslate"><span class="pre">scipy.integrate.solve_ivp</span></code>:</p>
@@ -220,7 +299,7 @@ params: dict with simulation parameters (t_span, y0, noise, etc.)</p>
 </ul>
 <hr class="docutils" />
 <section id="neural-network-method-nn">
-<h2><strong>Neural Network (method='NN')</strong><a class="headerlink" href="#neural-network-method-nn" title="Link to this heading"></a></h2>
+<h3><strong>Neural Network (method='NN')</strong><a class="headerlink" href="#neural-network-method-nn" title="Link to this heading"></a></h3>
 <p>This method simulates the system using the trained PyTorch Neural Network models obtained from <code class="docutils literal notranslate"><span class="pre">pycc.train(method='NN')</span></code>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">params</span></code> dictionary for this method may contain:</p>
 <ul class="simple">
@@ -245,7 +324,7 @@ params: dict with simulation parameters (t_span, y0, noise, etc.)</p>
 </section>
 <hr class="docutils" />
 <section id="symbolic-regression-method-symbr">
-<h2><strong>Symbolic Regression (method=’SymbR’)</strong><a class="headerlink" href="#symbolic-regression-method-symbr" title="Link to this heading"></a></h2>
+<h3><strong>Symbolic Regression (method=’SymbR’)</strong><a class="headerlink" href="#symbolic-regression-method-symbr" title="Link to this heading"></a></h3>
 <p>This method simulates the system using symbolic expressions. It has two primary modes of operation:</p>
 <ol class="arabic simple">
 <li><p><strong>Standard Simulation:</strong> Uses the <cite>PySRRegressor</cite> models directly from the <code class="docutils literal notranslate"><span class="pre">models</span></code> dictionary returned by <code class="docutils literal notranslate"><span class="pre">pycc.train(...,method='SymbR')</span></code>.</p></li>
@@ -366,7 +445,7 @@ params: dict with simulation parameters (t_span, y0, noise, etc.)</p>
 </section>
 <hr class="docutils" />
 <section id="polynomial-method-poly">
-<h2><strong>Polynomial (method='Poly')</strong><a class="headerlink" href="#polynomial-method-poly" title="Link to this heading"></a></h2>
+<h3><strong>Polynomial (method='Poly')</strong><a class="headerlink" href="#polynomial-method-poly" title="Link to this heading"></a></h3>
 <p>This method simulates the system using the polynomial models (e.g., coefficients) identified by <code class="docutils literal notranslate"><span class="pre">pycc.train(method='Poly')</span></code>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">params</span></code> dictionary for this method must contain:</p>
 <ul class="simple">
@@ -409,7 +488,7 @@ params: dict with simulation parameters (t_span, y0, noise, etc.)</p>
 </section>
 <hr class="docutils" />
 <section id="interpolation-method-interp">
-<h2><strong>Interpolation (method=’Interp’)</strong><a class="headerlink" href="#interpolation-method-interp" title="Link to this heading"></a></h2>
+<h3><strong>Interpolation (method=’Interp’)</strong><a class="headerlink" href="#interpolation-method-interp" title="Link to this heading"></a></h3>
 <p>This method provides a lightweight way to simulate the system dynamics using only the discrete characteristic curves (<code class="docutils literal notranslate"><span class="pre">evals</span></code>) returned from <em>any</em> <code class="docutils literal notranslate"><span class="pre">pycc.train</span></code> run (e.g., ‘NN’, ‘Poly’, ‘SymbR’).</p>
 <p>It is often significantly faster than simulating with the analytical expressions from <code class="docutils literal notranslate"><span class="pre">method='SymbR'</span></code> because it bypasses the computational overhead of symbolic evaluation at each time step, while generally maintaining a high level of accuracy.</p>
 <p>It does <em>not</em> require a <code class="docutils literal notranslate"><span class="pre">models</span></code> object. Instead, it creates a 1D numerical interpolant for each function <code class="docutils literal notranslate"><span class="pre">f_i</span></code> (e.g., <code class="docutils literal notranslate"><span class="pre">f1(x)</span></code>, <code class="docutils literal notranslate"><span class="pre">f2(x)</span></code>) from the provided <code class="docutils literal notranslate"><span class="pre">[x,</span> <span class="pre">y]</span></code> data points. The simulation then proceeds by calling these interpolants.</p>
@@ -490,7 +569,7 @@ params: dict with simulation parameters (t_span, y0, noise, etc.)</p>
 </section>
 <hr class="docutils" />
 <section id="theoretical-method-theoretical">
-<h2><strong>Theoretical (method='Theoretical')</strong><a class="headerlink" href="#theoretical-method-theoretical" title="Link to this heading"></a></h2>
+<h3><strong>Theoretical (method='Theoretical')</strong><a class="headerlink" href="#theoretical-method-theoretical" title="Link to this heading"></a></h3>
 <p>This method simulates the system of equations using user-provided, <em>known</em> Python functions for all unknown terms (e.g., <code class="docutils literal notranslate"><span class="pre">f1</span></code>, <code class="docutils literal notranslate"><span class="pre">f2</span></code>) and external forces (<code class="docutils literal notranslate"><span class="pre">F_ext</span></code>). It does <em>not</em> require any output from <code class="docutils literal notranslate"><span class="pre">pycc.train()</span></code>. It is used for validating known models or simulating ideal systems.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">params</span></code> dictionary for this method may contain:</p>
 <ul class="simple">
@@ -561,6 +640,7 @@ params: dict with simulation parameters (t_span, y0, noise, etc.)</p>
 <hr style="border: none; border-top: 4px dashed #bbb;">
 <hr style="border: none; border-top: 4px solid #bbb; width: 50%; margin: 20px auto;">
 <hr style="border: none; border-top: 4px dashed #bbb;"></section>
+</section>
 </section>
 
 

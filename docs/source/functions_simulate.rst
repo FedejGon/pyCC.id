@@ -5,79 +5,160 @@
 pycc.simulate()
 ===============
 
-This is the main function for simulating the system dynamics over time. It acts as a manager that calls a specific simulation method based on the ``method`` parameter.
+This section provides a detailed reference for the ``pycc.simulate()`` function
 
-This function is typically used *after* ``pycc.train()`` to integrate the identified equations of motion using the trained models. It can also be used in a standalone \'Theoretical\' mode if all functions and parameters are already known.
+
+--------
+Overview
+--------
+
+The ``pycc.simulate()`` function is responsible for integrating forward system dynamics over time. Like ``pycc.train()``, it operates as a manager that dispatches the task to a specific simulation strategy based on the ``method`` argument.
+
+**Key Use Cases:**
+
+..    
+     By comparing the simulated trajectory against your original data, you can validate the accuracy of the identified dynamics.
+    This is the main function for simulating the system dynamics over time. It acts as a manager that calls a specific simulation method based on the ``method`` parameter.
+    This function is typically used *after* ``pycc.train()`` to integrate the identified equations of motion using the trained models. It can also be used in a standalone \'Theoretical\' mode if all functions and parameters are already known.
+
+1. Validation (Post-Training): After training a model (e.g., using ``pycc.train(eqs,method='NN')``), you can use ``pycc.simulate()`` to integrate the discovered equations. 
+2. Theoretical Simulation: You can use ``method='Theoretical'`` to simulate a ground-truth dynamics as shown in the `Usage` tab. This method can be used to generate the training datasets or to integrate the ground-truth equations forward under other initial conditions or external forces to validate and compare with the predictions of the identified models.
+
+Below, we show additional details about the inputs and outputs for the manager function:
 
 .. autofunction:: pycc.simulate
    :noindex:
 
+**Basic example usage**: The following example demonstrates how to integrate forward ground-truth equations, then, we define the Database for training and train a model using ``method='NN'``. After that, we integrate forward the obtained model with the same initial conditions that were used to generate the training dataset, and finally compare our predictions with the ground-truth forward integrations 
 
-**Example Usage (with trained NN model):**
+
+ define a second-order system structure with unknown functions (f1​,f2​), and train a model using the Neural Network method (below we will .
+
 
 .. code-block:: python
 
-    import pycc
-    import numpy as np
-    import matplotlib.pyplot as plt
-
-    # Assume 'models_nn' and 'coefs_nn' are the outputs from
-    # pycc.train(..., method='NN')
-
-    # Assume 'eqs' is a list of equation strings:
-    # eqs = ['x1_dot = x2', 
-    #        'x2_dot = F_ext - f1(x2) - f2(x1)']
-    
-    # Assume 't_span', 'y0', 't_eval' are defined
-    # and 'F_ext_func' is a callable Python function:
-    # def F_ext_func(t): return 1.0 * np.cos(0.5 * t)
-
-    params_NN_simul = {
-        'models': models_nn,
-        'obtained_coefs': coefs_nn,
-        'local_funcs': {'F_ext': F_ext_func},
-        't_span': t_span,
-        'y0': y0,    # e.g., [1.0, 0.0] for [x1(0), x2(0)]
-        't_eval': t_eval,
-        'method': 'LSODA',  # This is the solver for scipy.solve_ivp
-        'atol': 1e-8,
-        'rtol': 1e-6,
-        'check_nan': True
-    }
-
-    # Simulate using the trained NN models
-    sol, derivatives = pycc.simulate(eqs, method='NN', params=params_NN_simul)
-
-    print("Integration success:", sol.success)
-
-    # Extract results
-    time_sim = sol.t
-    x1_sim = sol.y[0]  # State variable x1(t)
-    x2_sim = sol.y[1]  # State variable x2(t)
-    
-    # Derivatives are also returned
-    x1_dot_sim = derivatives[0] # x1_dot(t)
-    x2_dot_sim = derivatives[1] # x2_dot(t)
-
-    # Plot solution (assuming 'time_data', 'x_data' exist for comparison)
-    plt.figure()
-    plt.plot(time_sim, x1_sim, label="x(t) simulated")
-    plt.plot(time_data, x_data, 'r--', label="x(t) data")
-    plt.xlabel('t')
-    plt.ylabel('x(t)')
-    plt.legend()
-    plt.show()
+   import pycc
+   import numpy as np
+   import pandas as pd
+   import matplotlib.pyplot as plt
 
 
-Return Values
+   ##############################################
+   # Generating the theoretical data (could also be manually generated  
+   #                        with solve_ivp or experimentally measured)
+   alpha=1.0;beta=0.2;delta=0.1;Omega=1.0;
+   x0=0.0;v0=0.0; y0=[x0,v0] # initial conditions
+   t_span=(0, 20); t_eval=np.linspace(*t_span, 1000)
+   def F1_th(x_dot):
+       return delta * x_dot + 0.5 * np.tanh(500*x_dot)
+   def F2_th(x):
+       return alpha * x + beta * x**3
+   def F_ext(t):
+       return np.cos(Omega * t)
+   eqs_th = ['x1_dot = x2',
+             'x2_dot = F_ext - f1(x2) - f2(x1)']
+   params_th = {
+       't_span': t_span,
+       'y0': y0,  
+       't_eval': t_eval,
+       'method': 'LSODA',
+       'local_funcs': {'f1': lambda t: F1_th(t),'f2': lambda t: F2_th(t),'F_ext': lambda t: F_ext(t)}
+   }
+   sol,derivatives = pycc.simulate(eqs_th,method="Theoretical", params=params_th)
+   time_data    = sol.t
+   x1_data      = sol.y[0]
+   x2_data      = sol.y[1]
+   x1_dot_data  = derivatives[0]
+   x2_dot_data  = derivatives[1]
+   F_ext_val    = F_ext(time_data)
+   ##############################################
+
+   ##############################################
+   # Defining the database for training and the proposed equations 
+   # To this aim, we need to define a pandas DataFrame using the variables that will be used for training
+   df = pd.DataFrame({
+       'x1':x1_data,
+       'x2':x2_data,
+       'x1_dot':x1_dot_data,
+       'x2_dot':x2_dot_data,
+       'F_ext': F_ext_val
+   })
+   # Now, we define the system structure we want to discover
+   eqs = [
+       'x1_dot = x2',
+       'x2_dot = F_ext - f1(x2) - f2(x1)'
+   ]
+   ##############################################
+
+   ##############################################
+   # Setting constraints and parameters, in this case we will use NN-CC method
+   constraints= [
+       {'constraint': 'f1 odd'},
+       {'constraint': 'f2 odd'},
+       {'constraint': 'f2(0)=0'},
+   ]
+   nn_params = {
+       'neurons': 100,
+       'layers': 3,
+       'lr': 1e-4,
+       'epochs': 2000,
+       'device': 'cpu',
+       'constraints': constraints,
+   }
+   ##############################################
+   # Training the model
+   models, evals, coefs = pycc.train(df, eqs, method='NN', params=nn_params)
+   ##############################################
+
+
+   ##############################################
+   # Forward integration with the obtained model:
+   # Defining the simulation params using the obtained model
+   params_NN_simul = {
+       'models': models,
+       'obtained_coefs': coefs,
+       'local_funcs': {'F_ext': F_ext},
+       't_span': t_span,
+       'y0': y0,    # e.g., [1.0, 0.0] for [x1(0), x2(0)]
+       't_eval': t_eval,
+       'method': 'LSODA',  # This is the solver for scipy.solve_ivp
+       'atol': 1e-8,
+       'rtol': 1e-6,
+       'check_nan': True
+   }
+   # Simulating the obtained model 
+   sol, derivatives = pycc.simulate(eqs, method='NN', params=params_NN_simul)
+   print("Integration success:", sol.success)
+   # Extracting the results
+   time_sim = sol.t
+   x1_sim = sol.y[0]  # State variable x1(t)
+   x2_sim = sol.y[1]  # State variable x2(t)
+   # Derivatives can also be obtained if necessary
+   x1_dot_sim = derivatives[0] # x1_dot(t)
+   x2_dot_sim = derivatives[1] # x2_dot(t)
+   ##############################################
+
+   ##############################################  
+   # Compare the prediction with the ground-truth
+   plt.figure()
+   plt.plot(time_sim, x1_sim, label="identified model")
+   plt.plot(time_data, x_data, 'r--', label="ground-truth")
+   plt.xlabel('t')
+   plt.ylabel('x(t)')
+   plt.legend()
+   plt.show()
+
+Return Values of ``pycc.simulate()``
  
 
-Simulation methods return a tuple of two variables: ``(solution, derivatives)``.
+All simulation methods return a tuple of two variables: ``(solution, derivatives)``.
 
 * ``solution``: A ``scipy.integrate.OdeSolution`` object. This object contains the integration results, including the time points (``solution.t``) and the state variable values (``solution.y``). For a system with state ``[x1, x2]``, ``solution.y[0]`` will be the array for ``x1(t)`` and ``solution.y[1]`` will be the array for ``x2(t)``.
 * ``derivatives``: A NumPy array containing the time derivatives of the state variables, evaluated at each time step in ``solution.t``. For a system with state ``[x1, x2]``, ``derivatives[0]`` will be the array for ``x1_dot(t)`` and ``derivatives[1]`` will be the array for ``x2_dot(t)``. This is useful for plotting or analysis without needing to re-calculate the derivatives.
 
+---------------------------
 **Method-Specific Details**
+---------------------------
 
 Below are the details and available ``params`` for each simulation method.
 

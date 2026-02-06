@@ -7,6 +7,7 @@
 
 **pyCC.id** is a Python library for discovering interpretable, nonlinear dynamical systems from data. It is built on the concept of **Characteristic Curves (CCs)** and is designed to be highly customizable and user-friendly.
 
+**pyCC** is a user-friendly and highly-customizable Python library for data-driven equation discovery, designed to bridge the gap between *black-box* and *white-box* modeling paradigms, while facilitating practical applications in science and engineering.
 
 | **colab demo** | **Forums** | **Paper** |
 |:---:|:---:|:---:|
@@ -16,15 +17,17 @@
 
 ---
 
+
 ## 🎯 Core Idea
 
-System identification (also known as equation discovery) is the process of finding the underlying governing equations of a system from observational data.  🔬 For many physical systems, the dynamics can be described by a set of first-order ordinary differential equations (ODEs):
+System identification (also known as equation discovery) is the process of finding the underlying governing equations of a system from observational data.  For many physical systems, the dynamics can be described by a set of first-order ordinary differential equations (ODEs):
 
 $$
 \frac{d\mathbf{x}}{dt} = \mathbf{F}(\mathbf{x}, t)
 $$
 
 Here, $\mathbf{x}(t)$ is the vector of the system's state variables (like position, velocity, etc.). The problem is that the function $\mathbf{F}$ can be incredibly complex and act like a "black box," making it difficult to gain physical insight.
+
 
 The core philosophy of **pyCC.id** is to break down this complex function $\mathbf{F}$ into a combination of simpler, **interpretable building blocks**. This approach mirrors how a scientist or practitioner would construct a model: by considering different functions and parameters for modeling phenomena like stiffness, damping, or external forces.
 
@@ -48,18 +51,49 @@ where:
 
 The goal of **pyCC** is to discover the optimal functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$ that best fit the observed data based on a predefined model structure $\mathbf{G}$.
 
----
 
-## ✨ Key Features
+## 🔬 Why pyCC?
 
-* **Interpretable Models**: Decomposes complex dynamics into simpler, physically meaningful functions.
-* **Flexible Function Parametrization**: Supports various techniques to model the characteristic curves, including:
-    * Neural Networks (NN-CC) — Compatible with multicore CPUs and GPUs from both NVIDIA (CUDA) and Intel (XPU) architectures. GPU acceleration on Intel devices is enabled through the intel_extension_for_pytorch.
-    * Polynomials (Poly-CC) — Using polynomial expansion basis functions for comparison.
-    * Symbolic Regression (SymbR-CC)  —  Parallelized for multicore CPU execution, using the internal parallelization features of PySR.
-* **Physics-Informed Discovery**: Incorporate known physical constraints, such as symmetries (e.g., even and odd functions) or conservation laws, to guide the discovery process and ensure robust, physically consistent models.
-* **Built-in Simulator**: Includes a module for simulating higher-order and coupled ODEs, fully compatible with all identification methodologies.
-* **User-Focused Design**: Offers an API that is both easy to use for standard problems and highly customizable for advanced research.
+**i) Identifiability**
+When inferring dynamical equations from real experiments (often with finite sampling or noisy data), multiple distinct mathematical models can fit the observations with comparable accuracy. This leads to **ambiguity in model selection**. **pyCC** addresses this by injecting **prior physical knowledge** into the discovery process via a structural 'skeleton'. When the hypothesized model structure possesses uniqueness properties, **pyCC** provides a formal framework to assess whether the proposed equation is consistent with the data.
+
+**ii) Physical Consistency**
+To define physically motivated model structures, we use the formalism of **Characteristic Curves (CCs)**. This approach decomposes high-dimensional dynamics into modular, **univariate functions**. In this view, each CC represents a constitutive relation of an independent physical element (e.g., a specific spring or damper). This assures **physical consistency**: the learned model is not just a curve fit, but a collection of distinct physical mechanisms.
+
+**iii) Interpretability**
+The use of CCs allows the practitioner to 'visualize' the model simply by plotting the univariate curves.
+* *Traditional approach:* "Find the coefficients $k$ and $c$ assuming linear dynamics."
+* *pyCC approach:* "Find the **shapes** of the stiffness and damping curves."
+
+If the stiffness curve looks like a parabola, we know the system is nonlinear. This visual insight allows for qualitative discovery before quantitative fitting.
+
+**iv) Modularity, Universality, and Transparency**
+Since **pyCC** prioritizes the **shape** of the constitutive relations over their specific model coefficients, the parametric form (e.g., polynomial vs. exponential) does not need to be postulated *a priori*.
+We can parameterize the CCs using **universal approximators**, such as Neural Networks (the **NN-CC** approach).
+* **Universality:** The model can adapt to any continuous shape regardless of complexity, provided sufficient model capacity.
+* **Transparency:** While NNs are often regarded as "black boxes," within **pyCC** they are restricted to learning **univariate** functions. A "black box" with a single input and single output is effectively transparent: it is simply a curve that can be plotted and visually inspected to interpret the underlying physics.
+
+
+
+## 🔬 Application Example: Second-Order System
+
+Consider identifying a second-order system with a velocity-dependent friction force and external driving force. The practitioner starts by hypothesizing the skeleton:
+
+$$
+\ddot{x} + f_1(\dot{x}) + f_2(x) = F_{ext}(t)
+$$
+
+This equation implies two CCs: a **damping force** $f_1(\dot{x})$ and a **restoring force** $f_2(x)$.
+
+<div align="center">
+<img src="_static/Fig2_model_veloc.png" width="70%" alt="Neural Network architecture for a second-order system">
+
+*Figure 2: The architecture for a second-order system. Two independent neural networks ($\text{NN}_1$ and $\text{NN}_2$) approximate the unknown CCs. $\text{NN}_1$ sees only velocity, and $\text{NN}_2$ sees only position.*
+</div>
+
+**Why this architecture matters:**
+Crucially, this architecture enforces uniqueness and physical consistency. Even if the training data contains complex transient behaviors, the model **cannot** learn spurious cross-terms (like $x\dot{x}$) because no single module has access to both variables simultaneously.
+
 
 ---
 
@@ -127,12 +161,36 @@ Here, we identify the function $f_1(\dot{x})$ and the parameters $a_4$ and $a_5$
 
 ## 📥  Installation with pip (Recommended)
 
-### Installation for users
+### Installation on CPU and Nvidia GPUs
 Some features in PyCC include using the Symbolic Regression (pySR) package. Thus we recommend installing this package first. To install both packages use:  
 ```bash
-pip install pysr
 pip install pycc.id
 ```
+
+### Installation on Intel XPUs
+To run this library on Intel XPUs, you must install the *intel-extension-for-pytorch* package compatible with your operative system. Please refer to the official instructions at https://pytorch-extension.intel.com/installation.
+
+Below are examples for installing version v2.8.10+xpu.
+For Linux/WSL2 OS; first, install PyTorch and Intel extension packages: 
+```bash
+python -m pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/xpu
+python -m pip install intel-extension-for-pytorch==2.8.10+xpu --extra-index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/us/
+python -m pip install oneccl_bind_pt==2.8.0+xpu --index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/us/
+```
+For Windows OS; use instead:  
+```bash
+python -m pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/xpu
+python -m pip install intel-extension-for-pytorch==2.8.10+xpu --index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/us/
+```
+
+Final step: once the environment is set up, install the remaining packages from the PyCC library:
+```bash
+
+pip install pycc.id
+```
+
+
+
 
 ### Installation for developers (from source)
 Download or clone the repository and install with:
@@ -300,6 +358,18 @@ python Tutorial1.py
 ```
 
 
+---
+
+## ✨ Key Features
+
+* **Interpretable Models**: Decomposes complex dynamics into simpler, physically meaningful functions.
+* **Flexible Function Parametrization**: Supports various techniques to model the characteristic curves, including:
+    * Neural Networks (NN-CC) — Compatible with multicore CPUs and GPUs from both NVIDIA (CUDA) and Intel (XPU) architectures. GPU acceleration on Intel devices is enabled through the intel_extension_for_pytorch.
+    * Polynomials (Poly-CC) — Using polynomial expansion basis functions for comparison.
+    * Symbolic Regression (SymbR-CC)  —  Parallelized for multicore CPU execution, using the internal parallelization features of PySR.
+* **Physics-Informed Discovery**: Incorporate known physical constraints, such as symmetries (e.g., even and odd functions) or conservation laws, to guide the discovery process and ensure robust, physically consistent models.
+* **Built-in Simulator**: Includes a module for simulating higher-order and coupled ODEs, fully compatible with all identification methodologies.
+* **User-Focused Design**: Offers an API that is both easy to use for standard problems and highly customizable for advanced research.
 
 ---
 

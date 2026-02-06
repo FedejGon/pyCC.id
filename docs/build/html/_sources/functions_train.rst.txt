@@ -1,114 +1,165 @@
 ============
 pycc.train()
 ============
+This section provides a detailed reference for the ``pycc.train()`` function
+
+
+
+--------
+Overview
+--------
+The ``pycc.train()`` function is the primary entry point for identifying system dynamics from data. It functions as a training manager (or dispatcher) that abstracts the complexity of specific algorithms. Instead of calling a specific algorithm directly, you specify the ``method`` parameter (e.g., 'NN' for Neural Networks), and the manager automatically routes the data and equations to the appropriate specialized training module.
  
-This section provides a detailed reference for the core functions in the ``pycc`` library.
+This modular design allows users to seamlessly switch between different identification techniques (like Neural Networks, Polynomial Regression, or Symbolic Regression) without changing their data structures or equation definitions.
+ 
+..   This is the main function for identifying system dynamics from data. It acts as a manager that calls a specific training method based on the ``method`` parameter. For example, when ``method='NN'``, we activate the training with the neural network method. Hence, can easily switch between different training methods. this is a manager of training methods that switches between different training methods. In the following we show this training manager do not kwow what .... 
+    -------------------------------------------------
+    Additional details for the manager function 
+    -------------------------------------------------
+    
+Below, we show additional details about the inputs and outputs for the manager function: 
 
-
-
-This is the main function for identifying system dynamics from data. It acts as a manager that calls a specific training method based on the ``method`` parameter.
-
-.. autofunction:: pycc.train
+.. autofunction:: pycc.train 
    :noindex:
   
 
-**Example Usage:**
+**Basic example usage:** 
+The following example demonstrates how to set up a DataFrame, define a second-order system structure with unknown functions (f1​,f2​), and train a model using the Neural Network method (below we will .
 
 .. code-block:: python
 
-    import pycc
-    import pandas as pd
 
-    # Assume we have simulated a second order system
-    # and obtained x1,x2,x1_dot,x2_dot,Fext(t) variables
-    # Now define a pandas DataFrame with your data
-    df = pd.DataFrame({
-        'x1':x1_data,
-        'x2':x2_data,
-        'x1_dot':x1_dot_data,
-        'x2_dot':x2_dot_data,
-        'F_ext': F_ext_val
-    })
-    
-    #now define the system we want to fit
-    eqs = [
-        'x1_dot = x2',
-        'x2_dot = F_ext - f1(x2) - f2(x1)'
-    ]
+   import pycc
+   import numpy as np
+   import pandas as pd
+   import matplotlib.pyplot as plt
 
-    #define constraints and parameters
-    constraints= [
-        {'constraint': 'f1 odd'},
-        {'constraint': 'f2 odd'},
-        {'constraint': 'f2(0)=0'},
-    ]
-    nn_params = {
-        'neurons': 100,
-        'layers': 3,
-        'lr': 1e-4,
-        'epochs': 2000,
-        'device': 'cpu',
-        'constraints': constraints,
-    }
+   ##############################################
+   # Generating the theoretical data (could also be manually generated  
+   #                        with solve_ivp or experimentally measured)
+   alpha=1.0;beta=0.2;delta=0.1;Omega=1.0;
+   x0=0.0;v0=0.0; y0=[x0,v0] # initial conditions
+   t_span=(0, 20); t_eval=np.linspace(*t_span, 1000)
+   def F1_th(x_dot):
+       return delta * x_dot + 0.5 * np.tanh(500*x_dot)
+   def F2_th(x):
+       return alpha * x + beta * x**3
+   def F_ext(t):
+       return np.cos(Omega * t)
+   eqs_th = ['x1_dot = x2',
+             'x2_dot = F_ext - f1(x2) - f2(x1)']
+   params_th = {
+       't_span': t_span,
+       'y0': y0,  
+       't_eval': t_eval,
+       'method': 'LSODA',
+       'local_funcs': {'f1': lambda t: F1_th(t),'f2': lambda t: F2_th(t),'F_ext': lambda t: F_ext(t)}
+   }
+   sol,derivatives = pycc.simulate(eqs_th,method="Theoretical", params=params_th)
+   time_data    = sol.t
+   x1_data      = sol.y[0]
+   x2_data      = sol.y[1]
+   x1_dot_data  = derivatives[0]
+   x2_dot_data  = derivatives[1]
+   F_ext_val    = F_ext(time_data)
+   ##############################################
 
-    #train a NN model
-    models, evals, coefs = pycc.train(df, eqs, method='NN', params=nn_params)
+   ##############################################
+   # Defining the database for training and the proposed equations 
+   # To this aim, we need to define a pandas DataFrame using the variables that will be used for training
+   df = pd.DataFrame({
+       'x1':x1_data,
+       'x2':x2_data,
+       'x1_dot':x1_dot_data,
+       'x2_dot':x2_dot_data,
+       'F_ext': F_ext_val
+   })
+   # Now, we define the system structure we want to discover
+   eqs = [
+       'x1_dot = x2',
+       'x2_dot = F_ext - f1(x2) - f2(x1)'
+   ]
+   ##############################################
+
+   ##############################################
+   # Setting constraints and parameters, in this case we will use NN-CC method
+   constraints= [
+       {'constraint': 'f1 odd'},
+       {'constraint': 'f2 odd'},
+       {'constraint': 'f2(0)=0'},
+   ]
+   nn_params = {
+       'neurons': 100,
+       'layers': 3,
+       'lr': 1e-4,
+       'epochs': 2000,
+       'device': 'cpu',
+       'constraints': constraints,
+   }
+   ##############################################
+
+   # Training the model
+   models, evals, coefs = pycc.train(df, eqs, method='NN', params=nn_params)
 
 
-Return Values
+Return Values ``pycc.train()``
  
 
-Training methods return a tuple of three variables: ``(models, evals, obtained_params)``.
+All training methods return a tuple of three variables: ``(models, evals, obtained_params)``.
 
-* ``models``: A dictionary containing the trained models. This variable that depends on the chosen model. For example, for the **NN** method, this will be a dictionary mapping function names (e.g., ``'f1'``, and ``'f2'``) to their corresponding PyTorch ``NNModel`` objects. It is useful for using as input argument for pycc.simulate().   
-* ``evals``: A flat list of NumPy arrays ready for plotting, containing the identified functions. It contains the x and y valures of each identified function in the format ``[x_f1, y_f1, x_f2, y_f2, ...]``. All training methods return this variable using the same format.  
-* ``obtained_params``: A dictionary containing the identified scalar parameters from the equations (e.g., ``a1``, ``a2``). It contains the the parameter name (string) and its final identified value (float). All training methods return this variable using the same format.
+* ``models``: A dictionary containing the trained models. This variable that depends on the chosen model. For example, for the **NN** method, this is a dictionary mapping function names (e.g., ``'f1'``, and ``'f2'``) to their corresponding PyTorch ``NNModel`` objects. This models variable is useful for using as an input argument for pycc.simulate().   
+* ``evals``: A flat list of NumPy arrays ready for plotting, containing the identified functions. It contains the x and y values of each identified function in the format ``[x_f1, y_f1, x_f2, y_f2, ...]``. All training methods return this list using the same format.  
+* ``obtained_params``: A dictionary containing the identified scalar parameters from the equations (e.g., ``a1``, ``a2``). It contains the the parameter name (string) and its final identified value (float). All training methods return this variable using the same format. 
 
+---------------------------
 **Method-Specific Details**
+---------------------------
 
-Below are the details and available ``params`` for each training method.
+While the specific parameterization varies by method, it is all encapsulated within the ``params`` dictionary. The sections below detail the specific arguments required inside ``params`` for each approach.
 
 -----
 
-**Neural Network (method=\'NN\')**
+**Neural Networks (method=\'NN\')**
 ----------------------------------
 
 This method uses a physics-informed neural network to learn the unknown functions as characteristic curves. It is flexible and powerful for complex systems. The ``params`` dictionary for this method can contain the following keys:
 
-* ``'neurons':`` (*int, optional*)
-    The number of neurons in each hidden layer of the neural networks. **Default: 100**.
-* ``'layers':`` (*int, optional*)
-    The number of hidden layers for each neural network. **Default: 3**.
-* ``'lr':`` (*float, optional*)
-    The learning rate for the Adam optimizer for the neural networks. **Default: 1e-3**.
-* ``'scalar_lr':`` (*float, optional*)
-    Specifies a separate learning rate for the Adam optimizer to use *only* for the scalar parameters. The code creates two distinct optimizers: one for the neural network models (using ``'lr'``) and one for the scalars (using ``'scalar_lr'``). This allows the user to train the scalar coefficients at a different rate than the ``'fi'`` functions. **Default:** same value as ``'lr'``.
-* ``'epochs':`` (*int, optional*) 
-    The maximum number of training iterations. **Default: 1000**.
-* ``'error_threshold':`` (*float, optional*)
-    The training will stop early if the data loss falls below this value. **Default: 1e-6**.
-* ``'device':`` (*str, optional*)
+* ``'neurons':`` (*int, optional*) Default: 100
+    The number of neurons in each hidden layer of the neural networks.
+* ``'layers':`` (*int, optional*)  Default: 3
+    The number of hidden layers for each neural network.
+* ``'activation':`` (*list[str], optional*) Default: ``'relu'``
+    The activation functions to use. You can use any function available in the ``torch.nn.functional``  library  <https://docs.pytorch.org/docs/stable/nn.functional.html>. We recommend using ``'leaky_relu'`` , ``'relu'``, ``'tanh'``, or ``'rrelu'``. These were found to yield robust results for both chaotic and discontinuous systems in DOI:10.1007/s11071-025-11744-6 and 10.48550/arXiv.2601.21720.
+* ``'lr':`` (*float, optional*) Default: 1e-4
+    The learning rate for the Adam optimizer for the neural networks.
+* ``'scalar_lr':`` (*float, optional*) Default: same value as ``'lr'``
+    Specifies a separate learning rate for the Adam optimizer to use *only* for the scalar parameters. The code creates two distinct optimizers: one for the neural network models (using ``'lr'``) and one for the scalars (using ``'scalar_lr'``). This allows the user to train the scalar coefficients at a different rate than the ``'fi'`` functions. 
+* ``'epochs':`` (*int, optional*) Default: 1000
+    The maximum number of training iterations. 
+* ``'error_threshold':`` (*float, optional*) Default: 1e-6
+    The training will stop early if the data loss falls below this value. 
+* ``'device':`` (*str, optional*) Default: ``'automatic'``
     Specifies the computation device. Options are ``'automatic'``, ``'cpu'``, ``'gpu'``, ``'cuda'``, and intel ``'xpu'``. The ``'gpu'`` setting search if any ``'cuda'`` or ``'xpu'`` are available. The ``'xpu'`` setting is based on intel-extension-for-pytorch and supports the following hardware: Intel Arc A- and B-Series, Iris Xe Graphics, Intel Data Center GPU Max Series (see more details in the `Intel documentation for pytorch extension <https://intel.github.io/intel-extension-for-pytorch/>`_). 
     
-     The ``'automatic'`` setting will prioritize ``'cuda'``, ``'xpu'``, and finally ``'cpu'``. **Default: \'automatic\'**. 
-* ``'eq_weights':`` (*list[float], optional*)
-    A list of weights to apply to the loss function of each equation. The length of the list must match the number of equations. If not provided, all equations are weighted equally. **Default: \'None\'**.
-* ``'weight_loss_param':`` (*float, optional*)
-    A weight factor for the identified scalar parameters (``ai``). A small value helps prevent these parameters from growing too large during training, and a big value increase the importance of ``ai`` parameters over ``fi`` functions. **Default: 1e-3**.
-* ``'initial_params':`` (*dict, optional*)
-    An array containing the scalar parameters (e.g., ``'a1'``, ``'a2'``,...) and their desired initial floating-point values. Example: \'initial_params\': {\'a1\': 1.5, \'a4\': 2.0}. **Default: 1.0** for all parameters. 
-* ``'n_eval':`` (*int, optional*)
-    The number of points to evaluate for generating the final characteristic curves in the ``evals`` output, i.e. the number of point to evaluate the obtained ``'fi'`` functions. **Default: 200**.
-* ``'constraints':`` (*list[dict], optional*)
-    A list of dictionaries, where each dictionary defines a physical constraint to be imposed on the model. This is one of the most powerful features. **Default: \'None\'**.
+     The ``'automatic'`` setting will prioritize ``'cuda'``, ``'xpu'``, and finally ``'cpu'``. 
+* ``'eq_weights':`` (*list[float], optional*) Default: ``'None'``
+    A list of weights to apply to the loss function of each equation. The length of the list must match the number of equations. If not provided, all equations are weighted equally.
+* ``'weight_loss_param':`` (*float, optional*) Default: 1e-3
+    A weight factor for the identified scalar parameters (``ai``). A small value helps prevent these parameters from growing too large during training, and a big value increase the importance of ``ai`` parameters over ``fi`` functions.
+* ``'initial_params':`` (*dict, optional*) Default: 1.0 for all parameters
+    An array containing the scalar parameters (e.g., ``'a1'``, ``'a2'``,...) and their desired initial floating-point values. Example: \'initial_params\': {\'a1\': 1.5, \'a4\': 2.0}. 
+* ``'n_eval':`` (*int, optional*) Default: 200
+    The number of points to evaluate for generating the final characteristic curves in the ``evals`` output, i.e. the number of point to evaluate the obtained ``'fi'`` functions. 
+* ``'constraints':`` (*list[dict], optional*) Default: ``'None'``
+    A list of dictionaries, where each dictionary defines a physical constraint to be imposed on the model. This is one of the most powerful features. 
 
     Each constraint dictionary can have the following keys:
     * ``'constraint'``: A string defining the constraint. Supported formats are:
         * **Point value**: ``'f1(0)=0'`` or ``'f2(1.5)=-0.8'``
         * **Symmetry**: ``'f1 odd'`` or ``'f2 even'``
-    * ``'penalty'``: (*float, optional*) A weight to multiply the loss from this specific constraint. **Default: 1.0**.
-    * ``'eval'``: (*str, optional*) For symmetry constraints only. Defines how the constraint is evaluated. Can be ``'data'`` (uses the provided data points) or ``'array'`` (creates a new linearly spaced array over the data range). **Default: \'array\'**.
-    * ``'Nval_array'``: (*int, optional*) If ``eval=\'array'``, this sets the number of points in the evaluation array. **Default: 100**.
+    * ``'penalty'``: (*float, optional*) Default: 1.0.  A weight to multiply the loss from this specific constraint.
+    * ``'eval'``: (*str, optional*) Default: ``'array'``. For symmetry constraints only. Defines how the constraint is evaluated. Can be ``'data'`` (uses the provided data points) or ``'array'`` (creates a new linearly spaced array over the data range).
+    * ``'Nval_array'``: (*int, optional*) Default: 100. If ``eval='array'``, this sets the number of points in the evaluation array.
 
     .. note::
 
@@ -161,7 +212,7 @@ This method uses a physics-informed neural network to learn the unknown function
 **Symbolic Regression (method=\'SymbR\')**
 -----------------------------------------
 
-This method uses Symbolic Regression, powered by the ``PySR`` library, to discover concise mathematical expressions for the unknown functions. It works by iteratively by fitting a symbolic model for each function ``f_i`` to be compatible with the list of \'equations\' for a given input database.  
+This method uses Symbolic Regression, powered by the ``PySR`` library, to discover mathematical expressions for the unknown functions through an outer loop. It works by iteratively by fitting a symbolic model for each function :math:`f_i` to be compatible with the list of \'equations\'.  
 
 The ``params`` dictionary for this method can contain the following keys:
 
@@ -183,7 +234,7 @@ The ``params`` dictionary for this method can contain the following keys:
 * ``'scaling':`` (*bool, optional*)
     If ``'True'``, the input variable for each function is scaled to the range `[-1, 1]` before fitting, which can improve stability. **Default: \'False\'**.
 * ``'n_eval':`` (*int, optional*)
-    The number of points to evaluate for generating the final characteristic curves in the ``evals`` output. **Default: 200**.
+    The number of points to evaluate for generating the final characteristic curves in the ``evals`` output. **Default: 200**. 
 
 **Example Usage:**
 

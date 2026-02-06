@@ -7,7 +7,8 @@ from .train_GP import train_GP
 
 def train(df, equations, method='NN', params=None):
     """
-    Trains a model to identify the system dynamics from data.
+    Trains a model to identify system dynamics based on the provided data structure 
+    (df) and equation structure (equations).
 
     This function acts as a dispatcher, selecting the appropriate training
     method based on the `method` argument. It passes the data, equations,
@@ -42,7 +43,7 @@ def train(df, equations, method='NN', params=None):
         * **'lr'** (*float*): Learning rate for the optimizer. Default: 1e-3.
         * **'epochs'** (*int*): Number of training epochs. Default: 1000.
         * **'device'** (*str*): The computing device ('cpu', 'cuda', 'xpu', 'automatic'). Default: 'automatic'.
-        * ... and other ..
+        * ... and others (see below) ..
     """
 
 #    .. seealso::

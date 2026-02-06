@@ -17,10 +17,10 @@ The core strength of **pyCC** lies in its **identifiability**, **physical consis
 🎯 Why pyCC
 ===========
 
-------------------------
-i) Identifiability
-------------------------
 
+**i) Identifiability**
+  
+     
 When inferring dynamical equations from real experiments (often with finite sampling or noisy data) multiple distinct mathematical models can fit the observations with comparable accuracy. This leads to **ambiguity in model selection**, also referred to as the **identifiability challenge**. This issue is intrinsically connected to the **ill-posed nature of the inverse problem**.
 
 **pyCC** addresses this issue by injecting **prior physical knowledge** or **hypotheses** into the discovery process by defining a structural 'skeleton'.
@@ -28,9 +28,7 @@ When inferring dynamical equations from real experiments (often with finite samp
 The choice of the structural skeleton directly affects identifiability: some equation forms admit unique decompositions, whereas others may lead to non-identifiable or ambiguous representations.  When the hypothetized model structure possess uniqueness properties, **pyCC** provides a formal framework to assess whether the proposed equation is consistent with the data. This enables the rigorous validation or elimination of hypothesized models, thereby shedding light to the identifiability challenge. 
 
 
-------------------------
-ii) Physical consistency
-------------------------
+**ii) Physical consistency**
 
 To define physically motivated model structures, the formalism of **Characteristic Curves (CCs)** is ideal.
 
@@ -40,9 +38,8 @@ By enforcing this decomposition, we define model structures that, apart from hav
 
 
 
-------------------------
-iii) Interpretability
-------------------------
+**iii) Interpretability**
+
 The use of CCs allows the practitioner to 'visualize' the model simply by plotting the univariate curves. This offers a visual tool that significantly enhances **interpretability**. 
 This has a simple but profound implication: the objective shifts from finding precise parameter values that represent the CCs to finding the **shape** of the functions themselves.
 
@@ -51,9 +48,7 @@ This has a simple but profound implication: the objective shifts from finding pr
 
 If the stiffness curve comes out looking like a line, we know the system is linear. If it looks like a parabola, we know it is nonlinear. This visual insight allows for qualitative discovery before quantitative fitting.
 
----------------------------------------------
-iv) Modularity, Universality and Transparency
----------------------------------------------
+**iv) Modularity, Universality and Transparency**
 
 Since **pyCC** prioritizes the **shape** of the constitutive relations over their specific model coefficients, the specific **parametric form** of the curves (e.g., whether they are polynomial, exponential, or trigonometric) does not need to be postulated *a priori*. This flexibility unlocks a highly **modular** approach that can be implemented using different modeling paradigms.
 
@@ -156,7 +151,7 @@ The workflow proceeds in three main stages:
 ------------------------
 
 
-To illustrate the application of the workflow, consider the task of identifying a second-order witha a velocity-dependent friction force and external driving force. The practitioner starts by hypothesizing a **second-order structural skeleton**:
+To illustrate the application of the workflow, consider the task of identifying a second-order with a velocity-dependent friction force and external driving force. The practitioner starts by hypothesizing a **second-order structural skeleton**:
 
 .. math::
 
@@ -177,20 +172,25 @@ The package handles the structural implementation automatically, allowing the pr
 
 *Figure 2: The architecture for a second-order system. Two independent neural networks (*:math:`\text{NN}_1` *and*:math:`\text{NN}_2` *) approximate the unknown CCs.*:math:`\,\text{NN}_1` *sees only velocity, and*:math:`\,\text{NN}_2` *sees only position. Their outputs are summed to match the hypothetized structure.*
 
-
+The internal architecture can be basically characterized by:
+ 
+* A dedicated estimator ( :math:`\text{NN}_1` ) receives *only* the velocity :math:`\dot{x}` to learn the shape of :math:`f_1`.
+* A dedicted estimator ( :math:`\text{NN}_2` ) receives *only* the position :math:`x` to learn the shape of :math:`f_2`.
 
 **Why this architecture matters:**
 
-Crucially, this architecture enforces the properties of uniqueness, interpretability, and physical consistency mentioned above. Instead of feeding all state variables into a single `black box` network, the system is physically modularized:
+Crucially, this architecture enforces the properties of uniqueness, interpretability, and physical consistency mentioned above. 
+This guarantees that, upon convergence, the solution is unique: :math:`\text{NN}_1` effectively converges to :math:`f_1` and :math:`\text{NN}_2` to :math:`f_2`, avoiding any ambiguity in the identification of the functions, as discussed in arXiv:2601.21720. 
 
-* Estimator for:math:`\,f_1` : A dedicated estimator (e.g., a Neural Network) receives *only* the velocity :math:`\dot{x}` to learn the shape of :math:`f_1`.
-* Estimator for:math:`\,f_2` : A separate estimator receives *only* the position :math:`x` to learn the shape of :math:`f_2`.
+
+
+
 
 .. 
+   Instead of feeding all state variables into a single `black box` network, the system is physically modularized:
    Their outputs are summed to reconstruct the total internal force, which is then compared against the measured data to compute the loss. 
-
-By strictly segregating variables, this design inherently eliminates the possibility of learning spurious cross-terms, such as :math:`x\dot{x}`, which are often incorrectly captured from noisy data.  
-Furthermore, the uniqueness of this equation structure ensures that physical laws are correctly identified even when using noisy data that might otherwise produce inconsistent results.
+   By using the defining the mathematical structure, this design inherently eliminates the possibility of learning spurious functional relations. In this example, this means avoiding for instance cross-terms such as :math:`x\cdot\dot{x}`, which are often incorrectly captured from noisy data.  
+   Furthermore, the uniqueness of this equation structure ensures that physical laws are correctly identified even when using noisy data that might otherwise produce inconsistent results.
 
 
 

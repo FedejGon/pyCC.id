@@ -47,10 +47,6 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">✏️ pyCC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="#why-pycc">🎯 Why pyCC</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#i-identifiability">i) Identifiability</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#ii-physical-consistency">ii) Physical consistency</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#iii-interpretability">iii) Interpretability</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#iv-modularity-universality-and-transparency">iv) Modularity, Universality and Transparency</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-pycc-approach-a-schematic-workflow">💡 The pyCC approach: A schematic workflow</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#application-example-to-a-second-order-system">🔬 Application example to a second order system</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#formalism">📝 Formalism</a></li>
@@ -121,20 +117,15 @@
 </section>
 <section id="why-pycc">
 <h1>🎯 Why pyCC<a class="headerlink" href="#why-pycc" title="Link to this heading"></a></h1>
-<section id="i-identifiability">
-<h2>i) Identifiability<a class="headerlink" href="#i-identifiability" title="Link to this heading"></a></h2>
+<p><strong>i) Identifiability</strong></p>
 <p>When inferring dynamical equations from real experiments (often with finite sampling or noisy data) multiple distinct mathematical models can fit the observations with comparable accuracy. This leads to <strong>ambiguity in model selection</strong>, also referred to as the <strong>identifiability challenge</strong>. This issue is intrinsically connected to the <strong>ill-posed nature of the inverse problem</strong>.</p>
 <p><strong>pyCC</strong> addresses this issue by injecting <strong>prior physical knowledge</strong> or <strong>hypotheses</strong> into the discovery process by defining a structural ‘skeleton’.</p>
 <p>The choice of the structural skeleton directly affects identifiability: some equation forms admit unique decompositions, whereas others may lead to non-identifiable or ambiguous representations.  When the hypothetized model structure possess uniqueness properties, <strong>pyCC</strong> provides a formal framework to assess whether the proposed equation is consistent with the data. This enables the rigorous validation or elimination of hypothesized models, thereby shedding light to the identifiability challenge.</p>
-</section>
-<section id="ii-physical-consistency">
-<h2>ii) Physical consistency<a class="headerlink" href="#ii-physical-consistency" title="Link to this heading"></a></h2>
+<p><strong>ii) Physical consistency</strong></p>
 <p>To define physically motivated model structures, the formalism of <strong>Characteristic Curves (CCs)</strong> is ideal.</p>
 <p>This formalism is based on a decomposition of high-dimensional, multivalued dynamics into modular, <strong>univariate functions</strong> referred to as CCs. In this view, each CC represents a constitutive relation of an independent physical element (e.g., a specific spring or a specific damper).</p>
 <p>By enforcing this decomposition, we define model structures that, apart from having uniqueness properties, yield functions that possess inherent physical meaning. This assures <strong>physical consistency</strong>: the learned model is not just a curve fit, but a collection of distinct physical mechanisms.</p>
-</section>
-<section id="iii-interpretability">
-<h2>iii) Interpretability<a class="headerlink" href="#iii-interpretability" title="Link to this heading"></a></h2>
+<p><strong>iii) Interpretability</strong></p>
 <p>The use of CCs allows the practitioner to ‘visualize’ the model simply by plotting the univariate curves. This offers a visual tool that significantly enhances <strong>interpretability</strong>.
 This has a simple but profound implication: the objective shifts from finding precise parameter values that represent the CCs to finding the <strong>shape</strong> of the functions themselves.</p>
 <ul class="simple">
@@ -142,9 +133,7 @@ This has a simple but profound implication: the objective shifts from finding pr
 <li><p><strong>pyCC approach:</strong> “Find the <em>shapes</em> of the stiffness and damping curves.”</p></li>
 </ul>
 <p>If the stiffness curve comes out looking like a line, we know the system is linear. If it looks like a parabola, we know it is nonlinear. This visual insight allows for qualitative discovery before quantitative fitting.</p>
-</section>
-<section id="iv-modularity-universality-and-transparency">
-<h2>iv) Modularity, Universality and Transparency<a class="headerlink" href="#iv-modularity-universality-and-transparency" title="Link to this heading"></a></h2>
+<p><strong>iv) Modularity, Universality and Transparency</strong></p>
 <p>Since <strong>pyCC</strong> prioritizes the <strong>shape</strong> of the constitutive relations over their specific model coefficients, the specific <strong>parametric form</strong> of the curves (e.g., whether they are polynomial, exponential, or trigonometric) does not need to be postulated <em>a priori</em>. This flexibility unlocks a highly <strong>modular</strong> approach that can be implemented using different modeling paradigms.</p>
 <p>For example, we can parameterize the CCs using <strong>universal approximators</strong>, such as Neural Networks (NNs). This approach (refered to as NN-CC) is powerful because it allows the discovery of physical laws without bias: the model can adapt to any continuous shape and also discontinouous?, regardless of its complexity, provided that … enough layers neurons?</p>
 <p>Crucially, this approach maintains <strong>transparency</strong>. While NNs are often regarded as opaque “black boxes” in high-dimensional tasks, within <strong>pyCC</strong> they are restricted to learning <strong>univariate</strong> functions. A “black box” with a single input and single output is effectively transparent: it is simply a curve that can be plotted and visually inspected to interpret the underlying physics.</p>
@@ -152,7 +141,6 @@ This has a simple but profound implication: the objective shifts from finding pr
 <p class="admonition-title">Note</p>
 <p><strong>The Core Philosophy:</strong> Instead of asking “What is the global equation?”, pyCC asks “Given this physical structure (e.g., a damped oscillator), what are the specific shapes of the stiffness and damping curves?” These curves are the constitutive relations of the system; once they are identified, the identification problem is effectively solved.</p>
 </div>
-</section>
 <section id="the-pycc-approach-a-schematic-workflow">
 <h2>💡 The pyCC approach: A schematic workflow<a class="headerlink" href="#the-pycc-approach-a-schematic-workflow" title="Link to this heading"></a></h2>
 <p><strong>pyCC</strong> frames discovery as a hypothesis-testing loop. The practitioner proposes a structure (e.g., “Is this a friction-based oscillator?”), and the library determines the optimal shapes of the internal functions in order to decide if the hypothetized structure is coherent with the data or should be modified.</p>
@@ -188,7 +176,7 @@ This has a simple but profound implication: the objective shifts from finding pr
 </section>
 <section id="application-example-to-a-second-order-system">
 <h2>🔬 Application example to a second order system<a class="headerlink" href="#application-example-to-a-second-order-system" title="Link to this heading"></a></h2>
-<p>To illustrate the application of the workflow, consider the task of identifying a second-order witha a velocity-dependent friction force and external driving force. The practitioner starts by hypothesizing a <strong>second-order structural skeleton</strong>:</p>
+<p>To illustrate the application of the workflow, consider the task of identifying a second-order with a velocity-dependent friction force and external driving force. The practitioner starts by hypothesizing a <strong>second-order structural skeleton</strong>:</p>
 <div class="math notranslate nohighlight">
 \[\ddot{x} + f_1(\dot{x}) + f_2(x) = F_{ext}(t)\]</div>
 <p>This equation implies that the system is governed by two CCs:
@@ -199,14 +187,14 @@ ii) A <strong>restoring force</strong> <span class="math notranslate nohighlight
 <a class="reference internal image-reference" href="_images/Fig2_model_veloc.png"><img alt="Neural Network architecture for a second-order system, showing two parallel branches summing to the output." class="align-center" src="_images/Fig2_model_veloc.png" style="width: 80%;" />
 </a>
 <p><em>Figure 2: The architecture for a second-order system. Two independent neural networks (</em><span class="math notranslate nohighlight">\(\text{NN}_1\)</span> <em>and</em><span class="math notranslate nohighlight">\(\text{NN}_2\)</span> <em>) approximate the unknown CCs.</em><span class="math notranslate nohighlight">\(\,\text{NN}_1\)</span> <em>sees only velocity, and</em><span class="math notranslate nohighlight">\(\,\text{NN}_2\)</span> <em>sees only position. Their outputs are summed to match the hypothetized structure.</em></p>
-<p><strong>Why this architecture matters:</strong></p>
-<p>Crucially, this architecture enforces the properties of uniqueness, interpretability, and physical consistency mentioned above. Instead of feeding all state variables into a single <cite>black box</cite> network, the system is physically modularized:</p>
+<p>The internal architecture can be basically characterized by:</p>
 <ul class="simple">
-<li><p>Estimator for:math:<cite>,f_1</cite> : A dedicated estimator (e.g., a Neural Network) receives <em>only</em> the velocity <span class="math notranslate nohighlight">\(\dot{x}\)</span> to learn the shape of <span class="math notranslate nohighlight">\(f_1\)</span>.</p></li>
-<li><p>Estimator for:math:<cite>,f_2</cite> : A separate estimator receives <em>only</em> the position <span class="math notranslate nohighlight">\(x\)</span> to learn the shape of <span class="math notranslate nohighlight">\(f_2\)</span>.</p></li>
+<li><p>A dedicated estimator ( <span class="math notranslate nohighlight">\(\text{NN}_1\)</span> ) receives <em>only</em> the velocity <span class="math notranslate nohighlight">\(\dot{x}\)</span> to learn the shape of <span class="math notranslate nohighlight">\(f_1\)</span>.</p></li>
+<li><p>A dedicted estimator ( <span class="math notranslate nohighlight">\(\text{NN}_2\)</span> ) receives <em>only</em> the position <span class="math notranslate nohighlight">\(x\)</span> to learn the shape of <span class="math notranslate nohighlight">\(f_2\)</span>.</p></li>
 </ul>
-<p>By strictly segregating variables, this design inherently eliminates the possibility of learning spurious cross-terms, such as <span class="math notranslate nohighlight">\(x\dot{x}\)</span>, which are often incorrectly captured from noisy data.
-Furthermore, the uniqueness of this equation structure ensures that physical laws are correctly identified even when using noisy data that might otherwise produce inconsistent results.</p>
+<p><strong>Why this architecture matters:</strong></p>
+<p>Crucially, this architecture enforces the properties of uniqueness, interpretability, and physical consistency mentioned above.
+This guarantees that, upon convergence, the solution is unique: <span class="math notranslate nohighlight">\(\text{NN}_1\)</span> effectively converges to <span class="math notranslate nohighlight">\(f_1\)</span> and <span class="math notranslate nohighlight">\(\text{NN}_2\)</span> to <span class="math notranslate nohighlight">\(f_2\)</span>, avoiding any ambiguity in the identification of the functions, as discussed in arXiv:2601.21720.</p>
 </section>
 <section id="formalism">
 <h2>📝 Formalism<a class="headerlink" href="#formalism" title="Link to this heading"></a></h2>

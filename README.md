@@ -70,7 +70,7 @@ The goal of **pyCC** is to discover the optimal functions $\\{\mathbf{f}\\}$ and
 The workflow proceeds in three main stages:
 
 1.  **Hypothesis & Setup:** Select state variables and propose a **Structural Skeleton** (e.g., $\ddot{x} + f_1(\dot{x}) + f_2(x) = F_{ext}$).
-2.  **Physics-Informed Optimization:** The library constructs a loss function to fit the data, enforcing **prior physical knowledge** (e.g., symmetry constraints  \"$$f_1$$ must be odd\").
+2.  **Physics-Informed Optimization:** The library constructs a loss function to fit the data, enforcing **prior physical knowledge** such as symmetries (for instance, forcing $$f_1$$ to be an odd function).
 3.  **Discovery & Validation:** The outputs are the **Characteristic Curves** themselves. These can be visually inspected for physical meaning, converted to analytic equations via Symbolic Regression, and validated via forward simulations. 
 
 ---

@@ -45,13 +45,12 @@ where:
 
 * The semicolon **`;`** is used to separate the system variables from the components to be identified. The terms to the left are the inputs and states, while those to the right are the unknowns to be discovered, including both functional forms and scalar parameters.
 
-* **$\\{\mathbf{f}\\}$** is a set of **unknown functions**, referred to as the **Characteristic Curves** (CCs). In this framework, each function in the set depends on only a *single state variable* $x_i$, ensuring high interpretability. For instance, separate functions 
+* **$\\{\mathbf{f}\\}$** is a set of **unknown functions**, referred to as the **Characteristic Curves** (CCs). In this framework, each function in the set depends on only a *single state variable* $x_i$, ensuring high interpretability. For instance, in the context of a 1D mechanical oscillator, the $$\mathbf{G}$$ structure could be expresssed as $$\ddot{x}=\mathbf{G}(x,\dot{x},\{f_1,f_2\},\{m\}) $$, where $$f_1(x)$$ represents the nonlinear stiffness (the spring), $$f_2(\dot{x})$$ represents the nonlinear damping or friction, and $$m$$ is the mass. 
 
-for example, one function could represent a nonlinear spring force, while another one an aerodynamic drag).
+* **$\mathbf{a}$** is a vector of **unknown scalar parameters**, such as mass, damping coefficients, or other physical constants to be identified. Within the pyCC library, these paraemeters are reserved under the names $$a_1 , a_2, \ldots, a_n$$.
 
-* **$\mathbf{a}$** is a vector of **unknown scalar parameters**, such as mass, damping coefficients, or other physical constants.
+* **$\mathbf{G}$** represents a proposed **model structure**. It represents a formal hypothesis proposed by the practitioner, defining the template that dictates how the building blocks (the functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$) are combined with the state $\mathbf{x}$ to compute the system's evolution. 
 
-* **$\mathbf{G}$** represents a proposed **model structure**. It defines the template that dictates how the building blocks (the functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$) are combined with the state $\mathbf{x}$ to compute the system evolution. This structure can be an arbitrary user-defined function.
 
 The goal of **pyCC** is to discover the optimal functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$ that best fit the observed data based on a predefined model structure $\mathbf{G}$.
 

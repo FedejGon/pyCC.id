@@ -10,6 +10,9 @@
 **pyCC** is Python library for data-driven equation discovery, designed to be user-friendly and highly-customizable to facilitate practical applications across science and engineering.
 
 
+**First time you see this library? We recommend starting with our Google Colab Notebook** [![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)!
+
+
 | **colab demo** | **Forums** | **Paper** |
 |:---:|:---:|:---:|
 |[![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)|[![Discussions](https://img.shields.io/badge/discussions-github-informational)](https://github.com/FedejGon/pyCC.id/discussions)|[![Paper](https://img.shields.io/badge/arXiv-2305.01582-b31b1b)](https://arxiv.org/)||
@@ -17,7 +20,7 @@
 </div>
 
 
-**First time you see this library? We recommend starting with our Google Colab Notebook** [![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)!
+
 
 
 ---
@@ -49,7 +52,7 @@ where:
 
 * The semicolon **`;`** is used to separate the system variables from the components to be identified. The terms to the left are the inputs and states, while those to the right are the unknowns to be discovered, including both functional forms and scalar parameters.
 
-* **$\\{\mathbf{f}\\}$** is a set of **unknown functions**, referred to as the **Characteristic Curves** (CCs). In this framework, each function in the set depends on only a *single state variable* $x_i$, ensuring high interpretability. For instance, in the context of a 1D mechanical oscillator, the $$\mathbf{G}$$ structure could be expresssed as $$\ddot{x}=\mathbf{G}(x,\dot{x},\{f_1,f_2\},\{m\}) $$, where $$f_1(x)$$ represents the nonlinear stiffness (the spring), $$f_2(\dot{x})$$ represents the nonlinear damping or friction, and $$m$$ is the mass. 
+* **$\\{\mathbf{f}\\}$** is a set of **unknown functions**, referred to as the **Characteristic Curves** (CCs). In this framework, each function in the set depends on only a *single state variable* $x_i$, ensuring high interpretability. For instance, in the context of a 1D mechanical oscillator, the $$\mathbf{G}$$ structure could be expressed as $$\ddot{x}=\mathbf{G}(x,\dot{x},\left{f_1,f_2\right},\left{m\right}) $$, where $$f_1(x)$$ represents the nonlinear stiffness (the spring), $$f_2(\dot{x})$$ represents the nonlinear damping or friction, and $$m$$ is the mass. 
 
 * **$\mathbf{a}$** is a vector of **unknown scalar parameters**, such as mass, damping coefficients, or other physical constants to be identified. Within the pyCC library, these paraemeters are reserved under the names $$a_1 , a_2, \ldots, a_n$$.
 

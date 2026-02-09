@@ -5,8 +5,6 @@
 
 [![GitHub repository](https://img.shields.io/badge/GitHub-FedejGon/pyCC.id-blue?style=flat-square&logo=github)](https://github.com/FedejGon/pyCC.id)
 
-..    
-        **pyCC.id** is a Python library for discovering interpretable, nonlinear dynamical systems from data. It is built on the concept of **Characteristic Curves (CCs)** and is designed to be highly customizable and user-friendly.
 
 
 **pyCC** is Python library for data-driven equation discovery, designed to be user-friendly and highly-customizable to facilitate practical applications across science and engineering.

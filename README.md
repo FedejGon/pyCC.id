@@ -107,31 +107,9 @@ We can parameterize the CCs using **universal approximators**, such as Neural Ne
 
 
 
-
-
-## 🔬 Application Example: A Second-Order System
-
-Consider identifying a second-order system with a velocity-dependent friction force and external driving force. The practitioner starts by hypothesizing the skeleton:
-
-$$
-\ddot{x} + f_1(\dot{x}) + f_2(x) = F_{ext}(t)
-$$
-
-This equation implies two CCs: a **damping force** $f_1(\dot{x})$ and a **restoring force** $f_2(x)$.
-
-<div align="center">
-<img src="docs/source/_static/Fig2_model_veloc.png" width="70%" alt="Neural Network architecture for a second-order system">
-
-*Figure 2: The architecture for a second-order system. Two independent neural networks ($$\text{NN}_1$$ and $$\text{NN}_2$$) approximate the unknown CCs. $$\text{NN}_1$$ sees only velocity, and $$\text{NN}_2$$ sees only position.*
-</div>
-
-**Why this architecture matters:**
-Crucially, this architecture enforces uniqueness and physical consistency. Even if the training data contains complex transient behaviors, the model **cannot** learn spurious cross-terms (like $x\dot{x}$) because no single module has access to both variables simultaneously.
-
-
 ---
 
-## 📖 Example: Nonlinear Oscillator
+## 🔬 📖 Example: A second-order system
 
 Let's consider a second-order nonlinear differential equation:
 
@@ -156,7 +134,27 @@ After simulating this system, the input data that will be used for identificatio
 With **pyCC.id**, you can face the identification problem in several ways:
 
 #### (i) Functional Approach
-Here, we assume the structure of the equation but leave key components as unknown functions to be discovered from data.
+
+In the functional approach, we assume the structure of the equation but leave key components as unknown functions to be discovered from data. 
+The practitioner starts by hypothesizing the skeleton, which in this case could be a second-order system with a velocity-dependent friction force and external driving force:
+
+$$
+\ddot{x} + f_1(\dot{x}) + f_2(x) = F_{ext}(t)
+$$
+
+This equation implies two CCs: a **damping force** $f_1(\dot{x})$ and a **restoring force** $f_2(x)$. The model architecture is schematized for NN approach in Fig. 2.
+
+<div align="center">
+<img src="docs/source/_static/Fig2_model_veloc.png" width="70%" alt="Neural Network architecture for a second-order system">
+
+*Figure 2: The architecture for a second-order system with a velocity-dependent friction force. Two independent neural networks (NN$_1$ and NN$_2$) approximate the unknown CCs. NN$_1$ sees only velocity, and NN$_2$ sees only position.*
+</div>
+
+**Why this architecture matters:**
+Crucially, this architecture enforces uniqueness and physical consistency. Even if the training data contains complex transient behaviors, the model **cannot** learn spurious cross-terms (like $x\dot{x}$) because no single module has access to both variables simultaneously. See more details in arXiv:2601.21720.
+
+
+We can express the proposed system equation as a set of two first-order equations as follows:
 
 $$
 \begin{cases}
@@ -166,6 +164,8 @@ $$
 $$
 
 The goal is to find the shapes of the characteristic curves $f_1$ and $f_2$. These functions can be parameterized using neural networks, polynomials, or other methods.
+
+
 
 
 #### (ii) Parametric Approach

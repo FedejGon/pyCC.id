@@ -86,20 +86,20 @@ The workflow proceeds in three main stages:
 
 ## 🔬 Why pyCC?
 
-**i) Identifiability**
+**i) Identifiability: **
 When inferring dynamical equations from real experiments (often with finite sampling or noisy data), multiple distinct mathematical models can fit the observations with comparable accuracy. This leads to **ambiguity in model selection**. **pyCC** addresses this by injecting **prior physical knowledge** into the discovery process via a structural 'skeleton'. When the hypothesized model structure possesses uniqueness properties, **pyCC** provides a formal framework to assess whether the proposed equation is consistent with the data.
 
-**ii) Physical Consistency**
+**ii) Physical Consistency: **
 To define physically motivated model structures, we use the formalism of **Characteristic Curves (CCs)**. This approach decomposes high-dimensional dynamics into modular, **univariate functions**. In this view, each CC represents a constitutive relation of an independent physical element (e.g., a specific spring or damper). This assures **physical consistency**: the learned model is not just a curve fit, but a collection of distinct physical mechanisms.
 
-**iii) Interpretability**
+**iii) Interpretability: **
 The use of CCs allows the practitioner to 'visualize' the model simply by plotting the univariate curves.
 * *Traditional approach:* "Find the coefficients $k$ and $c$ assuming linear dynamics."
 * *pyCC approach:* "Find the **shapes** of the stiffness and damping curves."
 
 If the stiffness curve looks like a parabola, we know the system is nonlinear. This visual insight allows for qualitative discovery before quantitative fitting.
 
-**iv) Modularity, Universality, and Transparency**
+**iv) Modularity, Universality, and Transparency: **
 Since **pyCC** prioritizes the **shape** of the constitutive relations over their specific model coefficients, the parametric form (e.g., polynomial vs. exponential) does not need to be postulated *a priori*.
 We can parameterize the CCs using **universal approximators**, such as Neural Networks (the **NN-CC** approach).
 * **Universality:** The model can adapt to any continuous shape regardless of complexity, provided sufficient model capacity.

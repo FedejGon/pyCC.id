@@ -128,7 +128,8 @@ $$
 \end{cases}
 $$
 
-After simulating this system, the input data that will be used for identification is defined by **$x_i$**, **$\dot{x}_{i}$** and **$F_{ext}$**.
+After simulating this system, the set **$\\{x_i, \dot{x}_{i}, F_{ext}\\}$** will be used for defining the database for system identification.
+
 
 ### Define an Identification Strategy
 With **pyCC.id**, you can face the identification problem in several ways:
@@ -142,12 +143,12 @@ $$
 \ddot{x} + f_1(\dot{x}) + f_2(x) = F_{ext}(t)
 $$
 
-This equation implies two CCs: a **damping force** $f_1(\dot{x})$ and a **restoring force** $f_2(x)$. The model architecture is schematized for NN approach in Fig. 2.
+This equation implies two CCs: a **damping force** $f_1(\dot{x})$ and a **restoring force** $f_2(x)$. The model architecture is schematized for the NN approach in Fig. 2.
 
 <div align="center">
 <img src="docs/source/_static/Fig2_model_veloc.png" width="70%" alt="Neural Network architecture for a second-order system">
 
-*Figure 2: The architecture for a second-order system with a velocity-dependent friction force. Two independent neural networks (NN$_1$ and NN$_2$) approximate the unknown CCs. NN$_1$ sees only velocity, and NN$_2$ sees only position.*
+*Figure 2: The architecture for a second-order system with a velocity-dependent friction force. Two independent neural networks (NN$$_1$$ and NN$$_2$$) approximate the unknown CCs. NN$$_1$$ sees only velocity, and NN$$_2$$ sees only position.*
 </div>
 
 **Why this architecture matters:**

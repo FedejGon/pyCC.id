@@ -5,9 +5,12 @@
 
 [![GitHub repository](https://img.shields.io/badge/GitHub-FedejGon/pyCC.id-blue?style=flat-square&logo=github)](https://github.com/FedejGon/pyCC.id)
 
-**pyCC.id** is a Python library for discovering interpretable, nonlinear dynamical systems from data. It is built on the concept of **Characteristic Curves (CCs)** and is designed to be highly customizable and user-friendly.
+..    
+        **pyCC.id** is a Python library for discovering interpretable, nonlinear dynamical systems from data. It is built on the concept of **Characteristic Curves (CCs)** and is designed to be highly customizable and user-friendly.
 
-**pyCC** is a user-friendly and highly-customizable Python library for data-driven equation discovery, designed to bridge the gap between *black-box* and *white-box* modeling paradigms, while facilitating practical applications in science and engineering.
+
+**pyCC** is Python library for data-driven equation discovery, designed to be user-friendly and highly-customizable to facilitate practical applications across science and engineering.
+
 
 | **colab demo** | **Forums** | **Paper** |
 |:---:|:---:|:---:|
@@ -20,7 +23,8 @@
 
 ## 🎯 Core Idea
 
-System identification (also known as equation discovery) is the process of finding the underlying governing equations of a system from observational data.  For many physical systems, the dynamics can be described by a set of first-order ordinary differential equations (ODEs):
+
+Equation discovery, which can be considered as a subfield of system identification, is the process of finding the underlying governing equations of a system from observational data.  For many physical systems, the dynamics can be described by a set of first-order ordinary differential equations (ODEs):
 
 $$
 \frac{d\mathbf{x}}{dt} = \mathbf{F}(\mathbf{x}, t)
@@ -29,7 +33,7 @@ $$
 Here, $\mathbf{x}(t)$ is the vector of the system's state variables (like position, velocity, etc.). The problem is that the function $\mathbf{F}$ can be incredibly complex and act like a "black box," making it difficult to gain physical insight.
 
 
-The core philosophy of **pyCC.id** is to break down this complex function $\mathbf{F}$ into a combination of simpler, **interpretable building blocks**. This approach mirrors how a scientist or practitioner would construct a model: by considering different functions and parameters for modeling phenomena like stiffness, damping, or external forces.
+The core philosophy of **pyCC.id** is to decompose this complex function $\mathbf{F}$ into a combination of simpler, **interpretable building blocks**. This approach mirrors how a scientist or practitioner usually construct a model in practice: by hypothesizing various functional forms and parameters to represent physical phenomena like stiffness, damping, or external forces.
 
 We express this decomposition as:
 
@@ -39,11 +43,13 @@ $$
 
 where:
 
-* **$\mathbf{x}$** and **$\mathbf{F}_{ext}(t)$** are the **inputs** to the model: $\mathbf{x}$ is the dynamical variable or **state** of the system; and $\mathbf{F}_{ext}(t)$ is a set of known, time-dependent **external forces**. These are the quantities you measure or control.
+* **$\mathbf{x}$** and **$\mathbf{F}_{ext}(t)$** are the model **inputs**: $\mathbf{x}$ represents the dynamical variables or the **state** of the system; while $\mathbf{F}_{ext}(t)$ denotes a set of known, time-dependent **external forces**. These are the quantities typically measured and/or controlled during an experiment.
 
-* The semicolon **`;`** separates the variables of the system from the components of the model you are trying to find. To the left are the inputs; to the right are the unknowns that define the model.
+* The semicolon **`;`** is used to separate the system variables from the components to be identified. The terms to the left are the inputs and states, while those to the right are the unknowns to be discovered, including both functional forms and scalar parameters.
 
-* **$\\{\mathbf{f}\\}$** is a set of **unknown functions**, which we call the **Characteristic Curves**. In this approach, each function in this set depends on only a *single state variable* $x_i$. This makes them interpretable (for example, one function could represent a nonlinear spring force, while another one an aerodynamic drag).
+* **$\\{\mathbf{f}\\}$** is a set of **unknown functions**, referred to as the **Characteristic Curves** (CCs). In this framework, each function in the set depends on only a *single state variable* $x_i$, ensuring high interpretability. For instance, separate functions 
+
+for example, one function could represent a nonlinear spring force, while another one an aerodynamic drag).
 
 * **$\mathbf{a}$** is a vector of **unknown scalar parameters**, such as mass, damping coefficients, or other physical constants.
 

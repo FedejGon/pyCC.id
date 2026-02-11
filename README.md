@@ -109,6 +109,45 @@ We can parameterize the CCs using **universal approximators**, such as Neural Ne
 
 ---
 
+## 📥  Installation with pip (Recommended)
+
+### Installation on CPU and Nvidia GPUs
+Some features in PyCC include using the Symbolic Regression (pySR) package. Thus we recommend installing this package first. To install both packages use:  
+```bash
+pip install pycc.id
+```
+
+### Installation on Intel XPUs
+To run pyCC library on Intel XPUs, the user must first install the *intel-extension-for-pytorch* package compatible with their operative system. Please refer to the official instructions at https://pytorch-extension.intel.com/installation. 
+
+Below are examples for installing version v2.8.10+xpu. 
+For Linux/WSL2 OS; first, install PyTorch and Intel extension packages: 
+```bash
+python -m pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/xpu
+python -m pip install intel-extension-for-pytorch==2.8.10+xpu --extra-index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/us/
+python -m pip install oneccl_bind_pt==2.8.0+xpu --index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/us/
+```
+For Windows OS; use instead:  
+```bash
+python -m pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/xpu
+python -m pip install intel-extension-for-pytorch==2.8.10+xpu --index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/us/
+```
+
+Final step: once the environment is set up, install the remaining packages from the PyCC library:
+```bash
+
+pip install pycc.id
+```
+
+
+### Installation for developers (from source)
+Download or clone the repository and install with:
+```bash
+pip install -e .
+```
+
+
+
 ## 🔬 📖 Example: A second-order system
 
 Let's consider a second-order nonlinear differential equation:
@@ -170,7 +209,7 @@ The goal is to find the shapes of the characteristic curves $f_1$ and $f_2$. The
 
 
 #### (ii) Parametric Approach
-If you have a strong hypothesis about the functional forms, you can identify the unknown parameters directly.
+If the practitioner has a strong hypothesis regarding specific functional forms, pyCC can be used to identify the unknown parameters directly, effectively acting as a robust parameter estimation framework. For instance, the system equations can be defined as:
 
 $$
 \begin{cases}
@@ -182,7 +221,7 @@ $$
 The goal is to find the optimal values for the parameters $\\{a_i\\}$ using nonlinear iterative algorithms.
 
 #### (iii) Hybrid Approach
-This approach combines the functional and parametric methods. You can assume known forms for some parts of the equation while leaving other parts as unknown functions.
+The pyCC library also enables a hybrid identification approach, combining functional and parametric methods. Practitioners can prescribe known functional forms for specific terms (anchoring the model in established physical laws) while leaving other components as unknown functions to be discovered from the data. For instance, the practitioner may define the following system equations:
 
 $$
 \begin{cases}
@@ -191,51 +230,14 @@ $$
 \end{cases}
 $$
 
-Here, we identify the function $f_1(\dot{x})$ and the parameters $a_4$ and $a_5$ simultaneously.
-
-
-## 📥  Installation with pip (Recommended)
-
-### Installation on CPU and Nvidia GPUs
-Some features in PyCC include using the Symbolic Regression (pySR) package. Thus we recommend installing this package first. To install both packages use:  
-```bash
-pip install pycc.id
-```
-
-### Installation on Intel XPUs
-To run this library on Intel XPUs, you must install the *intel-extension-for-pytorch* package compatible with your operative system. Please refer to the official instructions at https://pytorch-extension.intel.com/installation.
-
-Below are examples for installing version v2.8.10+xpu.
-For Linux/WSL2 OS; first, install PyTorch and Intel extension packages: 
-```bash
-python -m pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/xpu
-python -m pip install intel-extension-for-pytorch==2.8.10+xpu --extra-index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/us/
-python -m pip install oneccl_bind_pt==2.8.0+xpu --index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/us/
-```
-For Windows OS; use instead:  
-```bash
-python -m pip install torch==2.8.0 torchvision==0.23.0 torchaudio==2.8.0 --index-url https://download.pytorch.org/whl/xpu
-python -m pip install intel-extension-for-pytorch==2.8.10+xpu --index-url https://pytorch-extension.intel.com/release-whl/stable/xpu/us/
-```
-
-Final step: once the environment is set up, install the remaining packages from the PyCC library:
-```bash
-
-pip install pycc.id
-```
+Here, the objective is to simultaneously identify the unknown function $f_1(\dot{x})$ and the parameters $a_4$ and $a_5$.
 
 
 
-
-### Installation for developers (from source)
-Download or clone the repository and install with:
-```bash
-pip install -e .
-```
 
 ## 🚀 Usage
 
-```bash
+```python
 # Import the package into your Python environment
 import pycc
 import numpy as np
@@ -248,7 +250,7 @@ import matplotlib.pyplot as plt
 # 3) how to simulate the identified model [pycc.simulate()]
 
 ##############################################
-# 1) how to simulate a stick-slip second order system using pycc.simulate()
+# 1) simulating a stick-slip second order system using pycc.simulate()
 # 1a) define parameters and functions
 alpha=1.0;beta=0.2;delta=0.1;Omega=1.0;
 x0=0.0;v0=0.0; y0=[x0,v0] # initial conditions
@@ -293,8 +295,8 @@ df = pd.DataFrame({
 })
 
 ##############################################
-# 2) how to train the NN-CC method to identify the model [pycc.train()]
-# 2a) propose equations to use for identification (fi functions and ai parameters).
+# 2) training a model with the NN-CC method to identify the system [pycc.train()]
+# 2a) define equations to be used for identification (fi functions and ai parameters).
 eqs = [
      'x1_dot = x2', #*exp(a1-2.0)',
      'x2_dot = F_ext - f1(x2) - f2(x1)'
@@ -344,9 +346,9 @@ if obtained_coefs:
 
 
 ##############################################
-# 3) how to simulate the identified model [pycc.simulate()]
+# 3) simulating forward the identified model [pycc.simulate()]
 
-### Simulation using the NN models
+### Forward simulation using the NN models
 print("simulation with NN simul")
 # 3a) define simulation parameters
 params_NN_simul = {
@@ -371,7 +373,7 @@ x2_sim=sol.y[1]
 
 # Identified vs theoretical solution
 plt.figure()
-plt.plot(time_sim, x1_sim, label="x(t) simulated NN(sym+SR)")
+plt.plot(time_sim, x1_sim, label="x(t) simulated NN(+sym+SR)")
 plt.plot(time_data, x1_data, label="x(t) th")
 plt.xlabel('t')
 plt.ylabel('x(t)')
@@ -385,7 +387,7 @@ plt.show()
 
 
 ## 📚  Tutorials
-**First time? We recommend starting with our Google Colab Notebook** [![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)!
+**First time you see this library? We recommend starting with our Google Colab Notebook** [![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)!
 
 Additionally, various tutorials and examples are available in the *Tutorials* folder. You can download or copy these files to your local machine or cluster, and execute them directly, for example:
 ```bash

@@ -167,7 +167,7 @@ $$
 \end{cases}
 $$
 
-After simulating this system, the set \{$$x_i, \dot{x}_{i}, F_{ext}$$\} will be used for defining the database for system identification.
+After simulating this system, the set \{ $$x_i, \dot{x}_{i}, F_{ext}$$\} will be used for defining the database for system identification.
 
 
 ### Define an Identification Strategy

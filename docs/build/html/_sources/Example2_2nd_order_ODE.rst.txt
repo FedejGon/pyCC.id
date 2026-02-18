@@ -1,6 +1,7 @@
 =====
 Example 2: 2nd-order ODE
 =====
+
 This example presents the application of pyCC to a family of second order systems called as `velocity-dependent friction models with external force` (which is a generalized Rayleigh-type nonlinear oscillation with velocity-dependent friction and external forcing)
 
 second order stick-slip system. 

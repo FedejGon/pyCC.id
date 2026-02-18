@@ -13,7 +13,7 @@
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="../../_static/documentation_options.js?v=01f34227"></script>
-      <script src="../../_static/doctools.js?v=9a2dae69"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -39,9 +39,39 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+              <p class="caption" role="heading"><span class="caption-text">User guide:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../selected_functions.html">Selected functions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../why_pycc.html">✏️ PyCC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../why_pycc.html#why-pycc">🎯 Why PyCC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../usage.html">Usage</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Functions:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../functions_train.html">pycc.train()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions_simulate.html">pycc.simulate()</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../functions_postprocessing.html">pycc.post_processing()</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../Example1_training_function.html">Example 1: Function y=f(x)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Example2_2nd_order_ODE.html">Example 2: 2nd-order ODE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Example3_3rd_order_ODE.html">Example 3: 3rd-order ODE</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../Example4_1st_order_ODE_denominator.html">Example 4: 1st-order ODE with f in denominator</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../practical_tips.html">Practical Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../practical_tips.html#workflow-1">Workflow 1</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../practical_tips.html#workflow-2">Workflow 2</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Links:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../links.html">Community &amp; Useful Links</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">References:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../references.html">How to cite this package</a></li>
 </ul>
 
         </div>
@@ -76,7 +106,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">.simulate_from_evals_interp</span><span class="w"> </span><span class="kn">import</span> <span class="n">simulate_from_evals_interp</span>
 
 <div class="viewcode-block" id="simulate">
-<a class="viewcode-back" href="../../selected_functions.html#pycc.simulate">[docs]</a>
+<a class="viewcode-back" href="../../functions_simulate.html#pycc.simulate">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">simulate</span><span class="p">(</span><span class="n">equations</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;Theoretical&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Manager to select simulation method.</span>

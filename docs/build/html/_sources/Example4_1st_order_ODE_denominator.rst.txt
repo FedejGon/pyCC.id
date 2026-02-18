@@ -1,6 +1,8 @@
 =====
 Example 4: 1st-order ODE with f in denominator
 =====
+
+
 This example presents the application of pyCC to a family of first-order systems as discussed in Ref.[Gonzalez2023]. In this case, for training the system is useful to rewrite the system with the unknown functions in the numerator.
 
 .. code-block:: python

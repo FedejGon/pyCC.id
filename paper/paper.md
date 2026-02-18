@@ -23,60 +23,22 @@ bibliography: paper.bib
 
 
 
-A primary challenge in data-driven equation discovery is identifiability (the ability to distinguish the true physical model from a set of mathematically equivalent but physically incorrect candidates). Standard regression methods often struggle with this, producing models that fit the data well but lack physical validity. `PyCC.id` (or `PycCC`) addresses this critical issue by allowing the practitioner to incorporate domain-specific prior information directly into the modeling process. By enforcing user-defined structural families, `PyCC` restricts the search space to forms that are structurally identifiable, ensuring that the discovered model is not just a statistical approximation, but a unique representation of the system’s underlying physics.
+A primary challenge in data-driven equation discovery is identifiability (the ability to distinguish the true physical model from a set of mathematically equivalent but physically incorrect candidates). Standard regression methods often struggle with this, producing models that fit the data well but lack physical validity. `PyCC.id` (or `PyCC`) addresses this critical issue by allowing the practitioner to incorporate domain-specific prior information directly into the modeling process. By enforcing user-defined structural families, `PyCC` restricts the search space to forms that are structurally identifiable, ensuring that the discovered model is not just a statistical approximation, but a unique representation of the underlying physics of the system.
 
-Beyond uniqueness, `PyCC` prioritizes interpretability and transparency. Instead of treating the system dynamics as a black-box function, the framework decomposes the governing equations into characteristic curves (CCs). These are one-dimensional functions that hold direct physical meaning (for example, one curve might represent a nonlinear elastic restoring force, while another represents a dissipative damping force). This decomposition ensures that the resulting model is composed of distinct, interpretable elements that can be individually verified and linked to specific constitutive relations.
+Beyond uniqueness, `PyCC` prioritizes interpretability and transparency. Instead of treating the system dynamics as a black-box function, the framework allows the practitioner to decomposes the governing equations into characteristic curves (CCs). These are one-dimensional functions that hold direct physical meaning (for example, one curve might represent a nonlinear elastic restoring force, while another represents a dissipative damping force). This decomposition ensures that the resulting model is composed of distinct, interpretable elements that can be individually verified and linked to specific constitutive relations.
 
 
-`PyCC` formalizes this approach for systems described by ordinary differential equations. For a general system written as a set of first order equations: 
+`PyCC` formalizes this approach for systems described by ordinary differential equations (ODEs). For a general system written as a set of first order equations: 
  $d\mathbf{x}/dt = \mathbf{F}(\mathbf{x}, t)$
-(where $\mathbf{x}$ is the state vector and $\mathbf{F}$ is the vector field that defines de system), the framework decompose the vector field according to a physically motivated structure:
+(where $\mathbf{x}$ is the state vector and $\mathbf{F}$ is the vector field that defines the system), the framework decomposes $\mathbf{F}$ according to a physically motivated structure:
 
 $$
 \frac{d\mathbf{x}}{dt} = \mathbf{G}(\mathbf{x}, \mathbf{F}_{ext}(t); \{\mathbf{f}\}, \mathbf{a})
 $$
 
-Here, $\mathbf{G}$ represents the structural family (a hypothesis defined by the practitioner, such as, selecting a second-order oscillator with velocity-dependent friction). The inputs include the state vector $\mathbf{x}$ and external forces $\mathbf{F}_{ext}(t)$. The unknowns to be discovered are: (i) a set of one-dimensional functions $\{\mathbf{f}\}=\{f_1,f_2,\ldots\}$, referred to as the CCs; and (ii) a set of scalar parameters $\mathbf{a}=\{a_1,a_2,\ldots\}$.
+Here, $\mathbf{G}$ represents the structural family (a practitioner-defined hypothesis, such as selecting a second-order oscillator with velocity-dependent friction). The inputs include the state vector $\mathbf{x}$ and the external forces $\mathbf{F}_{ext}(t)$. The unknowns to be discovered are: (i) a set of one-dimensional functions $\{\mathbf{f}\}=\{f_1,f_2,\ldots\}$, referred to as the CCs; and (ii) a set of scalar parameters $\mathbf{a}=\{a_1,a_2,\ldots\}$.
 
-The pyCC library provides a flexible implementation of this formalism, supporting multiple backends to represent and train the unknown CCs. Users can model CCs using Neural Networks (NN) via PyTorch [@Paszke2019pytorch], polynomial basis functions (Poly), or Symbolic Regression (SymbR) via PySR [@Cranmer2023PySR]. The symbolic regression backend is particularly powerful, as it allows users to extract analytical expressions for the CCs either directly or as a post-processing step. Furthermore, physical knowledge (such as geometric symmetries, boundary conditions, or conservation laws) can be incorporated as explicit constraints during training, guiding the discovery process toward models that are both accurate and physically consistent.
-
-
-
-a user-defined structural family that reflects the hypothesis of the practitioner about the system (e.g., *a second order system with velocity-dependent friction*). The inputs $\mathbf{x}$ and $\mathbf{F}_{ext}(t)$ represent state vector and external forces, respectively. The unknowns to be discovered are: (1) a set of one-dimensional functions $\{\mathbf{f}\}=\{f_1,f_2,\ldots\}$, referred to as the CCs; and (2) a set of scalar parameters $\mathbf{a}=\{a_1,a_2,\ldots\}$.
-
-
-
-
-`PyCC.id` (or simply `PyCC`) is a user-friendly and highly-customizable Python package for data-driven equation discovery. It is designed to address the critical challenge of identifiability by incorporating domain-specific prior information into the modeling process. 
-This is achieved through the use of user-defined structural families, which restricts the search to structurally identifiable forms. 
-When the hypothesized structure is selected to satisfy certain uniqueness properties, the methodology guarantees identifiability, thereby allowing the practitioner to rigorously verify the validity of the proposed physical structure. Furthermore, by using characteristic curves (CCs) to define the constitutive relations of the system elements, the method ensures that the resulting models are inherently interpretable and physically consistent. 
- 
- 
-`PyCC.id` (or `PyCC`) is a user-friendly and highly-customizable Python package for discovering physical equations from data. 
-
-
-It is designed to allow the practitioner to incorporate domain-specific prior information into the modeling process, and thus helping to address the critical challenge of identifiability. 
-
-
-by incorporating domain-specific prior information into the modeling process. 
-
-
-It bridges the gap between raw data and physical theory by allowing the practitioner to incorporate domain knowledge directly into the search process. 
-
-data-driven equation discovery. 
- 
- 
-For systems described by ordinary differential equations (usually expressed as a set of first-order equations $d\mathbf{x}/dt = \mathbf{F}(\mathbf{x}, t)$,
-where $\mathbf{x}$ is the state vector and $\mathbf{F}$ is the vector field that defines de system), the CC-based framework allows the practitioner to decompose the vector field according to a physically motivated structure:
-
-$$
-\frac{d\mathbf{x}}{dt} = \mathbf{G}(\mathbf{x}, \mathbf{F}_{ext}(t); \{\mathbf{f}\}, \mathbf{a})
-$$
-
-Here, $\mathbf{G}$ represents a user-defined structural family that reflects the hypothesis of the practitioner about the system (e.g., *a second order system with velocity-dependent friction*). The inputs $\mathbf{x}$ and $\mathbf{F}_{ext}(t)$ represent state vector and external forces, respectively. The unknowns to be discovered are: (1) a set of one-dimensional functions $\{\mathbf{f}\}=\{f_1,f_2,\ldots\}$, referred to as the CCs; and (2) a set of scalar parameters $\mathbf{a}=\{a_1,a_2,\ldots\}$. 
- 
- 
-The package offers multiple backends for modeling these CCs using multiple training methodologies: neural networks (NN) via PyTorch [@Paszke2019pytorch], polynomial basis functions (Poly), and symbolic regression (SymbR) via PySR [@Cranmer2023PySR] (which can be used to discover analytical expressions directly or as a post-processing tool). Physical knowledge (such as geometric symmetries, boundary conditions, or conservation laws) can be incorporated as explicit constraints during training, guiding the discovery toward identifiable and physically consistent models. 
+The pyCC library provides a flexible implementation of this formalism, supporting multiple backends for representing and training the unknown CCs. Users can model CCs using Neural Networks (NNs) via PyTorch [@Paszke2019pytorch], polynomial basis functions (Poly), or symbolic regression (SymbR) via PySR [@Cranmer2023PySR]. The symbolic regression backend is particularly powerful because it enables the extraction of analytical expressions for the CCs, either directly during training or as a post-processing step. Furthermore, physical knowledge (such as geometric symmetries, boundary conditions, or conservation laws) can be incorporated as explicit constraints during training, thereby guiding the discovery process toward models that are both accurate and physically consistent.
 
 
 # Statement of Need
@@ -471,8 +433,52 @@ eqs = [
 
 
 
-#### Implementation Details 
-The following code presents the implementation details using the `PyCC` library:
+#### Using Other Methods 
+The examples provided above demonstrate the NN method for training. However, other methods, such as Poly (polynomial) or SymbR (symbolic regression), can be selected to represent the CCs with minimal modifications.
+
+
+For instance, we can use SymbR with the following modifications to the previous code:
+
+```python
+params_SymbR = {
+  'pysr': {
+    'niterations': 100,
+    'unary_operators': ['sin','cos','tanh'],
+    'binary_operators': ['+','-','*'],
+    'maxsize': 12,
+    'populations':10,
+    'model_selection': 'accuracy', 
+    'verbosity': 0
+  },
+  'N_fit_points': 200,
+  'max_iterations': 25,
+}
+models, evals , obtained_coefs = pycc.train(
+    df=df,
+    equations=equations,
+    method='SymbR',
+    params=params_SymbR
+)
+```
+
+We can use the obtained models from SymbR to simulate the system using the analytical expressions via the following lines:
+
+```python
+params_SR_simul = {
+    'models': models,
+    'obtained_coefs': obtained_coefs,
+    'local_funcs': {'F_ext': lambda t: F_ext(t)},
+    't_span':t_span,
+    'y0': y0,   
+    't_eval': t_eval,
+    'method': 'LSODA',  
+    'atol': 1e-8,
+    'rtol': 1e-6,
+    'check_nan': True
+}
+sol,_  = pycc.simulate(equations, method='SymbR', params=params_SR_simul)
+```
+
 
 
 

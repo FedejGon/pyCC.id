@@ -203,7 +203,7 @@ def simulate_Poly(equations: List[str], params: Dict[str, Any]):
     # --- START OF MODIFIED PARAMETER READING (SIMPLIFIED, NO TORCH) ---
     
     # 1. Get the scalar dictionary using ONLY 'scalar_params'. Defaults to empty dict.
-    scalar_input = params.get('scalar_params', {})
+    scalar_input = params.get('obtained_coefs', params.get('scalar_params', {})) 
     
     # 2. Final conversion to a dictionary of pure floats using the existing utility function.
     # This function handles conversion errors for non-float/non-convertible values.

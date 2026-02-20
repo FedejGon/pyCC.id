@@ -123,7 +123,7 @@ params_poly={
         {'constraint': 'f2 odd'}
     ],
   'initial_param_guess':[
-      {'a3':500},
+      {'a3':100},
   ],
   'learning_rate': 1e-3,
   'N_order': 40,

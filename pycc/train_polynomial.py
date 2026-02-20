@@ -69,8 +69,8 @@ def build_constraint_mask(constraints, f_name, n_coeffs):
 #    return mask
 
 # this function performs forward simulations and updates the model 
-def simulation_residuals(p_flat, df, eqs, base_models, base_scalars, state_vars, params_simul_dict):
-    """
+#def simulation_residuals(p_flat, df, eqs, base_models, base_scalars, state_vars, params_simul_dict):
+def simulation_residuals(p_flat, df, eqs, base_models, base_scalars, state_vars, params_simul_dict, param_names, tracker):    """
     Objective function for the simulation-based outer loop.
     Unpacks parameters, runs the forward simulation, and returns the residuals against df.
     """
@@ -112,7 +112,20 @@ def simulation_residuals(p_flat, df, eqs, base_models, base_scalars, state_vars,
         actual_trajectory = df[var].values
         residuals.append(simulated_trajectory - actual_trajectory)
 
-    return np.concatenate(residuals)
+    residuals_concat = np.concatenate(residuals)
+
+    # Custom Logging ---
+    tracker['count'] += 1
+    loss = np.mean(residuals_concat**2)
+    
+    # Format the scalar parameters nicely
+    param_str = " ".join([f"{name}: {new_scalars[name]:.3e}" for name in param_names if name in new_scalars])
+    max_iter = tracker['max_iter'] if tracker['max_iter'] is not None else "inf"
+    
+    # Print the log line
+    print(f"Iter {tracker['count']}/{max_iter}, Loss_x: {loss:.4e}, Params: {param_str}")
+
+    return residuals_concat
 
 
 def train_polynomial(df, equation, params=None):
@@ -497,11 +510,14 @@ def train_polynomial(df, equation, params=None):
             p0.append(final_scalars[a_name])
         p0 = np.array(p0)
         
+        tracker = {'count': 0, 'max_iter': n_iter_outer}
+
         # Run Levenberg-Marquardt optimizer
         res = least_squares(
             simulation_residuals, 
             x0=p0, 
-            args=(df, equations, models, final_scalars, state_vars, params_simul_dict),
+            #args=(df, equations, models, final_scalars, state_vars, params_simul_dict),
+            args=(df, equations, models, final_scalars, state_vars, params_simul_dict, param_names, tracker),
             method='lm',
             max_nfev=n_iter_outer,   # Limits the maximum iterations
             ftol=outer_tol,          # Cost function tolerance

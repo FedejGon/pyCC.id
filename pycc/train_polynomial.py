@@ -132,7 +132,8 @@ def train_polynomial(df, equation, params=None):
     for d in initial_param_guess:
         init_guesses.update(d)
     fitting_forw_sim = bool(params.get('fitting_forw_sim', False))
-    params_simul_list = params.get('params_simul', [])
+    n_iter_outer = params.get('n_iter_outer', None)   # Defaults to None (letting scipy decide)
+    outer_tol = float(params.get('outer_tol', 1e-8))  # Default tolerance outer loop
     params_simul_dict = {}
     for d in params_simul_list:
         params_simul_dict.update(d)
@@ -501,6 +502,10 @@ def train_polynomial(df, equation, params=None):
             x0=p0, 
             args=(df, equations, models, final_scalars, state_vars, params_simul_dict),
             method='lm',
+            max_nfev=n_iter_outer,   # Limits the maximum iterations
+            ftol=outer_tol,          # Cost function tolerance
+            xtol=outer_tol,          # Step size tolerance
+            gtol=outer_tol,          # Gradient tolerance
             verbose=2
         )
         

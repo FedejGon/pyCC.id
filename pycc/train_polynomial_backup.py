@@ -78,6 +78,10 @@ def train_polynomial(df, equation, params=None):
     learning_rate = float(params.get('learning_rate', 0.01))
     error_threshold = float(params.get('error_threshold', 1e-10))
     n_eval = int(params.get('n_eval', 200))
+    initial_param_guess = params.get('initial_param_guess', [])
+    init_guesses = {}
+    for d in initial_param_guess:
+        init_guesses.update(d)
         
     equations = list(equation) if isinstance(equation, (list, tuple)) else [equation]
     N_data = len(df)
@@ -159,6 +163,13 @@ def train_polynomial(df, equation, params=None):
     # --- Iterative fitting (Gauss-Newton) ---
     rng = np.random.RandomState(0)
     p = rng.randn(total_unknowns) * 1e-2
+
+    for i, a_name in enumerate(param_names):
+        if a_name in init_guesses:
+            # Scalar params are located at the end of p, starting at index n_active_coeffs_total
+            p_idx = n_active_coeffs_total + i
+            p[p_idx] = float(init_guesses[a_name])
+            print(f"Initialized parameter '{a_name}' to {init_guesses[a_name]}")
 
     print("Starting non-linear polynomial fitting with constraints...")
     for iter_num in range(n_iter):

@@ -122,7 +122,10 @@ params_poly={
         {'constraint': 'f1 odd'},
         {'constraint': 'f2 odd'}
     ],
-   'learning_rate': 1e-3,
+  'initial_param_guess':[
+      {'a3':500},
+  ],
+  'learning_rate': 1e-3,
   'N_order': 40,
   'n_iter':4000,
   'eq_weights':[1.0,1.0]

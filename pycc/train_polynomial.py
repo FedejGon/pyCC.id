@@ -70,7 +70,9 @@ def build_constraint_mask(constraints, f_name, n_coeffs):
 
 # this function performs forward simulations and updates the model 
 #def simulation_residuals(p_flat, df, eqs, base_models, base_scalars, state_vars, params_simul_dict):
-def simulation_residuals(p_flat, df, eqs, base_models, base_scalars, state_vars, params_simul_dict, param_names, tracker):    """
+
+def simulation_residuals(p_flat, df, eqs, base_models, base_scalars, state_vars, params_simul_dict, param_names, tracker):    
+    """
     Objective function for the simulation-based outer loop.
     Unpacks parameters, runs the forward simulation, and returns the residuals against df.
     """

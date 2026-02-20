@@ -134,6 +134,7 @@ def train_polynomial(df, equation, params=None):
     fitting_forw_sim = bool(params.get('fitting_forw_sim', False))
     n_iter_outer = params.get('n_iter_outer', None)   # Defaults to None (letting scipy decide)
     outer_tol = float(params.get('outer_tol', 1e-8))  # Default tolerance outer loop
+    params_simul_list = params.get('params_simul', [])
     params_simul_dict = {}
     for d in params_simul_list:
         params_simul_dict.update(d)

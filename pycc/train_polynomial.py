@@ -514,18 +514,34 @@ def train_polynomial(df, equation, params=None):
         
         tracker = {'count': 0, 'max_iter': n_iter_outer}
 
-        # Run Levenberg-Marquardt optimizer
+#        # Run Levenberg-Marquardt optimizer
+#        res = least_squares(
+#            simulation_residuals, 
+#            x0=p0, 
+#            #args=(df, equations, models, final_scalars, state_vars, params_simul_dict),
+#            args=(df, equations, models, final_scalars, state_vars, params_simul_dict, param_names, tracker),
+#            method='lm',
+#            max_nfev=n_iter_outer,   # Limits the maximum iterations
+#            ftol=outer_tol,          # Cost function tolerance
+#            xtol=outer_tol,          # Step size tolerance
+#            gtol=outer_tol,          # Gradient tolerance
+#            verbose=2
+#        )
+
+        # Run Trust Region Reflective optimizer with aggressive settings
         res = least_squares(
             simulation_residuals, 
             x0=p0, 
-            #args=(df, equations, models, final_scalars, state_vars, params_simul_dict),
             args=(df, equations, models, final_scalars, state_vars, params_simul_dict, param_names, tracker),
-            method='lm',
-            max_nfev=n_iter_outer,   # Limits the maximum iterations
-            ftol=outer_tol,          # Cost function tolerance
-            xtol=outer_tol,          # Step size tolerance
-            gtol=outer_tol,          # Gradient tolerance
-            verbose=2
+            method='trf',           # Switch to Trust Region Reflective
+            x_scale='jac',          # Crucial: Auto-scales parameters based on the Jacobian so a1 and a2 are treated fairly
+            diff_step=1e-2,         # Violent step: Forces the gradient calculation to look much wider (default is ~1e-8)
+            loss='soft_l1',         # Makes it more robust to sudden large errors during simulation
+            max_nfev=n_iter_outer,
+            ftol=outer_tol * 1e-4,  # Crush the tolerances to force it to keep trying
+            xtol=outer_tol * 1e-4,
+            gtol=outer_tol * 1e-4,
+            verbose=0
         )
         
         print("\nSimulation Fine-Tuning Finished. Success:", res.success)

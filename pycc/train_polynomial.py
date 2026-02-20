@@ -537,7 +537,7 @@ def train_polynomial(df, equation, params=None):
             simulation_residuals, 
             x0=p0, 
             #args=(df, equations, models, final_scalars, state_vars, params_simul_dict),
-            args=(df, equations, models, final_scalars, state_vars, params_simul_dict, param_names, racker),
+            args=(df, equations, models, final_scalars, state_vars, params_simul_dict, param_names, tracker),
             method='lm',
             max_nfev=n_iter_outer,   # Limits the maximum iterations
             ftol=outer_tol,          # Cost function tolerance

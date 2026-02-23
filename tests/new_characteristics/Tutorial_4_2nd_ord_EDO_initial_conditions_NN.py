@@ -134,7 +134,10 @@ parameters_NN = {
     'constraints': constraints,
     # New Fine-Tuning parameters
     'fitting_forw_sim': True,
-    'n_iter_outer': 100,
+    'n_iter_outer': 30,           # Reduced from 100. We just want a quick alignment.
+    'outer_tol': 1e-6,
+    'ft_batch_size': 2,           # Reduced from 5. 
+    'ft_max_window_size': 15,     # Reduced from 50. 15 steps is plenty to catch drift.
     'outer_tol': 1e-6,
     'params_simul': [
         {'local_funcs': {'F_ext': lambda t: F_ext(t)}},

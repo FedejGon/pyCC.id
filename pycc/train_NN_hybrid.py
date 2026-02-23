@@ -516,6 +516,7 @@ def train_NN_hybrid(df, equation_str, params=None):
             
     print("Note: if Constraints are present, then:  Total_loss=Loss+Constraints")
     for epoch in range(epochs):
+        epoch=epoch+1
         optimizer.zero_grad()
         # Compute total loss as weighted sum over all equations' MSE(lhs, rhs)
         total_data_loss = 0.0
@@ -536,7 +537,7 @@ def train_NN_hybrid(df, equation_str, params=None):
         total_loss.backward()
         optimizer.step()
         # printing — same behavior as before but using total_data_loss
-        if (epoch + 1)  % 100 == 0 or total_data_loss.item() < error_threshold or (epoch + 1) == 1 :
+        if epoch  % 100 == 0 or total_data_loss.item() < error_threshold or epoch == 1 :
             if scalar_params and constraints:
                 print(f"Epoch {epoch}/{epochs}, Loss: {total_data_loss.item():.2e}, Constraints: {constraint_loss:.2e}, Params: ", end="")
                 for k in scalar_params:

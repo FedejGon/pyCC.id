@@ -133,7 +133,7 @@ parameters_NN = {
     'weight_loss_param': 1e-3,
     'constraints': constraints,
     # New Fine-Tuning parameters
-    'fitting_forw_sim': True,
+   # 'fitting_forw_sim': True,
     'n_iter_outer': 30,           # Reduced from 100. We just want a quick alignment.
     'outer_tol': 1e-6,
     'ft_batch_size': 2,           # Reduced from 5. 

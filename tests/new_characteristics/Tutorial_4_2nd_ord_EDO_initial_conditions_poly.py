@@ -93,10 +93,10 @@ eqs = [
     'x2_dot = F_ext - a1* x2 - a2 * tanh(a3*x2) - a4* x1 - a5 * x1^3'
 ]
 
-#eqs = [
-#    'x1_dot = x2',
-#    'x2_dot = F_ext - a1* x2 - a2 * tanh(a3*x_dot) - f2(x1)'
-#]
+eqs = [
+    'x1_dot = x2',
+    'x2_dot = F_ext - a1* x2 - a2 * tanh(a3*x_dot) - f2(x1)'
+]
 #  Generate database that will be used for training
 # Here, we need to define all the variables that appear in eqs variable
 df = pd.DataFrame({
@@ -105,7 +105,7 @@ df = pd.DataFrame({
     'x2':x2_data,
     'x1_dot':x1_dot_data,
     'x2_dot':x2_dot_data,
-    'F_ext': F_ext_val
+    'F_ext': F_ext_val,
 })
 
 
@@ -129,7 +129,7 @@ params_poly={
   'N_order': 40,
   'n_iter':4000,
   'eq_weights':[1.0,1.0],
-  'fitting_forw_sim':True,  # Enables the option of refitting the coefficients using forward integr
+#  'fitting_forw_sim':True,  # Enables the option of refitting the coefficients using forward integr
   'n_iter_outer': 100,      # Max number of function evaluations for the outer loop
   'outer_tol': 1e-6,        # Tolerance for termination in the outer loop
   'params_simul': [
@@ -152,7 +152,8 @@ print ("a1", coefs['a1'])
 #x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
 
 f1_cc = coefs['a1']*x2_data+ coefs['a2']*np.tanh(coefs['a3']*x2_data)
-f2_cc = coefs['a4']* x1_data + coefs['a5'] * x1_data**3
+#f2_cc = coefs['a4']* x1_data + coefs['a5'] * x1_data**3
+x_f2_cc, f2_cc = evals
 fig, ax = plt.subplots(1, 2, figsize=(12, 6))
 #ax[0].plot(x_f1_cc, f1_cc, label='$f_1$ learned Poly-CC')
 #ax[0].plot(x_f1_cc, F1(x_f1_cc), '--', label="$f_1$ theory")
@@ -163,7 +164,8 @@ ax[0].set_ylabel('$f_1(x_2)$')
 ax[0].legend()
 #ax[1].plot(x_f2_cc, f2_cc, label='$f_2$ learned Poly-CC')
 #ax[1].plot(x_f2_cc, F2(x_f2_cc), '--', label="$f_2$ theory")
-ax[1].plot(x1_data, f2_cc, label='$f_2$ learned Poly-CC')
+#ax[1].plot(x1_data, f2_cc, label='$f_2$ learned Poly-CC')
+ax[1].plot(x_f2_cc, f2_cc, label='$f_2$ learned Poly-CC')
 ax[1].plot(x1_data, F2(x1_data), '--', label="$f_1$ theory")
 ax[1].set_xlabel('$x_1$')
 ax[1].set_ylabel('$f_2(x_1)$')
@@ -187,7 +189,6 @@ params_poly_simul = {
     'y0': y0,
     't_eval': t_eval,
     'method': 'LSODA',
-
 }
 # in this case, using Poly method yield to integration issues
 #sol = pycc.simulate(eqs, method='Poly', params=params_poly_simul)

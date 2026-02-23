@@ -22,7 +22,7 @@ import warnings
 # For fine-tuning
 from scipy.optimize import minimize
 try:
-    from simulate_SymbR import simulate_SymbR
+    from .simulate_SymbR import simulate_SymbR
 except ImportError:
     simulate_SymbR = None
 
@@ -47,10 +47,12 @@ def extract_parameters(equation_str):
 
 # ------------------ Fine-Tuning Module ------------------
 
+
 def _fine_tune_constants(models, df, equations, params, func_order):
     """
     Extracts constants from PySR symbolic expressions and optimizes them 
     using forward simulation to minimize trajectory MSE.
+    Prints intermediate losses during the iterative procedure.
     """
     if simulate_SymbR is None:
         warnings.warn("simulate_SymbR not found. Skipping fine-tuning.")
@@ -86,7 +88,6 @@ def _fine_tune_constants(models, df, equations, params, func_order):
     # Extract expressions and map constants
     flat_params0 = []
     param_mappings = {} # f_name -> (sym_expr, list_of_param_syms)
-    
     x0_sym = sp.Symbol('x0')
     
     for f_name, m in models.items():
@@ -97,7 +98,6 @@ def _fine_tune_constants(models, df, equations, params, func_order):
             except Exception:
                 expr = sp.sympify(str(pm.get_best()['equation']))
             
-            # Find all floats (constants PySR found)
             floats = list(expr.atoms(sp.Float))
             c_syms = [sp.Symbol(f'c_{f_name}_{i}') for i in range(len(floats))]
             
@@ -107,7 +107,6 @@ def _fine_tune_constants(models, df, equations, params, func_order):
             param_mappings[f_name] = (expr_param, c_syms)
             flat_params0.extend([float(fl) for fl in floats])
         else:
-            # Handle constant baseline model
             val = m.get('const', 0.0)
             c_sym = sp.Symbol(f'c_{f_name}_0')
             param_mappings[f_name] = (c_sym, [c_sym])
@@ -119,7 +118,14 @@ def _fine_tune_constants(models, df, equations, params, func_order):
         print("No floating-point constants found to fine-tune.")
         return models, {}
 
+    # --- Tracking variables for intermediate printing ---
+    eval_counter = 0
+    best_loss = np.inf
+
     def objective(p_array):
+        nonlocal eval_counter, best_loss
+        eval_counter += 1
+        
         idx = 0
         temp_models = {}
         for f_name, m in models.items():
@@ -134,17 +140,13 @@ def _fine_tune_constants(models, df, equations, params, func_order):
             var_name = m['var']
             A0, A1 = m['A0'], m['A1']
             
-            # Lambdify expression
             if not new_expr.free_symbols.difference(set(c_syms)):
-                # Constant expression
                 const_val = float(new_expr)
                 temp_models[f_name] = {'const': const_val, 'A0': A0, 'A1': A1, 'var': var_name, 'expr': new_expr}
             else:
-                # Need to use the exact symbol PySR uses ('x0' by default for 1D inputs)
                 sym = x0_sym if x0_sym in new_expr.free_symbols else list(new_expr.free_symbols)[0]
                 lam = sp.lambdify(sym, new_expr, 'numpy')
                 
-                # We create a closure that handles the scaling internally
                 def mk_pred(lam_func, a0=A0, a1=A1):
                     def pred(x_arr):
                         z = (np.asarray(x_arr) - a0) / a1
@@ -156,27 +158,35 @@ def _fine_tune_constants(models, df, equations, params, func_order):
                 
                 temp_models[f_name] = {'func': mk_pred(lam), 'var': var_name, 'A0': A0, 'A1': A1, 'expr': new_expr}
                 
-        # Run simulation with temporary models
         sim_p = sim_params.copy()
         sim_p['models'] = temp_models
-        sim_p['print_models'] = False # Mute printing during optimization
+        sim_p['print_models'] = False
         sim_p['check_nan'] = False
         
         try:
             sol, _ = simulate_SymbR(equations, sim_p)
             if sol.y.shape != true_traj.shape:
-                return 1e6 # Shape mismatch penalty
-            mse = np.mean((sol.y - true_traj)**2)
-            return mse
+                mse = 1e6 # Penalty for shape mismatch
+            else:
+                mse = np.mean((sol.y - true_traj)**2)
         except Exception:
-            return 1e6 # Penalty for divergent integration
+            mse = 1e6 # Penalty for divergent integration
+
+        # --- Print intermediate results ---
+        if mse < best_loss and mse != 1e6:
+            best_loss = mse
+            print(f"  -> Eval {eval_counter:03d} | New best MSE: {best_loss:.6e}")
+        elif eval_counter % 20 == 0:
+            print(f"  -> Eval {eval_counter:03d} | Current MSE: {mse:.6e} (Best: {best_loss:.6e})")
+
+        return mse
 
     # Optimize
     print(f"Optimizing {len(flat_params0)} parameters...")
     res = minimize(objective, flat_params0, method='Nelder-Mead', 
                    options={'maxiter': n_iter_outer, 'xatol': outer_tol, 'disp': True})
     
-    print(f"Fine-tuning complete. Final MSE: {res.fun:.4e}")
+    print(f"Fine-tuning complete. Final MSE: {res.fun:.6e}")
     
     # Rebuild final updated models dict & prediction closures
     idx = 0
@@ -188,14 +198,13 @@ def _fine_tune_constants(models, df, equations, params, func_order):
         idx += n_c
         
         best_expr = expr_param.subs(dict(zip(c_syms, best_p)))
-        models[f_name]['expr'] = best_expr # store updated expr for simulation printing
+        models[f_name]['expr'] = best_expr
         
         A0, A1 = m['A0'], m['A1']
         if not best_expr.free_symbols.difference(set(c_syms)):
             const_val = float(best_expr)
             updated_preds[f_name] = lambda x, c=const_val: np.full_like(x, c, dtype=float)
             models[f_name]['const'] = const_val
-            # Optionally remove pysr_model to force using 'const' in downstream code
             models[f_name]['pysr_model'] = None 
         else:
             sym = x0_sym if x0_sym in best_expr.free_symbols else list(best_expr.free_symbols)[0]
@@ -210,7 +219,6 @@ def _fine_tune_constants(models, df, equations, params, func_order):
                 return pred
             
             updated_preds[f_name] = mk_pred(lam)
-            # Injecting the callable directly into the dictionary so simulate_SymbR uses it over PySR
             models[f_name]['func'] = updated_preds[f_name]
 
     return models, updated_preds

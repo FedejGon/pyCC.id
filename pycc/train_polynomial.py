@@ -71,31 +71,22 @@ def build_constraint_mask(constraints, f_name, n_coeffs):
 # this function performs forward simulations and updates the model 
 #def simulation_residuals(p_flat, df, eqs, base_models, base_scalars, state_vars, params_simul_dict):
 
-
-
-def simulation_residuals(p_flat, df, eqs, base_models, base_scalars, state_vars, params_simul_dict, param_names, tracker, coeffs_mask, func_order):    
+def simulation_residuals(p_flat, df, eqs, base_models, base_scalars, state_vars, params_simul_dict, param_names, tracker):    
     """
     Objective function for the simulation-based outer loop.
-    Unpacks ONLY active parameters, runs the forward simulation, and returns the residuals against df.
+    Unpacks parameters, runs the forward simulation, and returns the residuals against df.
     """
-    # 1. Unpack flat parameter array back into dictionaries using masks
+    # 1. Unpack flat parameter array back into dictionaries
     idx = 0
     new_models = copy.deepcopy(base_models)
-    
-    for f_name, _ in func_order:
-        mask = coeffs_mask[f_name]
-        n_active = int(np.sum(mask))
-        
-        # Create a zeroed array for all coefficients, then fill only the active ones
-        new_coeffs = np.zeros(len(mask), dtype=float)
-        if n_active > 0:
-            new_coeffs[mask] = p_flat[idx : idx + n_active]
-            
-        new_models[f_name]['coeffs'] = new_coeffs
-        idx += n_active
+    # We rely on base_models keeping insertion order (dict in Python 3.7+ keeps order)
+    for f_name in base_models.keys():
+        n_coeffs = len(new_models[f_name]['coeffs'])
+        new_models[f_name]['coeffs'] = p_flat[idx : idx + n_coeffs]
+        idx += n_coeffs
         
     new_scalars = copy.deepcopy(base_scalars)
-    for a_name in param_names:
+    for a_name in base_scalars.keys():
         new_scalars[a_name] = p_flat[idx]
         idx += 1
 
@@ -137,7 +128,6 @@ def simulation_residuals(p_flat, df, eqs, base_models, base_scalars, state_vars,
     print(f"Iter {tracker['count']}/{max_iter}, Loss_x: {loss:.4e}, Params: {param_str}")
 
     return residuals_concat
-    
 
 
 def train_polynomial(df, equation, params=None):
@@ -529,8 +519,7 @@ def train_polynomial(df, equation, params=None):
         res = least_squares(
             simulation_residuals, 
             x0=p0, 
-            #args=(df, equations, models, final_scalars, state_vars, params_simul_dict, param_names, tracker),
-            args=(df, equations, models, final_scalars, state_vars, params_simul_dict, param_names, tracker, coeffs_mask, func_order),
+            args=(df, equations, models, final_scalars, state_vars, params_simul_dict, param_names, tracker),
             method='trf',           # Switch to Trust Region Reflective
             x_scale='jac',          # Crucial: Auto-scales parameters based on the Jacobian so a1 and a2 are treated fairly
             diff_step=1e-2,         # Violent step: Forces the gradient calculation to look much wider (default is ~1e-8)
@@ -559,30 +548,17 @@ def train_polynomial(df, equation, params=None):
         
         print("\nSimulation Fine-Tuning Finished. Success:", res.success)
         
-#        # Overwrite models and final_scalars with the newly optimized values
-#        idx = 0
-#        for f_name, _ in func_order:
-#            n_coeffs = len(models[f_name]['coeffs'])
-#            models[f_name]['coeffs'] = res.x[idx : idx + n_coeffs]
-#            idx += n_coeffs
-#            
-#        for a_name in param_names:
-#            final_scalars[a_name] = res.x[idx]
-#            idx += 1    
-
-        # Overwrite models and final_scalars with the newly optimized ACTIVE values
+        # Overwrite models and final_scalars with the newly optimized values
         idx = 0
         for f_name, _ in func_order:
-            mask = coeffs_mask[f_name]
-            n_active = int(np.sum(mask))
-            # Update only active indices; inactive ones stay exactly 0
-            if n_active > 0:
-                models[f_name]['coeffs'][mask] = res.x[idx : idx + n_active]
-            idx += n_active
+            n_coeffs = len(models[f_name]['coeffs'])
+            models[f_name]['coeffs'] = res.x[idx : idx + n_coeffs]
+            idx += n_coeffs
             
         for a_name in param_names:
             final_scalars[a_name] = res.x[idx]
-            idx += 1
+            idx += 1    
+
 
 
     # Build evals

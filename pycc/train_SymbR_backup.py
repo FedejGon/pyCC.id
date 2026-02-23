@@ -5,11 +5,15 @@ Iterative symbolic-regression fitter for functions f1(x), f2(x_dot), ...
 Given a list of algebraic equations like
     'x_ddot + f1(x_dot) + f2(x) - F_ext = 0'
 and possibly additional equations, this script fits each f_i using PySR
-in an alternating / Gauss-Seidel style loop.
-
-Optionally performs forward-simulation fine-tuning of the discovered constants.
+in an alternating / Gauss-Seidel style loop: at each iteration we isolate one
+f_i from one equation (sympy), evaluate the target using current estimates
+of the other f_j's and then fit a PySR model mapping the function's variable
+-> f_i(variable).
 
 Returns: models (dict), evals (list: x_plot, y_plot pairs for each f), scalar_coefs (empty dict)
+
+Requirements: numpy, pandas, sympy, pysr
+
 """
 
 import numpy as np
@@ -19,13 +23,6 @@ import sympy as sp
 from collections import OrderedDict
 import warnings
 
-# For fine-tuning
-from scipy.optimize import minimize
-try:
-    from simulate_SymbR import simulate_SymbR
-except ImportError:
-    simulate_SymbR = None
-
 try:
     from pysr import PySRRegressor
 except Exception as e:
@@ -33,9 +30,10 @@ except Exception as e:
     warnings.warn("PySR import failed. Install pysr to use SymbR method.")
 
 
-# ------------------ Utilities ------------------
+# ------------------ Utilities copied/adapted from train_polynomial ------------------
 def parse_functions(equation_str):
-    pattern = r'(f\d+)\((\w+)\)' 
+    #pattern = r'(f\d+)\(([a-zA-Z_]+)\)' #without_numbers
+    pattern = r'(f\d+)\((\w+)\)' # with numbers, i.e. f(x1)
     all_funcs = re.findall(pattern, equation_str)
     unique_funcs = list(OrderedDict.fromkeys(all_funcs))
     return unique_funcs
@@ -45,197 +43,41 @@ def extract_parameters(equation_str):
     return sorted(set(re.findall(r'\ba\d+\b', equation_str)))
 
 
-# ------------------ Fine-Tuning Module ------------------
-
-def _fine_tune_constants(models, df, equations, params, func_order):
-    """
-    Extracts constants from PySR symbolic expressions and optimizes them 
-    using forward simulation to minimize trajectory MSE.
-    """
-    if simulate_SymbR is None:
-        warnings.warn("simulate_SymbR not found. Skipping fine-tuning.")
-        return models, {}
-    
-    print("Starting forward-simulation fine-tuning...")
-    
-    # Parse params_simul (handles list of dicts or single dict)
-    sim_params_raw = params.get('params_simul', {})
-    sim_params = {}
-    if isinstance(sim_params_raw, list):
-        for d in sim_params_raw:
-            sim_params.update(d)
-    else:
-        sim_params = sim_params_raw.copy()
-
-    # Determine ground truth trajectories from dataframe
-    state_vars = []
-    for eq in equations:
-        if '=' in eq:
-            lhs = eq.split('=')[0].strip()
-            state_vars.append(lhs.replace('_dot', ''))
-            
-    try:
-        true_traj = np.vstack([df[sv].values for sv in state_vars])
-    except KeyError as e:
-        warnings.warn(f"State variable missing from dataframe for fine-tuning: {e}")
-        return models, {}
-
-    n_iter_outer = params.get('n_iter_outer', 200)
-    outer_tol = params.get('outer_tol', 1e-6)
-
-    # Extract expressions and map constants
-    flat_params0 = []
-    param_mappings = {} # f_name -> (sym_expr, list_of_param_syms)
-    
-    x0_sym = sp.Symbol('x0')
-    
-    for f_name, m in models.items():
-        pm = m.get('pysr_model')
-        if pm is not None:
-            try:
-                expr = pm.sympy()
-            except Exception:
-                expr = sp.sympify(str(pm.get_best()['equation']))
-            
-            # Find all floats (constants PySR found)
-            floats = list(expr.atoms(sp.Float))
-            c_syms = [sp.Symbol(f'c_{f_name}_{i}') for i in range(len(floats))]
-            
-            subs_dict = dict(zip(floats, c_syms))
-            expr_param = expr.subs(subs_dict)
-            
-            param_mappings[f_name] = (expr_param, c_syms)
-            flat_params0.extend([float(fl) for fl in floats])
-        else:
-            # Handle constant baseline model
-            val = m.get('const', 0.0)
-            c_sym = sp.Symbol(f'c_{f_name}_0')
-            param_mappings[f_name] = (c_sym, [c_sym])
-            flat_params0.append(float(val))
-            
-    flat_params0 = np.array(flat_params0)
-    
-    if len(flat_params0) == 0:
-        print("No floating-point constants found to fine-tune.")
-        return models, {}
-
-    def objective(p_array):
-        idx = 0
-        temp_models = {}
-        for f_name, m in models.items():
-            expr_param, c_syms = param_mappings[f_name]
-            n_c = len(c_syms)
-            p_vals = p_array[idx:idx+n_c]
-            idx += n_c
-            
-            subs_dict = dict(zip(c_syms, p_vals))
-            new_expr = expr_param.subs(subs_dict)
-            
-            var_name = m['var']
-            A0, A1 = m['A0'], m['A1']
-            
-            # Lambdify expression
-            if not new_expr.free_symbols.difference(set(c_syms)):
-                # Constant expression
-                const_val = float(new_expr)
-                temp_models[f_name] = {'const': const_val, 'A0': A0, 'A1': A1, 'var': var_name, 'expr': new_expr}
-            else:
-                # Need to use the exact symbol PySR uses ('x0' by default for 1D inputs)
-                sym = x0_sym if x0_sym in new_expr.free_symbols else list(new_expr.free_symbols)[0]
-                lam = sp.lambdify(sym, new_expr, 'numpy')
-                
-                # We create a closure that handles the scaling internally
-                def mk_pred(lam_func, a0=A0, a1=A1):
-                    def pred(x_arr):
-                        z = (np.asarray(x_arr) - a0) / a1
-                        res = lam_func(z)
-                        if np.isscalar(res):
-                            return np.full_like(z, res, dtype=float)
-                        return np.asarray(res, dtype=float)
-                    return pred
-                
-                temp_models[f_name] = {'func': mk_pred(lam), 'var': var_name, 'A0': A0, 'A1': A1, 'expr': new_expr}
-                
-        # Run simulation with temporary models
-        sim_p = sim_params.copy()
-        sim_p['models'] = temp_models
-        sim_p['print_models'] = False # Mute printing during optimization
-        sim_p['check_nan'] = False
-        
-        try:
-            sol, _ = simulate_SymbR(equations, sim_p)
-            if sol.y.shape != true_traj.shape:
-                return 1e6 # Shape mismatch penalty
-            mse = np.mean((sol.y - true_traj)**2)
-            return mse
-        except Exception:
-            return 1e6 # Penalty for divergent integration
-
-    # Optimize
-    print(f"Optimizing {len(flat_params0)} parameters...")
-    res = minimize(objective, flat_params0, method='Nelder-Mead', 
-                   options={'maxiter': n_iter_outer, 'xatol': outer_tol, 'disp': True})
-    
-    print(f"Fine-tuning complete. Final MSE: {res.fun:.4e}")
-    
-    # Rebuild final updated models dict & prediction closures
-    idx = 0
-    updated_preds = {}
-    for f_name, m in models.items():
-        expr_param, c_syms = param_mappings[f_name]
-        n_c = len(c_syms)
-        best_p = res.x[idx:idx+n_c]
-        idx += n_c
-        
-        best_expr = expr_param.subs(dict(zip(c_syms, best_p)))
-        models[f_name]['expr'] = best_expr # store updated expr for simulation printing
-        
-        A0, A1 = m['A0'], m['A1']
-        if not best_expr.free_symbols.difference(set(c_syms)):
-            const_val = float(best_expr)
-            updated_preds[f_name] = lambda x, c=const_val: np.full_like(x, c, dtype=float)
-            models[f_name]['const'] = const_val
-            # Optionally remove pysr_model to force using 'const' in downstream code
-            models[f_name]['pysr_model'] = None 
-        else:
-            sym = x0_sym if x0_sym in best_expr.free_symbols else list(best_expr.free_symbols)[0]
-            lam = sp.lambdify(sym, best_expr, 'numpy')
-            def mk_pred(lam_func, a0=A0, a1=A1):
-                def pred(x_arr):
-                    z = (np.asarray(x_arr) - a0) / a1
-                    res = lam_func(z)
-                    if np.isscalar(res):
-                        return np.full_like(z, res, dtype=float)
-                    return np.asarray(res, dtype=float)
-                return pred
-            
-            updated_preds[f_name] = mk_pred(lam)
-            # Injecting the callable directly into the dictionary so simulate_SymbR uses it over PySR
-            models[f_name]['func'] = updated_preds[f_name]
-
-    return models, updated_preds
-
-
 # ------------------ Core SymbR trainer ------------------
 
 def train_SymbR(df, equations, params=None):
-    """Fit functions f1,f2,... appearing in equations using PySR."""
-    # ... [Same Default Setup as before] ...
+    """Fit functions f1,f2,... appearing in equations using PySR.
+
+    Args:
+        df: pandas.DataFrame with columns used in equations.
+        equations: list of equation strings (each containing an '=' ).
+        params: dict with keys:
+            - 'pysr': dict of kwargs forwarded to PySRRegressor (niterations, unary_operators, ...)
+            - 'N_fit_points': number of points to use to fit (subsample) or None
+            - 'max_iterations': max outer iterations
+            - 'tol': stopping tolerance on MSE change
+            - 'scaling': bool whether to scale inputs to [-1,1] for fitting
+    Returns:
+        models: dict f_name -> {'pysr_model': PySRRegressor, 'A0':, 'A1':, 'var': var_name}
+        evals: list [x_plot, y_plot, ...] pairs for plotting
+        scalar_coefs: {} (kept for compatibility)
+    """
     default_pysr = {
         'niterations': 100,
         'unary_operators': ['tanh'],
         'binary_operators': ['+', '-', '*'],
         'maxsize': 12,
         'populations': 10,
-        'model_selection': 'best', 
+        'model_selection': 'best', # 'accuracy' , 'score' 
         'verbosity': 0
     }
     if params is None:
         params = {}
+    #pysr_kwargs = params.get('pysr', {}) or {}
     pysr_kwargs = params.get('pysr', default_pysr)
     for key, val in default_pysr.items():
         pysr_kwargs.setdefault(key, val)
-    N_fit_points = params.get('N_fit_points', 200)
+    N_fit_points = params.get('N_fit_points', 200) # none
     max_iterations = int(params.get('max_iterations',15 ))
     tol = float(params.get('tol', 1e-10))
     scaling = bool(params.get('scaling', False))
@@ -244,9 +86,11 @@ def train_SymbR(df, equations, params=None):
     if PySRRegressor is None:
         raise ImportError('PySR is required for SymbR method. pip install pysr')
 
+    # Prepare
     equations = list(equations) if isinstance(equations, (list, tuple)) else [equations]
     N_data = len(df)
 
+    # Parse functions and ensure consistent usage
     func_map = OrderedDict()
     param_names = set()
     for eq in equations:
@@ -258,6 +102,7 @@ def train_SymbR(df, equations, params=None):
 
     func_order = list(func_map.items())
 
+    # Scaling params per variable
     scaling_params = {}
     for _, var_name in func_order:
         if var_name not in df.columns:
@@ -272,6 +117,7 @@ def train_SymbR(df, equations, params=None):
             A0, A1 = 0.0, 1.0
         scaling_params[var_name] = (A0, A1)
 
+    # Build sympy expressions parsed for algebraic manipulation
     sym_exprs = []
     for eq_str in equations:
         if '=' not in eq_str:
@@ -280,69 +126,87 @@ def train_SymbR(df, equations, params=None):
         expr = sp.sympify(lhs_str) - sp.sympify(rhs_str)
         sym_exprs.append(expr)
 
+    # Replace f_i(var) occurrences by symbolic symbols F_i so we can isolate them algebraically
     f_syms = {f_name: sp.Symbol(f_name) for f_name, _ in func_order}
     func_call_to_sym_map = {sp.Function(f_name)(sp.Symbol(var_name)): f_syms[f_name]
                              for f_name, var_name in func_order}
 
-    isolate_map = {}
+    # For each equation, try to isolate each F_i if it appears in that equation
+    isolate_map = {}  # (eq_index, f_name) -> sympy expression for F_i in terms of others
     for i, expr in enumerate(sym_exprs):
         expr_sub = expr.subs(func_call_to_sym_map)
         for f_name, _ in func_order:
             Fsym = f_syms[f_name]
             if Fsym in expr_sub.free_symbols:
+                # Try to solve algebraically for Fsym
                 try:
                     sols = sp.solve(sp.Eq(expr_sub, 0), Fsym, dict=True)
                 except Exception:
                     sols = []
                 if sols:
+                    # pick first solution
                     sol_expr = sols[0][Fsym]
                     isolate_map[(i, f_name)] = sol_expr
                 else:
+                    # If not solvable, try isolating linearly by rearranging manually:
+                    # gather terms: treat Fsym as linear: expr_sub = a*Fsym + rest
                     a = sp.simplify(sp.diff(expr_sub, Fsym))
                     if a == 0:
+                        # can't isolate
                         continue
                     rest = expr_sub - a * Fsym
                     sol_expr = sp.simplify(-rest / a)
                     isolate_map[(i, f_name)] = sol_expr
 
     if not isolate_map:
-        raise RuntimeError('Could not isolate any f_i from the provided equations.')
+        raise RuntimeError('Could not isolate any f_i from the provided equations. Check equations.')
 
+    # Initialize storage for current f estimates (callables that accept arrays)
     current_preds = {f_name: (lambda x: np.zeros_like(x)) for f_name, _ in func_order}
     models = {f_name: None for f_name, _ in func_order}
 
     prev_loss = np.inf
 
-    # ... [Same Outer Iterative Loop as before] ...
+    # Outer iterative loop: alternate between functions
     for outer in range(max_iterations):
         mse_accum = []
         for f_name, var_name in func_order:
+            # find one equation that provides an isolation for this f_name
             found = False
             for (eq_i, fn), sol_expr in isolate_map.items():
                 if fn != f_name:
                     continue
+                # We will use this equation to compute the target for f_name
+                # Build a lambda that evaluates sol_expr with dataframe columns and current preds
+                # Prepare sympy free symbols and their mapping
                 syms = sorted(sol_expr.free_symbols, key=lambda s: s.name)
                 lam = sp.lambdify(syms, sol_expr, 'numpy')
 
+                # Build arguments in the right order
                 arg_arrays = []
                 for s in syms:
                     sname = s.name
                     if sname in df.columns:
                         arr = df[sname].values
                     elif sname in f_syms:
+                        # other function symbol: use current prediction evaluated at its variable
                         other_f = sname
                         var_other = func_map[other_f]
                         xvar = df[var_other].values
                         arr = current_preds[other_f](xvar)
                     else:
-                        arr = np.np.zeros(N_data)
+                        # unknown symbol: zeros
+                        arr = np.zeros(N_data)
                     arg_arrays.append(arr)
 
+                # compute target values for this f_name
                 try:
                     target_vals = np.nan_to_num(np.asarray(lam(*arg_arrays), dtype=float)).ravel()
                 except Exception:
+                    # numerical issue evaluating lambdified expression, skip
                     continue
 
+                # prepare training data (optionally subsample)
                 x_raw = df[var_name].values.astype(float)
                 A0, A1 = scaling_params[var_name]
                 x_scaled = (x_raw - A0) / A1
@@ -355,16 +219,23 @@ def train_SymbR(df, equations, params=None):
                     X_train = x_scaled.reshape(-1, 1)
                     y_train = target_vals
 
+                # Build and fit PySR model for this function
                 pysr_local_kwargs = pysr_kwargs.copy()
+                # ensure unary/binary operators exist
                 try:
                     model = PySRRegressor(**pysr_local_kwargs)
                 except TypeError:
+                    # backward compatibility: if some kwargs invalid, call without kwargs
                     model = PySRRegressor()
 
+                # Fit. If X_train or y_train constant, skip and use constant model
                 if np.allclose(np.std(y_train), 0.0):
+                    # trivial constant function
                     const_val = float(np.mean(y_train))
+
                     def const_pred(x, c=const_val):
                         return np.full_like(x, c, dtype=float)
+
                     models[f_name] = {'pysr_model': None, 'A0': A0, 'A1': A1, 'var': var_name, 'const': const_val}
                     current_preds[f_name] = lambda xx, c=const_val: np.full_like(xx, c, dtype=float)
                     found = True
@@ -373,13 +244,16 @@ def train_SymbR(df, equations, params=None):
                         model.fit(X_train, y_train)
                         models[f_name] = {'pysr_model': model, 'A0': A0, 'A1': A1, 'var': var_name}
 
+                        # create prediction function (scale input inside)
                         def mk_pred(py_model, A0=A0, A1=A1):
                             def pred(x_arr):
                                 z = (x_arr - A0) / A1
                                 Xz = z.reshape(-1, 1)
+                                # PySR returns vector
                                 try:
                                     yhat = py_model.predict(Xz)
                                 except Exception:
+                                    # fallback: evaluate best program via .predict if available
                                     yhat = np.zeros(len(Xz))
                                 return np.asarray(yhat).ravel()
                             return pred
@@ -390,15 +264,19 @@ def train_SymbR(df, equations, params=None):
                         warnings.warn(f"PySR failed fitting {f_name}: {e}")
                         continue
 
+                # compute MSE for this function's fit (full dataset)
                 y_full = target_vals
                 y_pred_full = current_preds[f_name](x_raw)
                 mse = np.mean((y_full - y_pred_full)**2)
                 mse_accum.append(mse)
+
+                # break after using the first available isolation
                 break
 
             if not found:
                 warnings.warn(f"Could not find an isolation for {f_name} in any equation. Skipping.")
 
+        # end loop over functions
         mean_mse = np.mean(mse_accum) if mse_accum else np.inf
         if outer % 1 == 0:
             print(f"SymbR outer loop. Iter {outer+1}/{max_iterations}, Loss: {mean_mse:.2e}")
@@ -406,13 +284,6 @@ def train_SymbR(df, equations, params=None):
             print(f"Converged with Delta_Loss={tol}. Stopping outer loop.")
             break
         prev_loss = mean_mse
-
-    # --- NEW: Forward-Simulation Fine-Tuning Block ---
-    if params.get('fitting_forw_sim', False):
-        models, updated_preds = _fine_tune_constants(models, df, equations, params, func_order)
-        # Update current_preds with the optimized versions so `evals` generation uses them
-        for fn_name, updated_fn in updated_preds.items():
-            current_preds[fn_name] = updated_fn
 
     # Prepare evals for plotting
     evals = []
@@ -422,9 +293,18 @@ def train_SymbR(df, equations, params=None):
         x_plot = np.linspace(x_data.min(), x_data.max(), n_eval)
         if model is None:
             y_plot = np.zeros_like(x_plot)
+        elif model.get('pysr_model') is None:
+            y_plot = np.full_like(x_plot, model['const'], dtype=float)
         else:
             y_plot = current_preds[f_name](x_plot)
         evals.extend([x_plot, y_plot])
 
     scalar_coefs = {}
     return models, evals, scalar_coefs
+
+
+## If used as script, provide a small example (guarded)
+#if __name__ == '__main__':
+#    # simple demonstration with synthetic data - user should import train_symb from this file.
+#    print('This module provides train_symbr(df, equations, params). Import and call from your script.')
+

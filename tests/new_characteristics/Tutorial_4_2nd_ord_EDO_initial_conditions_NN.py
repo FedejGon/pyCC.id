@@ -166,39 +166,6 @@ plt.show()
 
 
 
-
-# METHOD 1:  using Polynomial method (Poly-CC)
-# This method uses Polynomial expansions for the CCs
-# First we set the parameters
-params_poly={
-  'scaling': True,
-  'constraints': [
-  #    #  {'constraint': 'f1(0)=0'},#,'penalty':1e1},
-  #      {'constraint': 'f2(0)=0','penalty':1e1},
-  #      {'constraint': 'f1 odd'},
-        {'constraint': 'f2 odd'}
-    ],
-  'initial_param_guess':[
-      {'a3':100},
-  ],
-  'learning_rate': 1e-3,
-  'N_order': 5,
-  'n_iter':4000,
-  'eq_weights':[1.0,1.0],
-  'fitting_forw_sim':True,  # Enables the option of refitting the coefficients using forward integr
-  'n_iter_outer': 100,      # Max number of function evaluations for the outer loop
-  'outer_tol': 1e-6,        # Tolerance for termination in the outer loop
-  'params_simul': [
-    {'local_funcs': {'F_ext': lambda t: F_ext(t)}},
-    {'t_span':t_span},
-    {'y0': y0},
-    {'t_eval': t_eval},
-    {'method': 'LSODA'},
-  ],
-}
-# And here, we train the model
-models, evals , coefs = pycc.train(df=df,equations=eqs,method='Poly',params=params_poly)
-
 print("scalar_coefs:",coefs)
 
 #print ("a1", coefs['a1'])

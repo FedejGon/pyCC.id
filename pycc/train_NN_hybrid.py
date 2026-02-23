@@ -536,66 +536,77 @@ def train_NN_hybrid(df, equation_str, params=None):
         total_loss.backward()
         optimizer.step()
         # printing — same behavior as before but using total_data_loss
-        if epoch % 100 == 0 or total_data_loss.item() < error_threshold:
+        if epoch + 1  % 100 == 0 or total_data_loss.item() < error_threshold or epoch + 1 == 1 :
             if scalar_params and constraints:
-                print(f"Epoch {epoch}, Loss: {total_data_loss.item():.2e}, Constraints: {constraint_loss:.2e}, Params: ", end="")
+                print(f"Epoch {epoch}/{epochs}, Loss: {total_data_loss.item():.2e}, Constraints: {constraint_loss:.2e}, Params: ", end="")
                 for k in scalar_params:
                     print(f"{k}: {scalar_params[k].item():.2e}", end="  ")
                 print()
             elif scalar_params:
-                print(f"Epoch {epoch}, Loss: {total_data_loss.item():.2e}, Params: ", end="")
+                print(f"Epoch {epoch}/{epochs}, Loss: {total_data_loss.item():.2e}, Params: ", end="")
                 for k in scalar_params:
                     print(f"{k}: {scalar_params[k].item():.2e}", end="  ")
                 print()
             elif constraints:
-                print(f"Epoch {epoch}, Loss: {total_data_loss.item():.2e}, Constraints: {constraint_loss:.2e}")
+                print(f"Epoch {epoch}/{epochs}, Loss: {total_data_loss.item():.2e}, Constraints: {constraint_loss:.2e}")
             else:
-                print(f"Epoch {epoch}, Loss: {total_data_loss.item():.2e}")
+                print(f"Epoch {epoch}/{epochs}, Loss: {total_data_loss.item():.2e}")
         if total_data_loss.item() < error_threshold:
             print(f"Early stopping at epoch {epoch}")
             break
-            
-            
+
     # =========================================================================
-    # --- Fine-Tuning with Forward Simulation (Neural ODE approach) ---
+    # --- Fine-Tuning with Forward Simulation (Curriculum & Batching) ---
     # =========================================================================
     if params.get('fitting_forw_sim', False):
         print("\n--- Starting Forward Simulation Fine-Tuning ---")
         n_iter_outer = params.get('n_iter_outer', 100)
         outer_tol = params.get('outer_tol', 1e-6)
         
-        # Parse params_simul (handles the list of dicts you proposed)
+        # Parse params_simul
         sim_params = {}
         for item in params.get('params_simul', []):
             sim_params.update(item)
             
         t_eval = sim_params.get('t_eval')
-        y0 = sim_params.get('y0')
         local_funcs = sim_params.get('local_funcs', {})
         
         # 1. Identify state variables from LHS (e.g., 'x1_dot' -> 'x1')
         state_vars = [str(lhs).replace('_dot', '') for lhs in lhs_exprs]
         
-        # 2. Extract the true trajectory from df to compute the loss
-        # NOTE: This assumes df has the same length and time-alignment as t_eval
+        # 2. Extract the true trajectory from df
         true_traj = []
         for sv in state_vars:
             true_traj.append(torch.tensor(df[sv].values, dtype=torch.float32, device=device).unsqueeze(1))
-        true_traj = torch.cat(true_traj, dim=1) # Shape: [N_time, N_states]
+        true_traj = torch.cat(true_traj, dim=1) 
         
         t_eval_tensor = torch.tensor(t_eval, dtype=torch.float32, device=device)
         
-        # 3. Create a fresh optimizer for the fine-tuning phase
-        optimizer_ft = optim.Adam(param_groups)
+        # 3. Gather parameters, create the optimizer and scheduler
+        ft_lr = params.get('lr', 1e-4) * 0.5 
         
+        ft_params = []
+        for model in models.values():
+            ft_params.extend(list(model.parameters()))
+            
+        if isinstance(scalar_params, torch.nn.ParameterDict):
+            ft_params.extend(list(scalar_params.parameters()))
+        elif isinstance(scalar_params, dict):
+            ft_params.extend(list(scalar_params.values()))
+            
+        # This MUST be assigned before the scheduler
+        optimizer_ft = optim.Adam(ft_params, lr=ft_lr)
+        
+        scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(
+            optimizer_ft, mode='min', factor=0.5, patience=20, min_lr=1e-7
+        )
+
+        # Helpers for native PyTorch integration
         def get_dydt(t_val, y_current):
-            """Evaluates the RHS expressions natively in PyTorch to keep gradients intact."""
             current_tensors = {}
-            # Map current state vector back to named variables for evaluate_expr
             for i, sv in enumerate(state_vars):
-                current_tensors[sv] = y_current[:, i].unsqueeze(1) # Shape: [1, 1]
+                current_tensors[sv] = y_current[:, i].unsqueeze(1) 
                 
-            # Evaluate explicit time-dependent functions (like F_ext)
             for func_name, func in local_funcs.items():
                 val = func(t_val.item())
                 current_tensors[func_name] = torch.tensor([[val]], dtype=torch.float32, device=device)
@@ -607,44 +618,68 @@ def train_NN_hybrid(df, equation_str, params=None):
             return torch.cat(dydt_list, dim=1)
 
         def rk4_step(t_val, y_val, dt_val):
-            """Differentiable RK4 step."""
             k1 = get_dydt(t_val, y_val)
             k2 = get_dydt(t_val + dt_val/2, y_val + dt_val/2 * k1)
             k3 = get_dydt(t_val + dt_val/2, y_val + dt_val/2 * k2)
             k4 = get_dydt(t_val + dt_val, y_val + dt_val * k3)
             return y_val + (dt_val/6) * (k1 + 2*k2 + 2*k3 + k4)
 
-        # 4. Fine-tuning loop
+        # 4. Fine-Tuning Loop
+        batch_size = params.get('ft_batch_size', 5)
+        max_window = params.get('ft_max_window_size', 50)
+        min_window = 5
+
         for epoch_ft in range(n_iter_outer):
             optimizer_ft.zero_grad()
             
-            # Rollout the forward simulation
-            y_sim = [torch.tensor([y0], dtype=torch.float32, device=device)]
+            # Curriculum Learning: Slowly increase window size
+            progress = epoch_ft / max(1, n_iter_outer - 1)
+            current_window = int(min_window + progress * (max_window - min_window))
             
-            for i in range(len(t_eval_tensor) - 1):
-                t_curr = t_eval_tensor[i]
-                dt = t_eval_tensor[i+1] - t_eval_tensor[i]
-                y_next = rk4_step(t_curr, y_sim[-1], dt)
-                y_sim.append(y_next)
+            total_traj_loss = 0.0
+            
+            # Batching: Sample multiple random chunks
+            for b in range(batch_size):
+                max_start = max(1, len(t_eval_tensor) - current_window - 1)
+                start_idx = torch.randint(0, max_start, (1,)).item()
                 
-            y_sim_tensor = torch.cat(y_sim, dim=0) # Shape: [N_time, N_states]
+                y_sim = [true_traj[start_idx].unsqueeze(0)] 
+                
+                # Integrate forward
+                for i in range(current_window):
+                    t_curr = t_eval_tensor[start_idx + i]
+                    dt = t_eval_tensor[start_idx + i + 1] - t_curr
+                    y_next = rk4_step(t_curr, y_sim[-1], dt)
+                    y_sim.append(y_next)
+                    
+                y_sim_tensor = torch.cat(y_sim, dim=0) 
+                target_chunk = true_traj[start_idx : start_idx + current_window + 1]
+                
+                total_traj_loss += criterion(y_sim_tensor, target_chunk)
             
-            # Calculate loss (Trajectory MSE + Physics Constraints)
-            traj_loss = criterion(y_sim_tensor, true_traj)
+            # Average the trajectory loss over the batch
+            total_traj_loss = total_traj_loss / batch_size
+            
             constraint_loss = compute_constraint_loss(models, constraints, func_order, tensors, device)
             
-            total_ft_loss = traj_loss + constraint_loss
+            total_ft_loss = total_traj_loss + constraint_loss
             total_ft_loss.backward()
+            
+            # Gradient Clipping (FIXED: using the gathered ft_params list)
+            torch.nn.utils.clip_grad_norm_(ft_params, max_norm=1.0)
+                
             optimizer_ft.step()
+            scheduler.step(total_ft_loss)
             
             if epoch_ft % 10 == 0 or total_ft_loss.item() < outer_tol:
-                print(f"FT Epoch {epoch_ft}, Traj Loss: {traj_loss.item():.2e}, Constraints: {constraint_loss:.2e}")
+                current_lr = optimizer_ft.param_groups[0]['lr']
+                print(f"FT Epoch {epoch_ft:03d} | Window: {current_window:02d} | LR: {current_lr:.1e} | "
+                      f"Traj Loss: {total_traj_loss.item():.2e} | Constraints: {constraint_loss:.2e}")
                 
             if total_ft_loss.item() < outer_tol:
                 print(f"Fine-tuning converged at FT epoch {epoch_ft}")
                 break
-    # =========================================================================        
-            
+    # =========================================================================
             
     # --- Move everything back to CPU for evaluation/plotting ---
     if device.type == 'xpu' or device.type=='cuda':

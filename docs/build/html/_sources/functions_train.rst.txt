@@ -102,6 +102,43 @@ The following example demonstrates how to set up a DataFrame, define a second-or
    models, evals, coefs = pycc.train(df, eqs, method='NN', params=nn_params)
 
 
+   # Plotting the obtained functions and parameters
+   # Define your custom inputs here (add more if you have more than 2 variables)
+   true_funcs = [F1, F2] # names of the theoretical equations (if we have them)
+   #true_funcs = [] # if we don't know them we can define an empty list
+   x_labels = ['$x_2$', '$x_1$'] # corresponding variables
+   # Calculate number of plots
+   n_plots = len(evals) // 2
+   fig, axes = plt.subplots(1, n_plots, figsize=(6 * n_plots, 6)) 
+   # Ensure axes is a list even if there's only 1 plot
+   if n_plots == 1:
+       axes = [axes]
+   # Plotting loop
+   for i in range(n_plots):
+       ax = axes[i]  
+       # Extract x and y for this specific characteristic curve
+       x_cc = evals[2 * i]
+       f_cc = evals[2 * i + 1]
+       # Plot learned functions
+       ax.plot(x_cc, f_cc, label=f'$f_{i+1}$ learned')
+       # Plot theory (assuming the function exists and is callable)
+       if i < len(true_funcs) and true_funcs[i] is not None:
+           ax.plot(x_cc, true_funcs[i](x_cc), '--', label=f'$f_{i+1}$ theory')
+       # Apply custom labels or fallback to generic ones
+       x_label = x_labels[i] if i < len(x_labels) else f'$x_{i+1}$'       
+       ax.set_xlabel(x_label)
+       ax.set_ylabel(f'$f_{i+1}({x_label.strip("$")})$')
+       ax.legend()
+   plt.tight_layout()
+   plt.show()
+   
+   # Print learned parameters if there are any
+   if 'obtained_coefs' in globals() and obtained_coefs:
+       print("\nLearned scalar parameters:")
+       for name, val in obtained_coefs.items():
+           print(f"{name} = {val.item():.4f}")
+   
+
 Return Values ``pycc.train()``
  
 
@@ -259,6 +296,10 @@ The ``params`` dictionary for this method can contain the following keys:
     }
 
     models, evals, coefs = pycc.train(df, eqs, method='SymbR', params=symbr_params)
+
+
+
+
 
 -----
 

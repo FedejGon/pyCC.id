@@ -182,9 +182,17 @@ def _fine_tune_constants(models, df, equations, params, func_order):
         return mse
 
     # Optimize
-    print(f"Optimizing {len(flat_params0)} parameters...")
+    #print(f"Optimizing {len(flat_params0)} parameters...")
+    #res = minimize(objective, flat_params0, method='Nelder-Mead', 
+    #               options={'maxiter': n_iter_outer, 'xatol': outer_tol, 'disp': True})
+    print(f"  [Fine-Tuning] Optimizing {len(flat_params0)} parameters...")
     res = minimize(objective, flat_params0, method='Nelder-Mead', 
-                   options={'maxiter': n_iter_outer, 'xatol': outer_tol, 'disp': True})
+                   options={
+                       'maxiter': n_iter_outer, 
+                       'maxfev': n_iter_outer,   # <-- THIS ENFORCES THE STRICT EVAL LIMIT
+                       'xatol': outer_tol, 
+                       'disp': False
+                   })
     
     print(f"Fine-tuning complete. Final MSE: {res.fun:.6e}")
     
@@ -415,7 +423,32 @@ def train_SymbR(df, equations, params=None):
             break
         prev_loss = mean_mse
 
-    # --- NEW: Forward-Simulation Fine-Tuning Block ---
+
+    # Print final models before fitting with x(t) 
+    print("\n=== Final Obtained Models ===")
+    for f_name, var_name in func_order:
+        m = models.get(f_name)
+        if m is None:
+            print(f"{f_name}({var_name}) = 0.0")
+            continue
+            
+        if 'expr' in m:
+            print(f"{f_name}({var_name}) = {m['expr']}")
+        elif 'const' in m:
+            print(f"{f_name}({var_name}) = {m['const']}")
+        elif m.get('pysr_model') is not None:
+            # Fallback if fine-tuning was skipped
+            try:
+                eq = m['pysr_model'].sympy()
+                print(f"{f_name}({var_name}) = {eq}")
+            except Exception:
+                eq = m['pysr_model'].get_best()['equation']
+                print(f"{f_name}({var_name}) = {eq}")
+        else:
+            print(f"{f_name}({var_name}) = [Unknown Format]")
+    print("=============================\n")
+
+    # Forward-Simulation Fine-Tuning Block ---
     if params.get('fitting_forw_sim', False):
         models, updated_preds = _fine_tune_constants(models, df, equations, params, func_order)
         # Update current_preds with the optimized versions so `evals` generation uses them
@@ -433,6 +466,31 @@ def train_SymbR(df, equations, params=None):
         else:
             y_plot = current_preds[f_name](x_plot)
         evals.extend([x_plot, y_plot])
+
+    # Print final models before exiting 
+    print("\n=== Final Obtained Models ===")
+    for f_name, var_name in func_order:
+        m = models.get(f_name)
+        if m is None:
+            print(f"{f_name}({var_name}) = 0.0")
+            continue
+            
+        if 'expr' in m:
+            print(f"{f_name}({var_name}) = {m['expr']}")
+        elif 'const' in m:
+            print(f"{f_name}({var_name}) = {m['const']}")
+        elif m.get('pysr_model') is not None:
+            # Fallback if fine-tuning was skipped
+            try:
+                eq = m['pysr_model'].sympy()
+                print(f"{f_name}({var_name}) = {eq}")
+            except Exception:
+                eq = m['pysr_model'].get_best()['equation']
+                print(f"{f_name}({var_name}) = {eq}")
+        else:
+            print(f"{f_name}({var_name}) = [Unknown Format]")
+    print("=============================\n")
+
 
     scalar_coefs = {}
     return models, evals, scalar_coefs

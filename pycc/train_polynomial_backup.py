@@ -2,6 +2,9 @@ import numpy as np
 import re
 import sympy as sp
 from collections import OrderedDict
+import copy
+from scipy.optimize import least_squares
+from .simulate_Poly import simulate_Poly
 
 def parse_functions(equation_str):
     pattern = r'(f\d+)\((\w+)\)'
@@ -65,6 +68,67 @@ def build_constraint_mask(constraints, f_name, n_coeffs):
 #            mask[0] = False
 #    return mask
 
+# this function performs forward simulations and updates the model 
+#def simulation_residuals(p_flat, df, eqs, base_models, base_scalars, state_vars, params_simul_dict):
+
+def simulation_residuals(p_flat, df, eqs, base_models, base_scalars, state_vars, params_simul_dict, param_names, tracker):    
+    """
+    Objective function for the simulation-based outer loop.
+    Unpacks parameters, runs the forward simulation, and returns the residuals against df.
+    """
+    # 1. Unpack flat parameter array back into dictionaries
+    idx = 0
+    new_models = copy.deepcopy(base_models)
+    # We rely on base_models keeping insertion order (dict in Python 3.7+ keeps order)
+    for f_name in base_models.keys():
+        n_coeffs = len(new_models[f_name]['coeffs'])
+        new_models[f_name]['coeffs'] = p_flat[idx : idx + n_coeffs]
+        idx += n_coeffs
+        
+    new_scalars = copy.deepcopy(base_scalars)
+    for a_name in base_scalars.keys():
+        new_scalars[a_name] = p_flat[idx]
+        idx += 1
+
+    # 2. Setup simulation parameters
+    sim_kwargs = copy.deepcopy(params_simul_dict)
+    sim_kwargs['models'] = new_models
+    sim_kwargs['obtained_coefs'] = new_scalars
+    t_data = sim_kwargs.get('t_eval')
+
+    # 3. Run simulation
+    try:
+        sol, _ = simulate_Poly(eqs, sim_kwargs)
+        
+        # Penalize if integration failed or didn't finish
+        if sol.status != 0 or len(sol.t) != len(t_data):
+            return np.ones(len(t_data) * len(state_vars)) * 1e6
+            
+    except Exception as e:
+        return np.ones(len(t_data) * len(state_vars)) * 1e6
+
+    # 4. Compute residuals (Simulated States - Actual Database States)
+    residuals = []
+    for i, var in enumerate(state_vars):
+        simulated_trajectory = sol.y[i, :]
+        actual_trajectory = df[var].values
+        residuals.append(simulated_trajectory - actual_trajectory)
+
+    residuals_concat = np.concatenate(residuals)
+
+    # Custom Logging ---
+    tracker['count'] += 1
+    loss = np.mean(residuals_concat**2)
+    
+    # Format the scalar parameters nicely
+    param_str = " ".join([f"{name}: {new_scalars[name]:.3e}" for name in param_names if name in new_scalars])
+    max_iter = tracker['max_iter'] if tracker['max_iter'] is not None else "inf"
+    
+    # Print the log line
+    print(f"Iter {tracker['count']}/{max_iter}, Loss_x: {loss:.4e}, Params: {param_str}")
+
+    return residuals_concat
+
 
 def train_polynomial(df, equation, params=None):
     if params is None:
@@ -82,10 +146,18 @@ def train_polynomial(df, equation, params=None):
     init_guesses = {}
     for d in initial_param_guess:
         init_guesses.update(d)
+    fitting_forw_sim = bool(params.get('fitting_forw_sim', False))
+    n_iter_outer = params.get('n_iter_outer', None)   # Defaults to None (letting scipy decide)
+    outer_tol = float(params.get('outer_tol', 1e-8))  # Default tolerance outer loop
+    params_simul_list = params.get('params_simul', [])
+    params_simul_dict = {}
+    for d in params_simul_list:
+        params_simul_dict.update(d)
         
     equations = list(equation) if isinstance(equation, (list, tuple)) else [equation]
     N_data = len(df)
     n_coeffs_per_func = N_order + 1
+        
 
     # --- Parse functions and scalar parameters ---
     func_map = OrderedDict()
@@ -164,6 +236,7 @@ def train_polynomial(df, equation, params=None):
     rng = np.random.RandomState(0)
     p = rng.randn(total_unknowns) * 1e-2
 
+    # Apply initial guesses
     for i, a_name in enumerate(param_names):
         if a_name in init_guesses:
             # Scalar params are located at the end of p, starting at index n_active_coeffs_total
@@ -424,6 +497,69 @@ def train_polynomial(df, equation, params=None):
     for f_name, var_name in func_order:
         A0, A1 = scaling_params[var_name]
         models[f_name] = {'coeffs': final_coeffs[f_name], 'A0': A0, 'A1': A1, 'var': var_name}
+        
+        
+    if fitting_forw_sim:
+        print("\n--- Starting Forward Simulation Fine-Tuning ---")
+        # Extract state variables from equations (e.g., 'x1_dot = ...' -> 'x1')
+        state_vars = [eq.split('_dot')[0].strip() for eq in equations]
+        
+        # Flatten the current best guess into p0 array
+        p0 = []
+        for f_name, _ in func_order: 
+            p0.extend(models[f_name]['coeffs'])
+        for a_name in param_names:
+            p0.append(final_scalars[a_name])
+        p0 = np.array(p0)
+        
+        tracker = {'count': 0, 'max_iter': n_iter_outer}
+
+
+        # Run Trust Region Reflective optimizer with aggressive settings
+        res = least_squares(
+            simulation_residuals, 
+            x0=p0, 
+            args=(df, equations, models, final_scalars, state_vars, params_simul_dict, param_names, tracker),
+            method='trf',           # Switch to Trust Region Reflective
+            x_scale='jac',          # Crucial: Auto-scales parameters based on the Jacobian so a1 and a2 are treated fairly
+            diff_step=1e-2,         # Violent step: Forces the gradient calculation to look much wider (default is ~1e-8)
+            loss='soft_l1',         # Makes it more robust to sudden large errors during simulation
+            max_nfev=n_iter_outer,
+            ftol=outer_tol * 1e-4,  # Crush the tolerances to force it to keep trying
+            xtol=outer_tol * 1e-4,
+            gtol=outer_tol * 1e-4,
+            verbose=0
+        )
+        
+
+#        # Run Levenberg-Marquardt optimizer
+#        res = least_squares(
+#            simulation_residuals, 
+#            x0=p0, 
+#            #args=(df, equations, models, final_scalars, state_vars, params_simul_dict),
+#            args=(df, equations, models, final_scalars, state_vars, params_simul_dict, param_names, tracker),
+#            method='lm',
+#            max_nfev=n_iter_outer,   # Limits the maximum iterations
+#            ftol=outer_tol,          # Cost function tolerance
+#            xtol=outer_tol,          # Step size tolerance
+#            gtol=outer_tol,          # Gradient tolerance
+#            verbose=2
+#        )        
+        
+        print("\nSimulation Fine-Tuning Finished. Success:", res.success)
+        
+        # Overwrite models and final_scalars with the newly optimized values
+        idx = 0
+        for f_name, _ in func_order:
+            n_coeffs = len(models[f_name]['coeffs'])
+            models[f_name]['coeffs'] = res.x[idx : idx + n_coeffs]
+            idx += n_coeffs
+            
+        for a_name in param_names:
+            final_scalars[a_name] = res.x[idx]
+            idx += 1    
+
+
 
     # Build evals
     evals = []

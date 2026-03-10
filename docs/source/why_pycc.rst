@@ -13,7 +13,7 @@ At its core, **PyCC** acts as a structural manager for this scientific modeling 
 
 
 By integrating these powerful estimators within practitioner-defined structures, **PyCC** ensures that the discovered models are **unique**, **interpretable**, and **physically** consistent. By incorporating prior information, this solver helps practitioners to address **identifiability** challenges often found in purely data-driven approaches, allowing scientists and engineers to distinguish the true physical mechanism from physically incorrect alternatives that yield to similar fitting errors.
-Also, its **transparent** and **modular** architecture allows practitioners to benefit from powerful approximation tools the power of **universal approximators**, such as Neural Networks, within a structured framework specifically tailored for reliable system identification (for more details, please refer to arXiv:2601.21720).
+Also, its **transparent** and **modular** architecture allows practitioners to benefit from the power of **universal approximators**, such as Neural Networks, within a structured framework specifically tailored for reliable system identification (for more details, please refer to arXiv:2601.21720).
 
 
 .. 
@@ -36,7 +36,7 @@ When inferring dynamical equations from real experiments (often with finite samp
 
 **PyCC** addresses this issue by injecting **prior physical knowledge** or **hypotheses** into the discovery process by defining a structural 'skeleton'.
 
-The choice of the structural skeleton directly affects identifiability: some equation forms admit unique decompositions, whereas others may lead to non-identifiable or ambiguous representations.  When the hypothetized model structure possess uniqueness properties, **PyCC** provides a formal framework to assess whether the proposed equation is consistent with the data. This enables the rigorous validation or elimination of hypothesized models, thereby shedding light to the identifiability challenge. 
+The choice of the structural skeleton directly affects identifiability: some equation forms admit unique decompositions, whereas others may lead to non-identifiable or ambiguous representations.  When the hypothesized model structure possesses uniqueness properties, **PyCC** provides a formal framework to assess whether the proposed equation is consistent with the data. This enables the rigorous validation or elimination of hypothesized models, thereby shedding light to the identifiability challenge. 
 
 
 **ii) Physical consistency**
@@ -63,9 +63,9 @@ If the stiffness curve comes out looking like a line, we know the system is line
 
 Since **PyCC** prioritizes the **shape** of the constitutive relations over their specific model coefficients, the specific **parametric form** of the curves (e.g., whether they are polynomial, exponential, or trigonometric) does not need to be postulated *a priori*. This flexibility unlocks a highly **modular** approach that can be implemented using different modeling paradigms.
 
-For example, we can parameterize the CCs using **universal approximators**, such as Neural Networks (NNs). This approach (refered to as NN-CC) is powerful because it allows the discovery of physical laws without bias: the model can adapt to any continuous shape and also discontinouous?, regardless of its complexity, provided that ... enough layers neurons?
+For example, we can parameterize the functions using **universal approximators**, such as Neural Networks (NNs). This approach (referred to as NN-CC) is powerful because it allows the discovery very complex physical laws: the model can adapt to any continuous shape, regardless of its complexity, even approximating sharp transitions or non-smooth behaviors, supported by universal approximation theorems. 
 
-Crucially, this approach maintains **transparency**. While NNs are often regarded as opaque "black boxes" in high-dimensional tasks, within **PyCC** they are restricted to learning **univariate** functions. A "black box" with a single input and single output is effectively transparent: it is simply a curve that can be plotted and visually inspected to interpret the underlying physics.
+Crucially, this approach maintains **transparency**. While NNs are often regarded as opaque "black boxes" in high-dimensional settings, within **PyCC** they are restricted to learning **univariate** functions. A "black box" with a single input and output is effectively a "glass box": it is simply a curve that can be plotted, inspected, and understood. 
 
 .. note::
     **The Core Philosophy:** Instead of asking "What is the global equation?", PyCC asks "Given this physical structure (e.g., a damped oscillator), what are the specific shapes of the stiffness and damping curves?" These curves are the constitutive relations of the system; once they are identified, the identification problem is effectively solved.
@@ -73,7 +73,7 @@ Crucially, this approach maintains **transparency**. While NNs are often regarde
 
 ..
    This focus on the **shape** of the constitutive relations (rather than their coefficients) unlocks a highly modular approach to model discovery.
-   Since the specific **parametric form** of the curves (e.g., whether they are polynomial, exponential, or trigonometric) does not need to be postulated *a priori*, instead, **PyCC** focus on the **shape** of the constitutive relations, it unlocks a highly modular approach that can be implmemented with different paradigms.
+   Since the specific **parametric form** of the curves (e.g., whether they are polynomial, exponential, or trigonometric) does not need to be postulated *a priori*, instead, **PyCC** focus on the **shape** of the constitutive relations, it unlocks a highly modular approach that can be implemented with different paradigms.
    For example, we can parameterize the CCs with universal approximators such as NN...
    nd add a paragraph about transparency
    **PyCC** can be implemented within diverse paradigms 
@@ -120,7 +120,7 @@ Crucially, this approach maintains **transparency**. While NNs are often regarde
 💡 The PyCC approach: A schematic workflow
 ------------------------
 
-**PyCC** frames discovery as a hypothesis-testing loop. The practitioner proposes a structure (e.g., "Is this a friction-based oscillator?"), and the library determines the optimal shapes of the internal functions in order to decide if the hypothetized structure is coherent with the data or should be modified. 
+**PyCC** frames discovery as a hypothesis-testing loop. The practitioner proposes a structure (e.g., "Is this a friction-based oscillator?"), and the library determines the optimal shapes of the internal functions in order to decide if the hypothesized structure is coherent with the data or should be modified. 
 
 .. image:: _static/Fig1_schematic.png
    :alt: description of the image for accessibility
@@ -162,7 +162,7 @@ The workflow proceeds in three main stages:
 ------------------------
 
 
-To illustrate the application of the workflow, consider the task of identifying a second-order with a velocity-dependent friction force and external driving force. The practitioner starts by hypothesizing a **second-order structural skeleton**:
+To illustrate the application of the workflow, consider the task of identifying a second-order system with a velocity-dependent friction force and external driving force. The practitioner starts by hypothesizing a **second-order structural skeleton**:
 
 .. math::
 
@@ -181,12 +181,12 @@ The package handles the structural implementation automatically, allowing the pr
    :width: 80%
    :align: center
 
-*Figure 2: The architecture for a second-order system. Two independent neural networks (*:math:`\text{NN}_1` *and*:math:`\text{NN}_2` *) approximate the unknown CCs.*:math:`\,\text{NN}_1` *sees only velocity, and*:math:`\,\text{NN}_2` *sees only position. Their outputs are summed to match the hypothetized structure.*
+*Figure 2: The architecture for a second-order system. Two independent neural networks (*:math:`\text{NN}_1` *and*:math:`\text{NN}_2` *) approximate the unknown CCs.*:math:`\,\text{NN}_1` *sees only velocity, and*:math:`\,\text{NN}_2` *sees only position. Their outputs are summed to match the hypothesized structure.*
 
 The internal architecture can be basically characterized by:
  
 * A dedicated estimator ( :math:`\text{NN}_1` ) receives *only* the velocity :math:`\dot{x}` to learn the shape of :math:`f_1`.
-* A dedicted estimator ( :math:`\text{NN}_2` ) receives *only* the position :math:`x` to learn the shape of :math:`f_2`.
+* A dedicated estimator ( :math:`\text{NN}_2` ) receives *only* the position :math:`x` to learn the shape of :math:`f_2`.
 
 **Why this architecture matters:**
 
@@ -234,7 +234,7 @@ The explicit time-dependence can always be considered as external driving forces
 .. math::
    \frac{d\mathbf{x}}{dt} = \mathbf{F}(\mathbf{x}, \mathbf{F}_{ext}(t))
 
-Identifying the global function :math:`\mathbf{F}` directly often results in "black-box" models that often lack physical insight and lead to ambigueties under noise or other experimental conditions. **PyCC.id** avoids this by decomposing :math:`\mathbf{F}` into **interpretable building blocks**, mimicking the way a scientist builds a model by isolating phenomena like stiffness or damping beforehand. 
+Identifying the global function :math:`\mathbf{F}` directly often results in "black-box" models that often lack physical insight and lead to ambiguities under noise or other experimental conditions. **PyCC.id** avoids this by decomposing :math:`\mathbf{F}` into **interpretable building blocks**, mimicking the way a scientist builds a model by isolating phenomena like stiffness or damping beforehand. 
  
 .. 
    The problem is that trying to identify the function :math:`\mathbf{F}` can be incredibly complex and act like a "black box," making it difficult to gain physical insight. The core philosophy of **PyCC.id** is to break down this complex function :math:`\mathbf{F}` into a combination of simpler, **interpretable building blocks**. This approach mirrors how a scientist or practitioner would construct a model: by considering different functions and parameters for modeling phenomena like stiffness, damping forces.      
@@ -270,8 +270,8 @@ The goal of **PyCC** is to discover the optimal functions :math:`\{\mathbf{f}\}`
 
     * **Neural networks (NN-CC)** : Utilizes NNs to parameterize the CCs; compatible with multicore CPUs and GPUs from both NVIDIA (CUDA) and Intel (XPU) architectures via PyTorch.
     * **Polynomials (Poly-CC)** : Utilizes polynomial basis functions to parameterize the CCs. 
-    * **Symbolic regression (SymbR-CC)** : Utilizes symbolic regreesion to parameterize the CCs; parallelized for multicore CPU execution using the internal parallelization features of the PySR package.
+    * **Symbolic regression (SymbR-CC)** : Utilizes symbolic regression to parameterize the CCs; parallelized for multicore CPU execution using the internal parallelization features of the PySR package.
 
-* **Physics-informed discovery**: Incorporate known physical constraints, such as symmetries (e.g., even and odd functions) or aditional conservation laws, to guide the discovery process and ensure robust, physically consistent models. 
-* **Interface with standard simulators**: Includes an interface with ``scipy.integrate.solve_ivp``, which is is the standard Python tool within the SciPy library used to numerically solve initial value problems (IVPs) for ordinary differential equations (ODEs). This module is fully compatible with all identification methodologies. 
+* **Physics-informed discovery**: Incorporate known physical constraints, such as symmetries (e.g., even and odd functions) or additional conservation laws, to guide the discovery process and ensure robust, physically consistent models. 
+* **Interface with standard simulators**: Includes an interface with ``scipy.integrate.solve_ivp``, which is the standard Python tool within the SciPy library used to numerically solve initial value problems (IVPs) for ordinary differential equations (ODEs). This module is fully compatible with all identification methodologies. 
 * **User-focused design**: Offers an API that is both easy to use and highly customizable for advanced research. 

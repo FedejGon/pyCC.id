@@ -1,13 +1,16 @@
 <div align="center">
 
-# pyCC.id: A Python package for nonlinear equation discovery based on characteristic curves
+# PyCC.id: A Python package for equation discovery based on characteristic curves
 
 
 [![GitHub repository](https://img.shields.io/badge/GitHub-FedejGon/pyCC.id-blue?style=flat-square&logo=github)](https://github.com/FedejGon/pyCC.id)
 
 
 
-**pyCC** is Python library for data-driven equation discovery, designed to be user-friendly and highly-customizable to facilitate practical applications across science and engineering.
+**PyCC** is a user-friendly Python library designed for equation discovery, specifically aimint to obtain ordinary differential equations (ODEs) from time-dependent data.
+
+..   
+          Python library for data-driven equation discovery, designed to be user-friendly and highly-customizable to facilitate practical applications across science and engineering.
 
 
 **First time you see this library? We recommend starting with our Google Colab Notebook** [![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)!

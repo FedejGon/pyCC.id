@@ -9,7 +9,7 @@ Community & Useful Links
 * **Paper (arXiv)**: `https://arxiv.org/abs/2601.21720 <https://arxiv.org/abs/2601.21720>`_
 
 Contact
--------
+------- 
 
 We are open to collaborations and adding new possible features. Please open an issue on GitHub Discussions or reach out to:
 

@@ -49,7 +49,7 @@ The following example shows:
    x2_data      = sol.y[1]
    x1_dot_data  = derivatives[0]
    x2_dot_data  = derivatives[1]
-   F_ext_val    = F_ext(time_data)
+   F_ext_val    = F_ext(time_data) 
    
    # define database for training
    df = pd.DataFrame({

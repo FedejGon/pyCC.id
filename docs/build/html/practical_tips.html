@@ -21,7 +21,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Community &amp; Useful Links" href="links.html" />
-    <link rel="prev" title="Example 4: 1st-order ODE with f in denominator" href="Example4_1st_order_ODE_denominator.html" /> 
+    <link rel="prev" title="Example 5: 2nd-order ODE - Parametric method with post-fine-tuning" href="Example5_automatic_outer_loop_fine_tuning_parametric.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -45,7 +45,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">User guide:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="why_pycc.html">✏️ PyCC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="why_pycc.html">👋 PyCC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="why_pycc.html#why-pycc">🎯 Why PyCC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
@@ -62,6 +62,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Example2_2nd_order_ODE.html">Example 2: 2nd-order ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Example3_3rd_order_ODE.html">Example 3: 3rd-order ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Example4_1st_order_ODE_denominator.html">Example 4: 1st-order ODE with f in denominator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example5_automatic_outer_loop_fine_tuning_parametric.html">Example 5: 2nd-order ODE - Parametric method with post-fine-tuning</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
 <ul class="current">
@@ -72,6 +73,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="#workflow-1">Workflow 1</a></li>
 <li class="toctree-l1"><a class="reference internal" href="#workflow-2">Workflow 2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="#workflow-3">Workflow 3</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Links:</span></p>
 <ul>
@@ -279,10 +281,10 @@
 <section id="workflow-2">
 <h1>Workflow 2<a class="headerlink" href="#workflow-2" title="Link to this heading"></a></h1>
 <p>Here, we present a recommended workflow for performing post-processing using 'evals' from a previously trained NN-CC model.</p>
-<p>Specifically, suppose steps 1 and 2 are the same as in Workflow 1, we modify step 3 and add step 4 as follows:</p>
+<p>Specifically, steps 1 and 2 are the same as in Workflow 1, but we modify step 3 and add step 4 by the following:</p>
 <ol class="arabic simple" start="3">
-<li><p>Perform post-processing of the identified models using <code class="docutils literal notranslate"><span class="pre">pycc.post_processing()</span></code></p></li>
-<li><p>Simulate the identified model using <code class="docutils literal notranslate"><span class="pre">pycc.simulate()</span></code>. We recommend using interpolation (method='Interp') instead of directly using the full analytical functions (method='SymbR') to reduce computation time. If higher precision is required, you can increase 'n_eval' in step 3</p></li>
+<li><p>Performing a post-processing of the identified models using <code class="docutils literal notranslate"><span class="pre">pycc.post_processing()</span></code></p></li>
+<li><p>Simulating the identified model using <code class="docutils literal notranslate"><span class="pre">pycc.simulate()</span></code>. We recommend using interpolation (method='Interp') instead of directly using the full analytical functions (method='SymbR') to reduce computation time (by multiple validations, it was tested that when using enough amount of points for evals (higher than 200 for instance), then the interpolated version of the fi functions give practically the same results as evaluating the symbolic expression direclty ). If higher precision is required, you can increase 'n_eval' in step 3</p></li>
 </ol>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1">##############################################</span>
 <span class="c1"># 3) Post-processing the identified models with SymbR [pycc.post_processing()]</span>
@@ -337,12 +339,16 @@
 </pre></div>
 </div>
 </section>
+<section id="workflow-3">
+<h1>Workflow 3<a class="headerlink" href="#workflow-3" title="Link to this heading"></a></h1>
+<p>When the user possesses or wants to hypothesize a fully parametric expression, we recommend using method=’Poly’. We also advise a two-step approach: first, provide reasonable initial guesses for the parameters and fit the model without post-fine-tuning. Then, enable post-fine-tuning, using the resulting values from the first step as the new initial guesses. During the second fit, you may also choose to keep certain parameters fixed  (see Example 5)</p>
+</section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Example4_1st_order_ODE_denominator.html" class="btn btn-neutral float-left" title="Example 4: 1st-order ODE with f in denominator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="Example5_automatic_outer_loop_fine_tuning_parametric.html" class="btn btn-neutral float-left" title="Example 5: 2nd-order ODE - Parametric method with post-fine-tuning" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="links.html" class="btn btn-neutral float-right" title="Community &amp; Useful Links" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

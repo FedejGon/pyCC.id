@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-pyCC.id documentation
+PyCC.id documentation
 =====================
 
 ..
@@ -25,7 +25,7 @@ pyCC.id documentation
    
    functions_train
    functions_simulate
-   functions_postprocessing
+   functions_postprocessing 
    
 .. toctree::
    :maxdepth: 2
@@ -35,7 +35,8 @@ pyCC.id documentation
    Example2_2nd_order_ODE
    Example3_3rd_order_ODE
    Example4_1st_order_ODE_denominator
-   
+   Example5_automatic_outer_loop_fine_tuning_parametric
+    
 .. toctree::
    :maxdepth: 2   
    :caption: Tips:

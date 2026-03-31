@@ -233,7 +233,7 @@ The following parameters are used in both simulation modes:
 **Mode 1: Standard Simulation (using \'models\')**
 
 This is the standard mode when you have already trained a symbolic model. The simulation will use the expressions found during training.
-
+ 
 * ``'models'``: (*dict, required*)
     The ``models`` object returned by ``pycc.train(method='SymbR')``. This contains the ``PySRRegressor`` objects or their callable equivalents.
 

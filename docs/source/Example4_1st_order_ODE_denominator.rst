@@ -7,14 +7,14 @@ This example presents the application of pyCC to a family of first-order systems
 
 .. code-block:: python
 
-   import pycc
+   import pycc 
    import numpy as np
    import pandas as pd
    import matplotlib.pyplot as plt
    import matplotlib.ticker as ticker
    from scipy.integrate import solve_ivp
    from scipy.signal import savgol_filter
-   
+    
    # --- Parameters ---
    beta   = 0.2
    delta  = 0.1

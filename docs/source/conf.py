@@ -27,6 +27,7 @@ extensions = [
     'sphinx.ext.napoleon',      # Google/Numpy style docstrings (optional)
     'sphinx.ext.viewcode',      # link to source
     'sphinx_autodoc_typehints', # optional: show type hints
+    'sphinxcontrib.bibtex',     # to add bibtex bibliography
 ]
 
 autosummary_generate = True   # generate autosummary .rst files automatically
@@ -36,6 +37,9 @@ autodoc_member_order = 'bysource'
 templates_path = ['_templates']
 exclude_patterns = []
 
+
+# Point this to your bib file (usually placed in the same dir as conf.py or _static)
+bibtex_bibfiles = ['references.bib']
 
 
 # -- Options for HTML output -------------------------------------------------

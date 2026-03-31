@@ -71,6 +71,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Example2_2nd_order_ODE.html">Example 2: 2nd-order ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Example3_3rd_order_ODE.html">Example 3: 3rd-order ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Example4_1st_order_ODE_denominator.html">Example 4: 1st-order ODE with f in denominator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example5_automatic_outer_loop_fine_tuning_parametric.html">Example 5: 2nd-order ODE - Parametric method with post-fine-tuning</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
 <ul>
@@ -116,8 +117,8 @@
 <p>This section provides a detailed reference for the <code class="docutils literal notranslate"><span class="pre">pycc.train()</span></code> function</p>
 <section id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Link to this heading"></a></h2>
-<p>The <code class="docutils literal notranslate"><span class="pre">pycc.train()</span></code> function is the primary entry point for identifying system dynamics from data. It functions as a training manager (or dispatcher) that abstracts the complexity of specific algorithms. Instead of calling a specific algorithm directly, you specify the <code class="docutils literal notranslate"><span class="pre">method</span></code> parameter (e.g., ‘NN’ for Neural Networks), and the manager automatically routes the data and equations to the appropriate specialized training module.</p>
-<p>This modular design allows users to seamlessly switch between different identification techniques (like Neural Networks, Polynomial Regression, or Symbolic Regression) without changing their data structures or equation definitions.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">pycc.train()</span></code> function is the primary entry point for identifying system dynamics from data. Acting as a <strong>training manager</strong> (or dispatcher), it abstracts the complexity of specific algorithms. By specifying the <code class="docutils literal notranslate"><span class="pre">method</span></code> parameter (e.g., <code class="docutils literal notranslate"><span class="pre">'NN'</span></code> for Neural Networks and <code class="docutils literal notranslate"><span class="pre">'Poly'</span></code> for the polynomial regression method), the function automatically routes data and equations to the corresponding training algorithm.</p>
+<p>This modular design ensures that training commands remain consistent across different techniques. Consequently, users can rapidly test different approaches (such as Neural Networks, Polynomial Regression, or Symbolic Regression) with only minor modifications, as the underlying data structures and equation definitions remain compatible.</p>
 <p>Below, we show additional details about the inputs and outputs for the manager function:</p>
 <dl class="py function">
 <dt class="sig sig-object py">
@@ -133,7 +134,7 @@ and hyperparameters to the selected specialized training function.</p>
 <li><p><strong>df</strong> (<em>pandas.DataFrame</em>) – The input data.</p></li>
 <li><p><strong>equations</strong> (<em>str</em><em> or </em><em>list</em><em>[</em><em>str</em><em>]</em>) – A string or list of strings defining the system equations.
 It defines the equations we want to fit with a given df.
-The user can include functions and parameters defined by f_i and a_j, respectively
+The user can include functions and parameters defined by fi and aj, respectively
 (i,j=0,1,…). It can also include time dependent functions, which must be
 defined in the df.</p></li>
 <li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – The system identification method to use.
@@ -168,7 +169,7 @@ selected <cite>method</cite>. For method=’NN’<a href="#id1"><span class="pro
 </dd></dl>
 
 <p><strong>Basic example usage:</strong>
-The following example demonstrates how to set up a DataFrame, define a second-order system structure with unknown functions (f1​,f2​), and train a model using the Neural Network method (below we will .</p>
+This example shows a simple workflow in three steps: i) generating the theoretical dataframe; ii) defining a hypothesized second-order system structure and the training database; iii) training the model using the method=’NN’ approach.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pycc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
@@ -296,12 +297,12 @@ The following example demonstrates how to set up a DataFrame, define a second-or
 <p>This method uses a physics-informed neural network to learn the unknown functions as characteristic curves. It is flexible and powerful for complex systems. The <code class="docutils literal notranslate"><span class="pre">params</span></code> dictionary for this method can contain the following keys:</p>
 <ul>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">'neurons':</span></code> (<em>int, optional</em>) Default: 100</dt><dd><p>The number of neurons in each hidden layer of the neural networks.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">'neurons':</span></code> (<em>int, optional</em>) Default: 100</dt><dd><p>The number of neurons in each hidden layer of the neural networks for each fi function defined in eqs variable.</p>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt><code class="docutils literal notranslate"><span class="pre">'layers':</span></code> (<em>int, optional</em>)  Default: 3</dt><dd><p>The number of hidden layers for each neural network.</p>
+<dt><code class="docutils literal notranslate"><span class="pre">'layers':</span></code> (<em>int, optional</em>)  Default: 3</dt><dd><p>The number of hidden layers for each neural network and each fi function defined in eqs variable.</p>
 </dd>
 </dl>
 </li>
@@ -371,7 +372,7 @@ The following example demonstrates how to set up a DataFrame, define a second-or
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">'penalty'</span></code>: (<em>float, optional</em>) Default: 1.0.  A weight to multiply the loss from this specific constraint.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">'eval'</span></code>: (<em>str, optional</em>) Default: <code class="docutils literal notranslate"><span class="pre">'array'</span></code>. For symmetry constraints only. Defines how the constraint is evaluated. Can be <code class="docutils literal notranslate"><span class="pre">'data'</span></code> (uses the provided data points) or <code class="docutils literal notranslate"><span class="pre">'array'</span></code> (creates a new linearly spaced array over the data range).</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">'Nval_array'</span></code>: (<em>int, optional</em>) Default: 100. If <code class="docutils literal notranslate"><span class="pre">eval='array'</span></code>, this sets the number of points in the evaluation array.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'Nval_array'</span></code>: (<em>int, optional</em>) Default: 100. If <code class="docutils literal notranslate"><span class="pre">eval='array'</span></code>, this sets the number of points in the evaluation array for the corresponding constrain.</p></li>
 </ul>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -536,9 +537,31 @@ PyCC code define:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p><strong>Point value</strong>: <code class="docutils literal notranslate"><span class="pre">'f1(0)=0'</span></code> (This forces the constant term to be zero).</p></li>
-<li><p><strong>Symmetry</strong>: <code class="docutils literal notranslate"><span class="pre">'f1</span> <span class="pre">odd'</span></code> (This forces all even-power coefficients to be zero) or <code class="docutils literal notranslate"><span class="pre">'f1</span> <span class="pre">even'</span></code> (This forces all odd-power coefficients to be zero).</p></li>
+<li><p><strong>Symmetry</strong>: <code class="docutils literal notranslate"><span class="pre">'f1</span> <span class="pre">odd'</span></code> (by forcing all even-power coefficients to be zero) or <code class="docutils literal notranslate"><span class="pre">'f1</span> <span class="pre">even'</span></code> (by forcing all odd-power coefficients to be zero).</p></li>
 </ul>
 </div></blockquote>
+</dd>
+</dl>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'print_poly_coeffs':</span></code> (<em>bool, optional</em>) <strong>Default: 'False'</strong>. It prints the final ai parameters after the training procedure.</p></li>
+<li><dl>
+<dt><strong>Post-fine-tuning parameters</strong></dt><dd><p>The <strong>pyCC</strong> library also supports an advanced optimization workflow referred to as post-fine-tuning. In this workflow, the code performs a two-step internal procedure. First, it optimizes the predefined model using the entire stream of reference database. Then, by simply adding extra parameters to the training routine, the code triggers an additional stage where it uses the obtained model to run forward integrations, generating simulated trajectories that are compared to the reference data. Based on this comparison, the code performs a fine-tuning of the model parameters and integrates forward again, thus performing an iterative post-fine-tuning procedure. The required and optional parameters are listed in the following:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">'fitting_forw_sim'</span></code> (<em>bool, optional</em>) <strong>Default: 'False'</strong>. It enables the post-fine-tuning by reffiting the coefficients using forward integrations.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'n_iter_outer'</span></code>: (<em>int, optional</em>) <strong>Default: 100</strong>. It defines a safety bound for the maximum number of iterations of the post-fine-tuning.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'outer_tol'</span></code>: (<em>float, optional</em>) <strong>Default: 1e-6</strong>. A tolerance bound for the loss value for the post-fine-tuning loop.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">'params_simul'</span></code>: (<em>list of dictionaries, mandatory</em>). It defines the simulation parameters for the post-fine-tuning forward integrations. We use a similar format than the pycc.simulate() function. For example:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="s1">&#39;params_simul&#39;</span><span class="p">:</span> <span class="p">[</span>
+<span class="p">{</span><span class="s1">&#39;local_funcs&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;F_ext&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">F_ext</span><span class="p">(</span><span class="n">t</span><span class="p">)}},</span> <span class="c1"># External time-dependent functions</span>
+<span class="p">{</span><span class="s1">&#39;t_span&#39;</span><span class="p">:</span><span class="n">t_span</span><span class="p">},</span>
+<span class="p">{</span><span class="s1">&#39;y0&#39;</span><span class="p">:</span> <span class="n">y0</span><span class="p">},</span>
+<span class="p">{</span><span class="s1">&#39;t_eval&#39;</span><span class="p">:</span> <span class="n">t_eval</span><span class="p">},</span>
+<span class="p">{</span><span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;LSODA&#39;</span><span class="p">},</span>
+<span class="p">],</span>
+</pre></div>
+</div>
+</li>
+</ul>
 </dd>
 </dl>
 </li>

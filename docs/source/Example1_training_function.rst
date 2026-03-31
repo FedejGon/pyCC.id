@@ -35,8 +35,8 @@ Example 1: Function y=f(x)
    print(df.head())
    
    ################################ training model stage #############################
-   # Define equation to discover
-   equations=['F1_th = f1(x1)']
+   # Define the hypotesized equations to discover
+   equations=['F1_th = f1(x1)'] 
    
    ########################################
              #### method Poly  ####

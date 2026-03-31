@@ -5,26 +5,28 @@ How to cite this package
 References
 -----------
 
-In case of using this pycc package, please cite [1] (Gonzalez2026pycc). 
+In case of using this pycc package, please cite :cite:`Gonzalez2026b`  (Gonzalez2026pycc). 
 
-Furthermore:
-  * If using the **NN-CC** method, please cite [2] and [3] (Gonzalez2026,Gonzalez2025)
+Furthermore: 
+  * If using the **NN-CC** method, please cite :cite:`Gonzalez2024` and :cite:`Gonzalez2025` 
 
-  * If using the **Poly-CC** method, please cite [4] and [5] (Gonzalez2023,Gonzalez2024)
+  * If using the **Poly-CC** method, please cite :cite:`Gonzalez2023` and :cite:`Gonzalez2024`
+  
+  * If using **post-SR** and/or **SymbReg-CC** methods, please cite :cite:`Gonzalez2026` and :cite:`Cranmer2023`
+  
 
-  * If using **post-SR** and/or **SymbReg-CC** methods, please cite [2] and [6] (Gonzalez2026,Cranmer2023)
-
-[1] Gonzalez, F. J. Arxiv joss arxiv (2025)
-
-[2] Gonzalez, F. J. "`Integrating prior knowledge in equation discovery: Interpretable symmetry-informed neural networks and symbolic regression via characteristic curves <https://doi.org/10.48550/arXiv.2601.21720>`_." arXiv preprint arXiv:2601.21720 (2026)
-
-[3] Gonzalez, F. J. and Lara, L. P. "`Interpretable neural network system identification method for two families of second-order systems based on characteristic curves <https://doi.org/10.1007/s11071-025-11744-6>`_." Nonlinear Dyn. (2025)
-
-[4] Gonzalez, F.J. "`Determination of the characteristic curves of a nonlinear first order system from fourier analysis <https://doi.org/10.1038/s41598-023-29151-5>`_." Sci. Rep., vol. 13, 1955, (2023).
-
-[5] Gonzalez, F.J. "`System identification based on characteristic curves: a mathematical connection between power series and Fourier analysis for first-order nonlinear systems <https://doi.org/10.1007/s11071-024-09890-4>`_." Nonlinear Dyn. 112, 16167–16197 (2024).
-
-[6] Cranmer, M. "`Interpretable Machine Learning for Science with PySR and SymbolicRegression.jl <https://doi.org/10.48550/arXiv.2305.01582>`_." arXiv preprint arXiv:2305.01582 (2023).
+..
+     [1] Gonzalez, F. J. Arxiv joss arxiv (2025)
+..
+     [2] Gonzalez, F. J. "`Integrating prior knowledge in equation discovery: Interpretable symmetry-informed neural networks and symbolic regression via characteristic curves <https://doi.org/10.48550/arXiv.2601.21720>`_." arXiv preprint arXiv:2601.21720 (2026)
+..
+     [3] Gonzalez, F. J. and Lara, L. P. "`Interpretable neural network system identification method for two families of second-order systems based on characteristic curves <https://doi.org/10.1007/s11071-025-11744-6>`_." Nonlinear Dyn. (2025)
+..
+     [4] Gonzalez, F.J. "`Determination of the characteristic curves of a nonlinear first order system from fourier analysis <https://doi.org/10.1038/s41598-023-29151-5>`_." Sci. Rep., vol. 13, 1955, (2023).
+..
+      [5] Gonzalez, F.J. "`System identification based on characteristic curves: a mathematical connection between power series and Fourier analysis for first-order nonlinear systems <https://doi.org/10.1007/s11071-024-09890-4>`_." Nonlinear Dyn. 112, 16167–16197 (2024).
+..
+      [6] Cranmer, M. "`Interpretable Machine Learning for Science with PySR and SymbolicRegression.jl <https://doi.org/10.48550/arXiv.2305.01582>`_." arXiv preprint arXiv:2305.01582 (2023).
 
 
 
@@ -94,3 +96,8 @@ BibTeX
      eprint={2305.01582},
      url={https://arxiv.org/abs/2305.01582}, 
    }
+   
+   
+   
+.. bibliography::
+   :all:

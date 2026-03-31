@@ -1,13 +1,13 @@
 =====
-Example 5: Automatic fine tuning using forward simulations (outer loop)
+Example 5: 2nd-order ODE - Parametric method with post-fine-tuning
 =====
 
+ 
 
+The pyCC library also supports an advanced optimization workflow referred to as post-fine-tuning. In this workflow, the code performs a two-step internal procedure. First, it optimizes the predefined model using the entire stream of reference database, exactly as shown earlier in this tutorial. Then, by simply adding extra parameters to the training routine, the code triggers an additional stage where it uses the obtained model to run forward integrations, generating simulated trajectories that are compared to the reference data. Based on this comparison, the code performs a fine-tuning of the model parameters and integrates forward again, thus performing an iterative post-fine-tuning procedure.
 
+.. code-block:: python 
 
-This example presents the application of pyCC to a family of first-order systems as discussed in Ref.[Gonzalez2023]. In this case, for training the system is useful to rewrite the system with the unknown functions in the numerator.
-
-.. code-block:: python
 
    import pycc
    import numpy as np
@@ -16,246 +16,180 @@ This example presents the application of pyCC to a family of first-order systems
    import matplotlib.ticker as ticker
    from scipy.integrate import solve_ivp
    from scipy.signal import savgol_filter
-   
-   # --- Parameters ---
-   beta   = 0.2
-   delta  = 0.1
-   F0     = 3.0
-   Omega  = 1.0
-   x0     = 0.5
-   t_span  = (0, 50)
+    
+   # Integration of the theoretical EDO
+   # We use here the method='Theoretical' using the pyCC library,
+   # but we could also use standard python integrators,
+   #
+   # define parameters
+   alpha=1.0; beta=0.2; delta=0.1; mu=0.5; omega=1.0; A=1.0
+   t_span  = (0, 20)
    t_eval  = np.linspace(*t_span, 1000)
-   y0      = [x0]  # initial conditions
-   
-   #theoretical functions
-   def F1(x):
-       return delta * x + beta* np.sin(3*x) 
+   x0     = 0.0; v0     = 0.0
+   y0      = [x0, v0]  # initial conditions
+   # Theoretical functions
+   def F1(x_dot):
+       return delta * x_dot + mu * np.tanh(500*x_dot)
    def F2(x):
-       return 1+np.abs(x) # np.sin(x) 
+       return alpha * x + beta * x**3
    def F_ext(t):
-       return F0 * np.cos(Omega * t)
-   
-   print(f"beta={beta}, delta={delta}")
-   print(f"Omega={Omega}, F0={F0}, $x_0$={x0}")
+       return A * np.cos(omega * t)
    
    
-   ########################
-   ##### integration using pycc of theoretical equation 
-   #########################
-   # equation involved: 
-   ## Fext = f1(x) +f2(x) x'
-   
-   # Parameters for simulation
+   # In the following:
+   # 1) we define the equations we want to integrate,
+   #    (functions must be defined by f_i and params as a_i)
+   # 2) we define parameters for the integrator,
+   # 3) we call to pycc to make the theoretical simulation
+   equations = [
+       'x1_dot = x2',
+       'x2_dot = F_ext - f1(x2) - f2(x1)'
+   ]
    params_th = {
-       "t_span": t_span,
-       "y0": y0,  # x, x_dot, x_ddot
-       "t_eval": t_eval,
-       "method": "LSODA",
-       "local_funcs": {"f1": lambda t: F1(t), "f2": lambda t: F2(t), "F_ext": lambda t: F_ext(t)}
+       # we internally use ivp_solve python function with params defined in the following 4 lines
+       't_span': t_span,
+       'y0': y0,
+       't_eval': t_eval,
+       'method': 'LSODA',
+       # we need to tell to pycc how to find external/local functions
+       'local_funcs': {'f1': lambda x: F1(x),'f2': lambda x: F2(x),'F_ext': lambda t: F_ext(t)},
+       #'scalar_params': {'a1':2.0}
    }
+   # now use pycc to integrate the EDOs
+   sol,derivatives = pycc.simulate(equations,method="Theoretical", params=params_th)
+   # Extract results
+   time_data   = sol.t # sol is the OdeSolution returned from ivp_solve
+   x1_data     = sol.y[0] # x1=x(t)
+   x2_data     = sol.y[1] # x2=x_dot(t)
+   F_ext_val   = F_ext(time_data)
+   x1_dot_data = derivatives[0] #x1_dot=x_dot(t)
+   x2_dot_data = derivatives[1] #x2_dot=x_ddot(t)
+   F1_th = F1(x2_data)
+   F2_th = F2(x1_data)
    
-   #equation=['f1(x) + x_dot*f2(x) = F_ext']
-   equation=['x_dot = (F_ext - f1(x))/f2(x)']
-   
-   #equation = "x_ddot + f1(x) + f2(x) - F_ext = 0"
-   sol,der = pycc.simulate(equation,method="Theoretical", params=params_th)
-   
-   
-   # 1e) extract data from theoretical solution
-   time_data  = sol.t
-   x1_data     = sol.y[0]
-   x1_dot_data=der[0]
-   F_ext_val  = F_ext(time_data)
-   
-   
-   plt.plot(time_data,x1_data)
+   fig, axes = plt.subplots(1, 2, figsize=(12, 6))
+   axes[0].plot(time_data, x1_data, label='$x_1$ (Position)', color='blue', linewidth=2)
+   axes[0].plot(time_data, x1_dot_data, label='$\\dot{x}_1=x_2$ (Velocity)', color='red', linestyle='--', linewidth=2)
+   axes[0].set_title('Position and Velocity vs. Time', fontsize=16)
+   axes[0].set_xlabel('Time', fontsize=12)
+   axes[0].set_ylabel('Value', fontsize=12)
+   axes[0].legend()
+   axes[0].grid(True, which='both', linestyle='--', linewidth=0.5)
+   axes[1].plot(time_data, x2_dot_data, label='$\\dot{x}_2$ (State Derivative)', color='orange', linestyle='--', linewidth=2)
+   axes[1].plot(time_data, F_ext_val, label='$F_{ext}$ (External Force)', color='purple', linestyle=':', linewidth=2)
+   axes[1].set_title('$x_2$, $\\dot{x}_2$ and External Force vs. Time', fontsize=16)
+   axes[1].set_xlabel('Time', fontsize=12)
+   axes[1].set_ylabel('Value', fontsize=12)
+   axes[1].legend()
+   axes[1].grid(True, which='both', linestyle='--', linewidth=0.5)
+   plt.tight_layout()
    plt.show()
    
-   F1_th=F1(x1_data)
-   F2_th=F2(x1_data)
-   
-   plt.plot(x1_data, F1_th)
-   plt.xlabel("x")
-   plt.ylabel("F1(x)")
-   plt.grid(True)
-   plt.show()
-
-   plt.plot(x1_data, F2_th)
-   plt.xlabel("x")
-   plt.ylabel("F2(x)")
-   plt.grid(True)
+   # plotting theoretical functions f1 and f2
+   fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+   ax[0].plot(x1_data, F1(x1_data), '.',color='orange', label="$f_1$ theory")
+   ax[0].set_xlabel('$x_2$')
+   ax[0].set_ylabel('$f_1(x_2)$')
+   ax[0].legend()
+   ax[1].plot(x2_data, F2(x2_data), '.',color='orange', label="$f_2$ theory")
+   ax[1].set_xlabel('$x_1$')
+   ax[1].set_ylabel('$f_2(x_1)$')
+   ax[1].legend()
+   plt.tight_layout()
    plt.show()
    
-     
-   # define database for training
+   
+   #  Generate database that will be used for training
+   # Here, we need to define all the variables that appear in eqs variable
    df = pd.DataFrame({
-       'x':x1_data,
-       'x_dot':x1_dot_data,
+       #'t': time_data, # this can be added if eqs include t as an explicit variable but in this example, we encapsulated all the time dependence within F_ext_val
+       'x1':x1_data,
+       'x2':x2_data,
+       'x1_dot':x1_dot_data,
+       'x2_dot':x2_dot_data,
        'F_ext': F_ext_val
    })
    
-   # define the equation for training with functions in the numerators
-   eq_train=['f1(x) + x_dot*f2(x) = F_ext']
-   
-   ########################################
-             #### method NN  ####
-   ########################################
-   constraints = [
-       {'constraint': 'f1(0)=0'},
-       {'constraint': 'f1 odd'},
-       {'constraint': 'f2 odd'},
+   # Define the proposed equation, in this approach, we will use the parametric
+   # approach where we want to find the ai parameters
+   eqs = [
+       'x1_dot = x2',
+       'x2_dot = F_ext - a1 * x2 - a2* tanh(a3*x2)- a4 * x1 - a5 * x1^3',
    ]
-   parameters_NN = {
-       'neurons': 100,
-       'lr': 1e-4,
-       'epochs': 2000,
-       'error_threshold': 1e-6,
-       'extrapolation': None,
-       'weight_loss_param': 1e1,
-       #'constraints':constraints,
+   
+   # Using Polynomial method (Poly-CC)
+   # This method uses Polynomial expansions for the CCs
+   # First we set the parameters
+   params_poly={
+     'learning_rate': 1e-3,
+     'initial_param_guess':[
+         {'a3':100},
+     ],
+     'N_order': 40,
+     'n_iter': 4000,
+     'eq_weights': [1.0 , 1.0],
+     ## post-fine-tuning parameters are in the following:
+     'fitting_forw_sim':True,  # Enables the option of refitting the coefficients using forward integr
+     'n_iter_outer': 100,      # Max number of function evaluations for the outer loop
+     'outer_tol': 1e-6,        # Tolerance for termination in the outer loop
+     'params_simul': [
+       {'local_funcs': {'F_ext': lambda t: F_ext(t)}},
+       {'t_span':t_span},
+       {'y0': y0},
+       {'t_eval': t_eval},
+       {'method': 'LSODA'},
+     ],
    }
+   # And here, we train the model
+   models, evals , scalar_coefs = pycc.train(df=df,equations=eqs,method='Poly',params=params_poly)
+   # plot obtained functions (characteristic curves CCs)
+   #x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
+   print(scalar_coefs)
    
-   models, evals, obtained_coefs = pycc.train(
-       df=df,
-       equations=eq_train,
-       method='NN',
-       params=parameters_NN
-   )
+   x_f1_cc = np.linspace(np.min(x1_data), np.max(x1_data), 200)
+   x_f2_cc = np.linspace(np.min(x2_data), np.max(x2_data), 200)
    
-   
-   x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
-   
-   plt.figure()
-   plt.plot(x_f1_cc, f1_cc, label='f1_NN learned')
-   plt.plot(x1_data,F1_th, '+', label="f1 theory")
-   plt.xlabel('x')
-   plt.ylabel('f1(x)')
-   plt.legend()
-   plt.figure()
-   plt.plot(x_f2_cc, f2_cc, label='f2_NN learned')
-   plt.plot(x1_data, F2_th, '+', label="f2 theory")
-   plt.xlabel('x')
-   plt.ylabel('f2(x)')
-   plt.legend() 
+   fig, ax = plt.subplots(1, 2, figsize=(12, 6))
+   ax[0].plot(x_f1_cc, scalar_coefs['a1']*x_f1_cc+scalar_coefs['a2']*np.tanh(scalar_coefs['a3']*x_f1_cc), label='$f_1$ learned Poly-CC')
+   ax[0].plot(x_f1_cc, F1(x_f1_cc), '--', label="$f_1$ theory")
+   ax[0].set_xlabel('$x_2$')
+   ax[0].set_ylabel('$f_1(x_2)$')
+   ax[0].legend()
+   ax[1].plot(x_f2_cc, scalar_coefs['a4']*x_f2_cc+scalar_coefs['a5']*x_f2_cc**3, label='$f_2$ learned Poly-CC')
+   ax[1].plot(x_f2_cc, F2(x_f2_cc), '--', label="$f_2$ theory")
+   ax[1].set_xlabel('$x_1$')
+   ax[1].set_ylabel('$f_2(x_1)$')
+   ax[1].legend()
+   plt.tight_layout()
    plt.show()
-           
-   # Print learned parameters (if any)
-   if obtained_coefs:
-       print("\nLearned scalar parameters:")
-       for name, val in obtained_coefs.items():
-           print(f"{name} = {val.item():.4f}")
-
    
-   
-   ############### now simulate with NN-CC #########
-   # WARNING: for simulation we must redefine the train equations
-   # as a set of equivalent first order equations like the following:
-   #eq_train=['f1(x) + x_dot*f2(x) = F_ext']
-   eq_simulate=['x_dot = (F_ext - f1(x))/f2(x)']
-   
-   print("simulation with NN simul")
-   params_NN_simul = {
-       'models': models,
-       'obtained_coefs': obtained_coefs,
+   params_poly_simul = {
+       'models': models, # how we enter evals instead of models
+       #'evals':evals, # fi functions obtained from Poly-CC to do interpolation
+       'scaling': True,
+       'obtained_coefs': scalar_coefs,
+       'scalar_params': scalar_coefs,
        'local_funcs': {'F_ext': lambda t: F_ext(t)},
        't_span':t_span,
        'y0': y0,
        't_eval': t_eval,
-       'method': 'LSODA',  # solve_ivp
-       'atol': 1e-8,
-       'rtol': 1e-6,
-       'check_nan': True
+       'method': 'LSODA',
    }
-   sol,_ = pycc.simulate(eq_simulate, method='NN', params=params_NN_simul)
-   print("Integration success:", sol.success)
-   time_sim=sol.t
-   x1_sim=sol.y[0]
    
-   # Identified vs theoretical solution
+   sol,_ = pycc.simulate(eqs, method='Poly', params=params_poly_simul)
+   print(sol)
+   time_sim=sol.t
+   x1=sol.y[0]
+   x2=sol.y[1]
+   
+   # Plot solution
    plt.figure()
-   plt.plot(time_sim, x1_sim, label="x(t) simulated NN(symm.)")
    plt.plot(time_data, x1_data, label="x(t) th")
+   plt.plot(time_sim, x1,'--', label="x(t) simulated Parametric model using Poly and post fine-tuning")
    plt.xlabel('t')
    plt.ylabel('x(t)')
    plt.legend()
    plt.show()
    
-   
-   ## now we will test 
-   ########################################
-             #### method Poly  ####
-   ########################################
-   print("computing Poly")
-   params_poly={
-     'scaling': True,
-     'n_iter':2000,
-   }
-   models, evals , scalar_coefs = pycc.train(
-       df=df,
-       equations=eq_train,
-       method='Poly', 
-       params=params_poly
-   )
-   
-   x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
-   plt.figure()
-   plt.plot(x_f1_cc, f1_cc, label='f1_Poly learned')
-   plt.plot(x1_data,F1_th, '+', label="f1 theory")
-   plt.xlabel('x')
-   plt.ylabel('f1(x)')
-   plt.legend()
-   plt.figure()
-   plt.plot(x_f2_cc, f2_cc, label='f2_Poly learned')
-   plt.plot(x1_data, F2_th, '+', label="f2 theory")
-   plt.xlabel('x')
-   plt.ylabel('f2(x)')
-   plt.legend()
-   plt.show()
-   
-   
-
-   ########################################
-             #### method SymbR  ####
-   ########################################
-   # symbolic regression method is not as useful
-   # as NN in this example   
-   
-   params_SymbR = {
-     'pysr': {
-       'niterations': 100,
-       'unary_operators': ['tanh'],
-       'binary_operators': ['+','-','*'],
-       'maxsize': 12,
-       'populations':10,
-       'model_selection': 'best', # 'best' , 'accuracy' , 'score'
-       'verbosity': 0
-     },
-     'N_fit_points': 200,
-     'max_iterations': 15,
-   }
-   
-   models, evals , scalar_coefs = pycc.train(
-       df=df,
-       equations=eq_train,
-       method='SymbR',
-       params=params_SymbR
-   )
-   
-   x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
-   
-   plt.figure()
-   plt.plot(x_f1_cc, f1_cc, label='f1_SR learned')
-   plt.plot(x1_data,F1_th, '+', label="f1 theory")
-   plt.xlabel('x')
-   plt.ylabel('f1(x)')
-   plt.legend()
-   plt.figure()
-   plt.plot(x_f2_cc, f2_cc, label='f2_SR learned')
-   plt.plot(x1_data, F2_th, '+', label="f2 theory")
-   plt.xlabel('x')
-   plt.ylabel('f2(x)')
-   plt.legend() 
-   plt.show()
-
 
 

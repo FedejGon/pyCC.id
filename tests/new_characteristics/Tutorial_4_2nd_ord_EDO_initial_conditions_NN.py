@@ -126,19 +126,18 @@ parameters_NN = {
     'neurons': 100,
     'layers':3,
     'lr': 1e-4,
-    'epochs': 2000,
+    'epochs': 500,
     'error_threshold': 1e-6,
     'extrapolation': None,
     'device':'gpu', #'gpu', #'cpu',
     'weight_loss_param': 1e-3,
     'constraints': constraints,
     # New Fine-Tuning parameters
-   # 'fitting_forw_sim': True,
-    'n_iter_outer': 30,           # Reduced from 100. We just want a quick alignment.
-    'outer_tol': 1e-6,
-    'ft_batch_size': 2,           # Reduced from 5. 
-    'ft_max_window_size': 15,     # Reduced from 50. 15 steps is plenty to catch drift.
-    'outer_tol': 1e-6,
+    'fitting_forw_sim': True,
+    'n_iter_outer': 40,           # Reduced from 100. We just want a quick alignment.
+    'ft_batch_size': 4,           # Reduced from 5. 
+    'ft_max_window_size': 20,     # Reduced from 50. 15 steps is plenty to catch drift.
+    'outer_tol': 1e-10,
     'params_simul': [
         {'local_funcs': {'F_ext': lambda t: F_ext(t)}},
         {'t_span': t_span},
@@ -169,58 +168,26 @@ plt.show()
 
 
 
-print("scalar_coefs:",coefs)
+print("scalar_coefs:",obtained_coefs)
 
 #print ("a1", coefs['a1'])
 
 
-# plot obtained functions (characteristic curves CCs)
-x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals
 
-#f1_cc = coefs['a1']*x2_data+ coefs['a2']*np.tanh(coefs['a3']*x2_data)
-#f2_cc = coefs['a4']* x1_data + coefs['a5'] * x1_data**3
-#x_f2_cc, f2_cc = evals
-fig, ax = plt.subplots(1, 2, figsize=(12, 6))
-ax[0].plot(x_f1_cc, f1_cc, label='$f_1$ learned Poly-CC')
-#ax[0].plot(x_f1_cc, F1(x_f1_cc), '--', label="$f_1$ theory")
-#ax[0].plot(x2_data,f1_cc, label="$f_1$ learned Poly")
-ax[0].plot(x2_data, F1(x2_data), '--', label="$f_1$ theory")
-ax[0].set_xlabel('$x_2$')
-ax[0].set_ylabel('$f_1(x_2)$')
-ax[0].legend()
-#ax[1].plot(x_f2_cc, f2_cc, label='$f_2$ learned Poly-CC')
-#ax[1].plot(x_f2_cc, F2(x_f2_cc), '--', label="$f_2$ theory")
-#ax[1].plot(x1_data, f2_cc, label='$f_2$ learned Poly-CC')
-ax[1].plot(x_f2_cc, f2_cc, label='$f_2$ learned Poly-CC')
-ax[1].plot(x1_data, F2(x1_data), '--', label="$f_1$ theory")
-ax[1].set_xlabel('$x_1$')
-ax[1].set_ylabel('$f_2(x_1)$')
-ax[1].legend()
-plt.tight_layout()
-plt.show()
-
-
-# Forward integration with method='Interp' using evals obtained from Poly-CC
-# In this step, we integrate the models forward using a previously computed 'evals'
-# variable. By using interpolation instead of direct numerical evaluation of the
-# polynomial, we often improve numerical stability.
-params_poly_simul = {
-    'models': models, # how we enter evals instead of models
-    #'evals':evals, # fi functions obtained from Poly-CC to do interpolation
-    'scaling': True,
-    'obtained_coefs': coefs,
-    'scalar_params': coefs,
+# Forward integration using the NN method using our NN-CC models previously obtained
+# and comparing the predictions with the original data
+params_NN_simul = {
+    'models': models,
+    'obtained_coefs': obtained_coefs,
     'local_funcs': {'F_ext': lambda t: F_ext(t)},
     't_span':t_span,
     'y0': y0,
     't_eval': t_eval,
-    'method': 'LSODA',
+    'method': 'LSODA'
 }
-# in this case, using Poly method yield to integration issues
-#sol = pycc.simulate(eqs, method='Poly', params=params_poly_simul)
-# Integration issues may be solved by using the interpolation method
-sol,_ = pycc.simulate(eqs, method='Poly', params=params_poly_simul)
-print(sol)
+
+sol,_ = pycc.simulate(eqs, method='NN', params=params_NN_simul)
+
 time_sim=sol.t
 x1=sol.y[0]
 x2=sol.y[1]
@@ -228,10 +195,12 @@ x2=sol.y[1]
 # Plot solution
 plt.figure()
 plt.plot(time_data, x1_data, label="x(t) th")
-plt.plot(time_sim, x1,'--', label="x(t) simulated Interp using Poly")
+plt.plot(time_sim, x1,'--', label="x(t) simulated NN(sym)")
 plt.xlabel('t')
 plt.ylabel('x(t)')
 plt.legend()
 plt.show()
+
+
 
 

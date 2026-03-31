@@ -8,10 +8,11 @@ This section provides a detailed reference for the ``pycc.train()`` function
 --------
 Overview
 --------
-The ``pycc.train()`` function is the primary entry point for identifying system dynamics from data. It functions as a training manager (or dispatcher) that abstracts the complexity of specific algorithms. Instead of calling a specific algorithm directly, you specify the ``method`` parameter (e.g., 'NN' for Neural Networks), and the manager automatically routes the data and equations to the appropriate specialized training module.
- 
-This modular design allows users to seamlessly switch between different identification techniques (like Neural Networks, Polynomial Regression, or Symbolic Regression) without changing their data structures or equation definitions.
- 
+The ``pycc.train()`` function is the primary entry point for identifying system dynamics from data. Acting as a **training manager** (or dispatcher), it abstracts the complexity of specific algorithms. By specifying the ``method`` parameter (e.g., ``'NN'`` for Neural Networks and ``'Poly'`` for the polynomial regression method), the function automatically routes data and equations to the corresponding training algorithm.
+
+
+This modular design ensures that training commands remain consistent across different techniques. Consequently, users can rapidly test different approaches (such as Neural Networks, Polynomial Regression, or Symbolic Regression) with only minor modifications, as the underlying data structures and equation definitions remain compatible.
+
 ..   This is the main function for identifying system dynamics from data. It acts as a manager that calls a specific training method based on the ``method`` parameter. For example, when ``method='NN'``, we activate the training with the neural network method. Hence, can easily switch between different training methods. this is a manager of training methods that switches between different training methods. In the following we show this training manager do not kwow what .... 
     -------------------------------------------------
     Additional details for the manager function 
@@ -22,9 +23,9 @@ Below, we show additional details about the inputs and outputs for the manager f
 .. autofunction:: pycc.train 
    :noindex:
   
-
+ 
 **Basic example usage:** 
-The following example demonstrates how to set up a DataFrame, define a second-order system structure with unknown functions (f1​,f2​), and train a model using the Neural Network method (below we will .
+This example shows a simple workflow in three steps: i) generating the theoretical dataframe; ii) defining a hypothesized second-order system structure and the training database; iii) training the model using the method='NN' approach.
 
 .. code-block:: python
 
@@ -162,9 +163,9 @@ While the specific parameterization varies by method, it is all encapsulated wit
 This method uses a physics-informed neural network to learn the unknown functions as characteristic curves. It is flexible and powerful for complex systems. The ``params`` dictionary for this method can contain the following keys:
 
 * ``'neurons':`` (*int, optional*) Default: 100
-    The number of neurons in each hidden layer of the neural networks.
+    The number of neurons in each hidden layer of the neural networks for each fi function defined in eqs variable.
 * ``'layers':`` (*int, optional*)  Default: 3
-    The number of hidden layers for each neural network.
+    The number of hidden layers for each neural network and each fi function defined in eqs variable.
 * ``'activation':`` (*list[str], optional*) Default: ``'relu'``
     The activation functions to use. You can use any function available in the ``torch.nn.functional``  library  <https://docs.pytorch.org/docs/stable/nn.functional.html>. We recommend using ``'leaky_relu'`` , ``'relu'``, ``'tanh'``, or ``'rrelu'``. These were found to yield robust results for both chaotic and discontinuous systems in DOI:10.1007/s11071-025-11744-6 and 10.48550/arXiv.2601.21720.
 * ``'lr':`` (*float, optional*) Default: 1e-4
@@ -196,7 +197,8 @@ This method uses a physics-informed neural network to learn the unknown function
         * **Symmetry**: ``'f1 odd'`` or ``'f2 even'``
     * ``'penalty'``: (*float, optional*) Default: 1.0.  A weight to multiply the loss from this specific constraint.
     * ``'eval'``: (*str, optional*) Default: ``'array'``. For symmetry constraints only. Defines how the constraint is evaluated. Can be ``'data'`` (uses the provided data points) or ``'array'`` (creates a new linearly spaced array over the data range).
-    * ``'Nval_array'``: (*int, optional*) Default: 100. If ``eval='array'``, this sets the number of points in the evaluation array.
+    * ``'Nval_array'``: (*int, optional*) Default: 100. If ``eval='array'``, this sets the number of points in the evaluation array for the corresponding constrain. 
+
 
     .. note::
 
@@ -215,6 +217,9 @@ This method uses a physics-informed neural network to learn the unknown function
                 {'constraint': 'f2 odd', 'eval': 'array', 'Nval_array': 200},
             ]
 
+
+
+       
 
 **Example Usage:**
 
@@ -326,11 +331,32 @@ The ``params`` dictionary for this method can contain the following keys:
     The number of points to evaluate for generating the final characteristic curves in the ``evals`` output. **Default: 200**.
 * ``'constraints':`` (*list[dict], optional*)
     A list of dictionaries to impose constraints on the polynomial forms, effectively setting certain coefficients to zero. **Default: []**.
-
+ 
     Each constraint dictionary can have the following keys:
     * ``'constraint'``: A string defining the constraint. Supported formats are:
         * **Point value**: ``'f1(0)=0'`` (This forces the constant term to be zero).
-        * **Symmetry**: ``'f1 odd'`` (This forces all even-power coefficients to be zero) or ``'f1 even'`` (This forces all odd-power coefficients to be zero).
+        * **Symmetry**: ``'f1 odd'`` (by forcing all even-power coefficients to be zero) or ``'f1 even'`` (by forcing all odd-power coefficients to be zero).
+* ``'print_poly_coeffs':`` (*bool, optional*) **Default: \'False\'**. It prints the final ai parameters after the training procedure. 
+
+* **Post-fine-tuning parameters**
+    The **pyCC** library also supports an advanced optimization workflow referred to as post-fine-tuning. In this workflow, the code performs a two-step internal procedure. First, it optimizes the predefined model using the entire stream of reference database. Then, by simply adding extra parameters to the training routine, the code triggers an additional stage where it uses the obtained model to run forward integrations, generating simulated trajectories that are compared to the reference data. Based on this comparison, the code performs a fine-tuning of the model parameters and integrates forward again, thus performing an iterative post-fine-tuning procedure. The required and optional parameters are listed in the following:
+    
+    * ``'fitting_forw_sim'`` (*bool, optional*) **Default: \'False\'**. It enables the post-fine-tuning by reffiting the coefficients using forward integrations. 
+    * ``'n_iter_outer'``: (*int, optional*) **Default: 100**. It defines a safety bound for the maximum number of iterations of the post-fine-tuning.
+    * ``'outer_tol'``: (*float, optional*) **Default: 1e-6**. A tolerance bound for the loss value for the post-fine-tuning loop.
+    * ``'params_simul'``: (*list of dictionaries, mandatory*). It defines the simulation parameters for the post-fine-tuning forward integrations. We use a similar format than the pycc.simulate() function. For example:
+    
+      .. code-block:: python  
+      
+         'params_simul': [
+         {'local_funcs': {'F_ext': lambda t: F_ext(t)}}, # External time-dependent functions 
+         {'t_span':t_span},
+         {'y0': y0},
+         {'t_eval': t_eval},
+         {'method': 'LSODA'},
+         ],
+
+
 
 **Example Usage:**
 

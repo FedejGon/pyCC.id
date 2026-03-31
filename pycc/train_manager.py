@@ -18,7 +18,7 @@ def train(df, equations, method='NN', params=None):
     :type df: pandas.DataFrame
     :param equations: A string or list of strings defining the system equations.
                       It defines the equations we want to fit with a given df.
-                      The user can include functions and parameters defined by f_i and a_j, respectively 
+                      The user can include functions and parameters defined by fi and aj, respectively 
                       (i,j=0,1,...). It can also include time dependent functions, which must be
                       defined in the df. 
     :type equations: str or list[str]

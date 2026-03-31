@@ -35,7 +35,7 @@ While NN-CC is the core method, ``pyCC`` also provides other approaches for comp
 * **SymbR-CC (Symbolic Regression)**: This method, which internally uses the ``pySR`` library, attempts to find an explicit symbolic mathematical expression for the characteristic curves (e.g., :math:`f(x) = 0.5 \tanh(500x)`). It is computationally more demanding than NN-CC.
 
 .. note::
-   Performing simulations with SymbR-CC is often slow, as it requires to evaluate the analytical expressions for the functions at every time step. Aternatively, you can simulate the system using the ``Interp`` method and using as input the ``evals`` variable obtained from SymbR-CC. The simulation using interpolation is much faster than analytical evaluation.  
+   Performing simulations with SymbR-CC is often slow, as it requires to evaluate the analytical expressions for the functions at every time step. Aternatively, you can simulate the system using the ``Interp`` method and using as input the ``evals`` variable obtained from SymbR-CC. The simulation using interpolation is much faster than analytical evaluation.   
 
 .. warning::
    Be cautious with complex model structures (:math:`\mathbf{G}`), in particular when trying to identify expressions that contain functions in the denominators. It is recommended to rewrite the system equations to move the functions to the numerator during the identification stage and then redefining them as a set of first-order equations during the simulation stage. More information is given in the Example 4 of the documentation.
@@ -198,10 +198,10 @@ Workflow 2
   
 Here, we present a recommended workflow for performing post-processing using \'evals\' from a previously trained NN-CC model. 
 
-Specifically, suppose steps 1 and 2 are the same as in Workflow 1, we modify step 3 and add step 4 as follows:
+Specifically, steps 1 and 2 are the same as in Workflow 1, but we modify step 3 and add step 4 by the following:
 
-3. Perform post-processing of the identified models using ``pycc.post_processing()``
-4. Simulate the identified model using ``pycc.simulate()``. We recommend using interpolation (method=\'Interp\') instead of directly using the full analytical functions (method=\'SymbR\') to reduce computation time. If higher precision is required, you can increase \'n_eval\' in step 3
+3. Performing a post-processing of the identified models using ``pycc.post_processing()``
+4. Simulating the identified model using ``pycc.simulate()``. We recommend using interpolation (method=\'Interp\') instead of directly using the full analytical functions (method=\'SymbR\') to reduce computation time (by multiple validations, it was tested that when using enough amount of points for evals (higher than 200 for instance), then the interpolated version of the fi functions give practically the same results as evaluating the symbolic expression direclty ). If higher precision is required, you can increase \'n_eval\' in step 3
    
    
 .. code-block:: python   
@@ -256,3 +256,14 @@ Specifically, suppose steps 1 and 2 are the same as in Workflow 1, we modify ste
    plt.ylabel('x(t)')
    plt.legend()
    plt.show()
+   
+   
+
+=====
+Workflow 3
+=====
+   
+When the user possesses or wants to hypothesize a fully parametric expression, we recommend using method='Poly'. We also advise a two-step approach: first, provide reasonable initial guesses for the parameters and fit the model without post-fine-tuning. Then, enable post-fine-tuning, using the resulting values from the first step as the new initial guesses. During the second fit, you may also choose to keep certain parameters fixed  (see Example 5)
+
+   
+  

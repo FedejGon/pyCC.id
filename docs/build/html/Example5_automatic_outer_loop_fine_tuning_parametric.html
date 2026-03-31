@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Example 5: Automatic fine tuning using forward simulations (outer loop) &mdash; pyCC.id 0.1.0 documentation</title>
+  <title>Example 5: 2nd-order ODE - Parametric method with post-fine-tuning &mdash; pyCC.id 0.1.0 documentation</title>
       <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
@@ -18,7 +18,9 @@
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" /> 
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Practical Tips" href="practical_tips.html" />
+    <link rel="prev" title="Example 4: 1st-order ODE with f in denominator" href="Example4_1st_order_ODE_denominator.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -54,11 +56,12 @@
 <li class="toctree-l1"><a class="reference internal" href="functions_postprocessing.html">pycc.post_processing()</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Examples:</span></p>
-<ul>
+<ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Example1_training_function.html">Example 1: Function y=f(x)</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Example2_2nd_order_ODE.html">Example 2: 2nd-order ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Example3_3rd_order_ODE.html">Example 3: 3rd-order ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Example4_1st_order_ODE_denominator.html">Example 4: 1st-order ODE with f in denominator</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Example 5: 2nd-order ODE - Parametric method with post-fine-tuning</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
 <ul>
@@ -89,7 +92,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Example 5: Automatic fine tuning using forward simulations (outer loop)</li>
+      <li class="breadcrumb-item active">Example 5: 2nd-order ODE - Parametric method with post-fine-tuning</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/Example5_automatic_outer_loop_fine_tuning_parametric.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -99,9 +102,9 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="example-5-automatic-fine-tuning-using-forward-simulations-outer-loop">
-<h1>Example 5: Automatic fine tuning using forward simulations (outer loop)<a class="headerlink" href="#example-5-automatic-fine-tuning-using-forward-simulations-outer-loop" title="Link to this heading"></a></h1>
-<p>This example presents the application of pyCC to a family of first-order systems as discussed in Ref.[Gonzalez2023]. In this case, for training the system is useful to rewrite the system with the unknown functions in the numerator.</p>
+  <section id="example-5-2nd-order-ode-parametric-method-with-post-fine-tuning">
+<h1>Example 5: 2nd-order ODE - Parametric method with post-fine-tuning<a class="headerlink" href="#example-5-2nd-order-ode-parametric-method-with-post-fine-tuning" title="Link to this heading"></a></h1>
+<p>The pyCC library also supports an advanced optimization workflow referred to as post-fine-tuning. In this workflow, the code performs a two-step internal procedure. First, it optimizes the predefined model using the entire stream of reference database, exactly as shown earlier in this tutorial. Then, by simply adding extra parameters to the training routine, the code triggers an additional stage where it uses the obtained model to run forward integrations, generating simulated trajectories that are compared to the reference data. Based on this comparison, the code performs a fine-tuning of the model parameters and integrates forward again, thus performing an iterative post-fine-tuning procedure.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pycc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
@@ -110,243 +113,177 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.integrate</span><span class="w"> </span><span class="kn">import</span> <span class="n">solve_ivp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">scipy.signal</span><span class="w"> </span><span class="kn">import</span> <span class="n">savgol_filter</span>
 
-<span class="c1"># --- Parameters ---</span>
-<span class="n">beta</span>   <span class="o">=</span> <span class="mf">0.2</span>
-<span class="n">delta</span>  <span class="o">=</span> <span class="mf">0.1</span>
-<span class="n">F0</span>     <span class="o">=</span> <span class="mf">3.0</span>
-<span class="n">Omega</span>  <span class="o">=</span> <span class="mf">1.0</span>
-<span class="n">x0</span>     <span class="o">=</span> <span class="mf">0.5</span>
-<span class="n">t_span</span>  <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="c1"># Integration of the theoretical EDO</span>
+<span class="c1"># We use here the method=&#39;Theoretical&#39; using the pyCC library,</span>
+<span class="c1"># but we could also use standard python integrators,</span>
+<span class="c1">#</span>
+<span class="c1"># define parameters</span>
+<span class="n">alpha</span><span class="o">=</span><span class="mf">1.0</span><span class="p">;</span> <span class="n">beta</span><span class="o">=</span><span class="mf">0.2</span><span class="p">;</span> <span class="n">delta</span><span class="o">=</span><span class="mf">0.1</span><span class="p">;</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.5</span><span class="p">;</span> <span class="n">omega</span><span class="o">=</span><span class="mf">1.0</span><span class="p">;</span> <span class="n">A</span><span class="o">=</span><span class="mf">1.0</span>
+<span class="n">t_span</span>  <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">20</span><span class="p">)</span>
 <span class="n">t_eval</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">*</span><span class="n">t_span</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
-<span class="n">y0</span>      <span class="o">=</span> <span class="p">[</span><span class="n">x0</span><span class="p">]</span>  <span class="c1"># initial conditions</span>
-
-<span class="c1">#theoretical functions</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">F1</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">delta</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">beta</span><span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="mi">3</span><span class="o">*</span><span class="n">x</span><span class="p">)</span>
+<span class="n">x0</span>     <span class="o">=</span> <span class="mf">0.0</span><span class="p">;</span> <span class="n">v0</span>     <span class="o">=</span> <span class="mf">0.0</span>
+<span class="n">y0</span>      <span class="o">=</span> <span class="p">[</span><span class="n">x0</span><span class="p">,</span> <span class="n">v0</span><span class="p">]</span>  <span class="c1"># initial conditions</span>
+<span class="c1"># Theoretical functions</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">F1</span><span class="p">(</span><span class="n">x_dot</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">delta</span> <span class="o">*</span> <span class="n">x_dot</span> <span class="o">+</span> <span class="n">mu</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="mi">500</span><span class="o">*</span><span class="n">x_dot</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">F2</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-    <span class="k">return</span> <span class="mi">1</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="c1"># np.sin(x)</span>
+    <span class="k">return</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">x</span> <span class="o">+</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">x</span><span class="o">**</span><span class="mi">3</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">F_ext</span><span class="p">(</span><span class="n">t</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">F0</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">Omega</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;beta=</span><span class="si">{</span><span class="n">beta</span><span class="si">}</span><span class="s2">, delta=</span><span class="si">{</span><span class="n">delta</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Omega=</span><span class="si">{</span><span class="n">Omega</span><span class="si">}</span><span class="s2">, F0=</span><span class="si">{</span><span class="n">F0</span><span class="si">}</span><span class="s2">, $x_0$=</span><span class="si">{</span><span class="n">x0</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">A</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">omega</span> <span class="o">*</span> <span class="n">t</span><span class="p">)</span>
 
 
-<span class="c1">########################</span>
-<span class="c1">##### integration using pycc of theoretical equation</span>
-<span class="c1">#########################</span>
-<span class="c1"># equation involved:</span>
-<span class="c1">## Fext = f1(x) +f2(x) x&#39;</span>
-
-<span class="c1"># Parameters for simulation</span>
+<span class="c1"># In the following:</span>
+<span class="c1"># 1) we define the equations we want to integrate,</span>
+<span class="c1">#    (functions must be defined by f_i and params as a_i)</span>
+<span class="c1"># 2) we define parameters for the integrator,</span>
+<span class="c1"># 3) we call to pycc to make the theoretical simulation</span>
+<span class="n">equations</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;x1_dot = x2&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;x2_dot = F_ext - f1(x2) - f2(x1)&#39;</span>
+<span class="p">]</span>
 <span class="n">params_th</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s2">&quot;t_span&quot;</span><span class="p">:</span> <span class="n">t_span</span><span class="p">,</span>
-    <span class="s2">&quot;y0&quot;</span><span class="p">:</span> <span class="n">y0</span><span class="p">,</span>  <span class="c1"># x, x_dot, x_ddot</span>
-    <span class="s2">&quot;t_eval&quot;</span><span class="p">:</span> <span class="n">t_eval</span><span class="p">,</span>
-    <span class="s2">&quot;method&quot;</span><span class="p">:</span> <span class="s2">&quot;LSODA&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;local_funcs&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;f1&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">F1</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="s2">&quot;f2&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">F2</span><span class="p">(</span><span class="n">t</span><span class="p">),</span> <span class="s2">&quot;F_ext&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">F_ext</span><span class="p">(</span><span class="n">t</span><span class="p">)}</span>
+    <span class="c1"># we internally use ivp_solve python function with params defined in the following 4 lines</span>
+    <span class="s1">&#39;t_span&#39;</span><span class="p">:</span> <span class="n">t_span</span><span class="p">,</span>
+    <span class="s1">&#39;y0&#39;</span><span class="p">:</span> <span class="n">y0</span><span class="p">,</span>
+    <span class="s1">&#39;t_eval&#39;</span><span class="p">:</span> <span class="n">t_eval</span><span class="p">,</span>
+    <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;LSODA&#39;</span><span class="p">,</span>
+    <span class="c1"># we need to tell to pycc how to find external/local functions</span>
+    <span class="s1">&#39;local_funcs&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;f1&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">F1</span><span class="p">(</span><span class="n">x</span><span class="p">),</span><span class="s1">&#39;f2&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">F2</span><span class="p">(</span><span class="n">x</span><span class="p">),</span><span class="s1">&#39;F_ext&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">F_ext</span><span class="p">(</span><span class="n">t</span><span class="p">)},</span>
+    <span class="c1">#&#39;scalar_params&#39;: {&#39;a1&#39;:2.0}</span>
 <span class="p">}</span>
+<span class="c1"># now use pycc to integrate the EDOs</span>
+<span class="n">sol</span><span class="p">,</span><span class="n">derivatives</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">equations</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;Theoretical&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params_th</span><span class="p">)</span>
+<span class="c1"># Extract results</span>
+<span class="n">time_data</span>   <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">t</span> <span class="c1"># sol is the OdeSolution returned from ivp_solve</span>
+<span class="n">x1_data</span>     <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1"># x1=x(t)</span>
+<span class="n">x2_data</span>     <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c1"># x2=x_dot(t)</span>
+<span class="n">F_ext_val</span>   <span class="o">=</span> <span class="n">F_ext</span><span class="p">(</span><span class="n">time_data</span><span class="p">)</span>
+<span class="n">x1_dot_data</span> <span class="o">=</span> <span class="n">derivatives</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="c1">#x1_dot=x_dot(t)</span>
+<span class="n">x2_dot_data</span> <span class="o">=</span> <span class="n">derivatives</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c1">#x2_dot=x_ddot(t)</span>
+<span class="n">F1_th</span> <span class="o">=</span> <span class="n">F1</span><span class="p">(</span><span class="n">x2_data</span><span class="p">)</span>
+<span class="n">F2_th</span> <span class="o">=</span> <span class="n">F2</span><span class="p">(</span><span class="n">x1_data</span><span class="p">)</span>
 
-<span class="c1">#equation=[&#39;f1(x) + x_dot*f2(x) = F_ext&#39;]</span>
-<span class="n">equation</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x_dot = (F_ext - f1(x))/f2(x)&#39;</span><span class="p">]</span>
-
-<span class="c1">#equation = &quot;x_ddot + f1(x) + f2(x) - F_ext = 0&quot;</span>
-<span class="n">sol</span><span class="p">,</span><span class="n">der</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">equation</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s2">&quot;Theoretical&quot;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params_th</span><span class="p">)</span>
-
-
-<span class="c1"># 1e) extract data from theoretical solution</span>
-<span class="n">time_data</span>  <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">t</span>
-<span class="n">x1_data</span>     <span class="o">=</span> <span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">x1_dot_data</span><span class="o">=</span><span class="n">der</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-<span class="n">F_ext_val</span>  <span class="o">=</span> <span class="n">F_ext</span><span class="p">(</span><span class="n">time_data</span><span class="p">)</span>
-
-
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time_data</span><span class="p">,</span><span class="n">x1_data</span><span class="p">)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time_data</span><span class="p">,</span> <span class="n">x1_data</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$x_1$ (Position)&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time_data</span><span class="p">,</span> <span class="n">x1_dot_data</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">dot</span><span class="si">{x}</span><span class="s1">_1=x_2$ (Velocity)&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Position and Velocity vs. Time&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Value&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time_data</span><span class="p">,</span> <span class="n">x2_dot_data</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$</span><span class="se">\\</span><span class="s1">dot</span><span class="si">{x}</span><span class="s1">_2$ (State Derivative)&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time_data</span><span class="p">,</span> <span class="n">F_ext_val</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$F_</span><span class="si">{ext}</span><span class="s1">$ (External Force)&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;purple&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;$x_2$, $</span><span class="se">\\</span><span class="s1">dot</span><span class="si">{x}</span><span class="s1">_2$ and External Force vs. Time&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Time&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Value&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">axes</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
-<span class="n">F1_th</span><span class="o">=</span><span class="n">F1</span><span class="p">(</span><span class="n">x1_data</span><span class="p">)</span>
-<span class="n">F2_th</span><span class="o">=</span><span class="n">F2</span><span class="p">(</span><span class="n">x1_data</span><span class="p">)</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1_data</span><span class="p">,</span> <span class="n">F1_th</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;F1(x)&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+<span class="c1"># plotting theoretical functions f1 and f2</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1_data</span><span class="p">,</span> <span class="n">F1</span><span class="p">(</span><span class="n">x1_data</span><span class="p">),</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;$f_1$ theory&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$x_2$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$f_1(x_2)$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x2_data</span><span class="p">,</span> <span class="n">F2</span><span class="p">(</span><span class="n">x2_data</span><span class="p">),</span> <span class="s1">&#39;.&#39;</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;orange&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;$f_2$ theory&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$x_1$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$f_2(x_1)$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1_data</span><span class="p">,</span> <span class="n">F2_th</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s2">&quot;F2(x)&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
-
-<span class="c1"># define database for training</span>
+<span class="c1">#  Generate database that will be used for training</span>
+<span class="c1"># Here, we need to define all the variables that appear in eqs variable</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
-    <span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="n">x1_data</span><span class="p">,</span>
-    <span class="s1">&#39;x_dot&#39;</span><span class="p">:</span><span class="n">x1_dot_data</span><span class="p">,</span>
+    <span class="c1">#&#39;t&#39;: time_data, # this can be added if eqs include t as an explicit variable but in this example, we encapsulated all the time dependence within F_ext_val</span>
+    <span class="s1">&#39;x1&#39;</span><span class="p">:</span><span class="n">x1_data</span><span class="p">,</span>
+    <span class="s1">&#39;x2&#39;</span><span class="p">:</span><span class="n">x2_data</span><span class="p">,</span>
+    <span class="s1">&#39;x1_dot&#39;</span><span class="p">:</span><span class="n">x1_dot_data</span><span class="p">,</span>
+    <span class="s1">&#39;x2_dot&#39;</span><span class="p">:</span><span class="n">x2_dot_data</span><span class="p">,</span>
     <span class="s1">&#39;F_ext&#39;</span><span class="p">:</span> <span class="n">F_ext_val</span>
 <span class="p">})</span>
 
-<span class="c1"># define the equation for training with functions in the numerators</span>
-<span class="n">eq_train</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;f1(x) + x_dot*f2(x) = F_ext&#39;</span><span class="p">]</span>
-
-<span class="c1">########################################</span>
-          <span class="c1">#### method NN  ####</span>
-<span class="c1">########################################</span>
-<span class="n">constraints</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f1(0)=0&#39;</span><span class="p">},</span>
-    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f1 odd&#39;</span><span class="p">},</span>
-    <span class="p">{</span><span class="s1">&#39;constraint&#39;</span><span class="p">:</span> <span class="s1">&#39;f2 odd&#39;</span><span class="p">},</span>
+<span class="c1"># Define the proposed equation, in this approach, we will use the parametric</span>
+<span class="c1"># approach where we want to find the ai parameters</span>
+<span class="n">eqs</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;x1_dot = x2&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;x2_dot = F_ext - a1 * x2 - a2* tanh(a3*x2)- a4 * x1 - a5 * x1^3&#39;</span><span class="p">,</span>
 <span class="p">]</span>
-<span class="n">parameters_NN</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;neurons&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
-    <span class="s1">&#39;lr&#39;</span><span class="p">:</span> <span class="mf">1e-4</span><span class="p">,</span>
-    <span class="s1">&#39;epochs&#39;</span><span class="p">:</span> <span class="mi">2000</span><span class="p">,</span>
-    <span class="s1">&#39;error_threshold&#39;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">,</span>
-    <span class="s1">&#39;extrapolation&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="s1">&#39;weight_loss_param&#39;</span><span class="p">:</span> <span class="mf">1e1</span><span class="p">,</span>
-    <span class="c1">#&#39;constraints&#39;:constraints,</span>
+
+<span class="c1"># Using Polynomial method (Poly-CC)</span>
+<span class="c1"># This method uses Polynomial expansions for the CCs</span>
+<span class="c1"># First we set the parameters</span>
+<span class="n">params_poly</span><span class="o">=</span><span class="p">{</span>
+  <span class="s1">&#39;learning_rate&#39;</span><span class="p">:</span> <span class="mf">1e-3</span><span class="p">,</span>
+  <span class="s1">&#39;initial_param_guess&#39;</span><span class="p">:[</span>
+      <span class="p">{</span><span class="s1">&#39;a3&#39;</span><span class="p">:</span><span class="mi">100</span><span class="p">},</span>
+  <span class="p">],</span>
+  <span class="s1">&#39;N_order&#39;</span><span class="p">:</span> <span class="mi">40</span><span class="p">,</span>
+  <span class="s1">&#39;n_iter&#39;</span><span class="p">:</span> <span class="mi">4000</span><span class="p">,</span>
+  <span class="s1">&#39;eq_weights&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span> <span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span>
+  <span class="c1">## post-fine-tuning parameters are in the following:</span>
+  <span class="s1">&#39;fitting_forw_sim&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># Enables the option of refitting the coefficients using forward integr</span>
+  <span class="s1">&#39;n_iter_outer&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>      <span class="c1"># Max number of function evaluations for the outer loop</span>
+  <span class="s1">&#39;outer_tol&#39;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">,</span>        <span class="c1"># Tolerance for termination in the outer loop</span>
+  <span class="s1">&#39;params_simul&#39;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s1">&#39;local_funcs&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;F_ext&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">F_ext</span><span class="p">(</span><span class="n">t</span><span class="p">)}},</span>
+    <span class="p">{</span><span class="s1">&#39;t_span&#39;</span><span class="p">:</span><span class="n">t_span</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">&#39;y0&#39;</span><span class="p">:</span> <span class="n">y0</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">&#39;t_eval&#39;</span><span class="p">:</span> <span class="n">t_eval</span><span class="p">},</span>
+    <span class="p">{</span><span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;LSODA&#39;</span><span class="p">},</span>
+  <span class="p">],</span>
 <span class="p">}</span>
+<span class="c1"># And here, we train the model</span>
+<span class="n">models</span><span class="p">,</span> <span class="n">evals</span> <span class="p">,</span> <span class="n">scalar_coefs</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span><span class="n">equations</span><span class="o">=</span><span class="n">eqs</span><span class="p">,</span><span class="n">method</span><span class="o">=</span><span class="s1">&#39;Poly&#39;</span><span class="p">,</span><span class="n">params</span><span class="o">=</span><span class="n">params_poly</span><span class="p">)</span>
+<span class="c1"># plot obtained functions (characteristic curves CCs)</span>
+<span class="c1">#x_f1_cc, f1_cc, x_f2_cc, f2_cc = evals</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">scalar_coefs</span><span class="p">)</span>
 
-<span class="n">models</span><span class="p">,</span> <span class="n">evals</span><span class="p">,</span> <span class="n">obtained_coefs</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">train</span><span class="p">(</span>
-    <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
-    <span class="n">equations</span><span class="o">=</span><span class="n">eq_train</span><span class="p">,</span>
-    <span class="n">method</span><span class="o">=</span><span class="s1">&#39;NN&#39;</span><span class="p">,</span>
-    <span class="n">params</span><span class="o">=</span><span class="n">parameters_NN</span>
-<span class="p">)</span>
+<span class="n">x_f1_cc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">x1_data</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">x1_data</span><span class="p">),</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">x_f2_cc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">x2_data</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">x2_data</span><span class="p">),</span> <span class="mi">200</span><span class="p">)</span>
 
-
-<span class="n">x_f1_cc</span><span class="p">,</span> <span class="n">f1_cc</span><span class="p">,</span> <span class="n">x_f2_cc</span><span class="p">,</span> <span class="n">f2_cc</span> <span class="o">=</span> <span class="n">evals</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_f1_cc</span><span class="p">,</span> <span class="n">f1_cc</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;f1_NN learned&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1_data</span><span class="p">,</span><span class="n">F1_th</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;f1 theory&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;f1(x)&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_f2_cc</span><span class="p">,</span> <span class="n">f2_cc</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;f2_NN learned&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1_data</span><span class="p">,</span> <span class="n">F2_th</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;f2 theory&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;f2(x)&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_f1_cc</span><span class="p">,</span> <span class="n">scalar_coefs</span><span class="p">[</span><span class="s1">&#39;a1&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">x_f1_cc</span><span class="o">+</span><span class="n">scalar_coefs</span><span class="p">[</span><span class="s1">&#39;a2&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">tanh</span><span class="p">(</span><span class="n">scalar_coefs</span><span class="p">[</span><span class="s1">&#39;a3&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">x_f1_cc</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$f_1$ learned Poly-CC&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_f1_cc</span><span class="p">,</span> <span class="n">F1</span><span class="p">(</span><span class="n">x_f1_cc</span><span class="p">),</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;$f_1$ theory&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$x_2$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$f_1(x_2)$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_f2_cc</span><span class="p">,</span> <span class="n">scalar_coefs</span><span class="p">[</span><span class="s1">&#39;a4&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">x_f2_cc</span><span class="o">+</span><span class="n">scalar_coefs</span><span class="p">[</span><span class="s1">&#39;a5&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">x_f2_cc</span><span class="o">**</span><span class="mi">3</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;$f_2$ learned Poly-CC&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_f2_cc</span><span class="p">,</span> <span class="n">F2</span><span class="p">(</span><span class="n">x_f2_cc</span><span class="p">),</span> <span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;$f_2$ theory&quot;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;$x_1$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;$f_2(x_1)$&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 
-<span class="c1"># Print learned parameters (if any)</span>
-<span class="k">if</span> <span class="n">obtained_coefs</span><span class="p">:</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Learned scalar parameters:&quot;</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">obtained_coefs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> = </span><span class="si">{</span><span class="n">val</span><span class="o">.</span><span class="n">item</span><span class="p">()</span><span class="si">:</span><span class="s2">.4f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-
-
-<span class="c1">############### now simulate with NN-CC #########</span>
-<span class="c1"># WARNING: for simulation we must redefine the train equations</span>
-<span class="c1"># as a set of equivalent first order equations like the following:</span>
-<span class="c1">#eq_train=[&#39;f1(x) + x_dot*f2(x) = F_ext&#39;]</span>
-<span class="n">eq_simulate</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;x_dot = (F_ext - f1(x))/f2(x)&#39;</span><span class="p">]</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;simulation with NN simul&quot;</span><span class="p">)</span>
-<span class="n">params_NN_simul</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">&#39;models&#39;</span><span class="p">:</span> <span class="n">models</span><span class="p">,</span>
-    <span class="s1">&#39;obtained_coefs&#39;</span><span class="p">:</span> <span class="n">obtained_coefs</span><span class="p">,</span>
+<span class="n">params_poly_simul</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;models&#39;</span><span class="p">:</span> <span class="n">models</span><span class="p">,</span> <span class="c1"># how we enter evals instead of models</span>
+    <span class="c1">#&#39;evals&#39;:evals, # fi functions obtained from Poly-CC to do interpolation</span>
+    <span class="s1">&#39;scaling&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="s1">&#39;obtained_coefs&#39;</span><span class="p">:</span> <span class="n">scalar_coefs</span><span class="p">,</span>
+    <span class="s1">&#39;scalar_params&#39;</span><span class="p">:</span> <span class="n">scalar_coefs</span><span class="p">,</span>
     <span class="s1">&#39;local_funcs&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;F_ext&#39;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">t</span><span class="p">:</span> <span class="n">F_ext</span><span class="p">(</span><span class="n">t</span><span class="p">)},</span>
     <span class="s1">&#39;t_span&#39;</span><span class="p">:</span><span class="n">t_span</span><span class="p">,</span>
     <span class="s1">&#39;y0&#39;</span><span class="p">:</span> <span class="n">y0</span><span class="p">,</span>
     <span class="s1">&#39;t_eval&#39;</span><span class="p">:</span> <span class="n">t_eval</span><span class="p">,</span>
-    <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;LSODA&#39;</span><span class="p">,</span>  <span class="c1"># solve_ivp</span>
-    <span class="s1">&#39;atol&#39;</span><span class="p">:</span> <span class="mf">1e-8</span><span class="p">,</span>
-    <span class="s1">&#39;rtol&#39;</span><span class="p">:</span> <span class="mf">1e-6</span><span class="p">,</span>
-    <span class="s1">&#39;check_nan&#39;</span><span class="p">:</span> <span class="kc">True</span>
+    <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;LSODA&#39;</span><span class="p">,</span>
 <span class="p">}</span>
-<span class="n">sol</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">eq_simulate</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;NN&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params_NN_simul</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Integration success:&quot;</span><span class="p">,</span> <span class="n">sol</span><span class="o">.</span><span class="n">success</span><span class="p">)</span>
-<span class="n">time_sim</span><span class="o">=</span><span class="n">sol</span><span class="o">.</span><span class="n">t</span>
-<span class="n">x1_sim</span><span class="o">=</span><span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-<span class="c1"># Identified vs theoretical solution</span>
+<span class="n">sol</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">simulate</span><span class="p">(</span><span class="n">eqs</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;Poly&#39;</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params_poly_simul</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
+<span class="n">time_sim</span><span class="o">=</span><span class="n">sol</span><span class="o">.</span><span class="n">t</span>
+<span class="n">x1</span><span class="o">=</span><span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">x2</span><span class="o">=</span><span class="n">sol</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># Plot solution</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time_sim</span><span class="p">,</span> <span class="n">x1_sim</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;x(t) simulated NN(symm.)&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time_data</span><span class="p">,</span> <span class="n">x1_data</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;x(t) th&quot;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">time_sim</span><span class="p">,</span> <span class="n">x1</span><span class="p">,</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;x(t) simulated Parametric model using Poly and post fine-tuning&quot;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;x(t)&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-
-
-<span class="c1">## now we will test</span>
-<span class="c1">########################################</span>
-          <span class="c1">#### method Poly  ####</span>
-<span class="c1">########################################</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;computing Poly&quot;</span><span class="p">)</span>
-<span class="n">params_poly</span><span class="o">=</span><span class="p">{</span>
-  <span class="s1">&#39;scaling&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-  <span class="s1">&#39;n_iter&#39;</span><span class="p">:</span><span class="mi">2000</span><span class="p">,</span>
-<span class="p">}</span>
-<span class="n">models</span><span class="p">,</span> <span class="n">evals</span> <span class="p">,</span> <span class="n">scalar_coefs</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">train</span><span class="p">(</span>
-    <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
-    <span class="n">equations</span><span class="o">=</span><span class="n">eq_train</span><span class="p">,</span>
-    <span class="n">method</span><span class="o">=</span><span class="s1">&#39;Poly&#39;</span><span class="p">,</span>
-    <span class="n">params</span><span class="o">=</span><span class="n">params_poly</span>
-<span class="p">)</span>
-
-<span class="n">x_f1_cc</span><span class="p">,</span> <span class="n">f1_cc</span><span class="p">,</span> <span class="n">x_f2_cc</span><span class="p">,</span> <span class="n">f2_cc</span> <span class="o">=</span> <span class="n">evals</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_f1_cc</span><span class="p">,</span> <span class="n">f1_cc</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;f1_Poly learned&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1_data</span><span class="p">,</span><span class="n">F1_th</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;f1 theory&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;f1(x)&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_f2_cc</span><span class="p">,</span> <span class="n">f2_cc</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;f2_Poly learned&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1_data</span><span class="p">,</span> <span class="n">F2_th</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;f2 theory&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;f2(x)&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
-
-
-
-<span class="c1">########################################</span>
-          <span class="c1">#### method SymbR  ####</span>
-<span class="c1">########################################</span>
-<span class="c1"># symbolic regression method is not as useful</span>
-<span class="c1"># as NN in this example</span>
-
-<span class="n">params_SymbR</span> <span class="o">=</span> <span class="p">{</span>
-  <span class="s1">&#39;pysr&#39;</span><span class="p">:</span> <span class="p">{</span>
-    <span class="s1">&#39;niterations&#39;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
-    <span class="s1">&#39;unary_operators&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;tanh&#39;</span><span class="p">],</span>
-    <span class="s1">&#39;binary_operators&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;+&#39;</span><span class="p">,</span><span class="s1">&#39;-&#39;</span><span class="p">,</span><span class="s1">&#39;*&#39;</span><span class="p">],</span>
-    <span class="s1">&#39;maxsize&#39;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
-    <span class="s1">&#39;populations&#39;</span><span class="p">:</span><span class="mi">10</span><span class="p">,</span>
-    <span class="s1">&#39;model_selection&#39;</span><span class="p">:</span> <span class="s1">&#39;best&#39;</span><span class="p">,</span> <span class="c1"># &#39;best&#39; , &#39;accuracy&#39; , &#39;score&#39;</span>
-    <span class="s1">&#39;verbosity&#39;</span><span class="p">:</span> <span class="mi">0</span>
-  <span class="p">},</span>
-  <span class="s1">&#39;N_fit_points&#39;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
-  <span class="s1">&#39;max_iterations&#39;</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>
-<span class="p">}</span>
-
-<span class="n">models</span><span class="p">,</span> <span class="n">evals</span> <span class="p">,</span> <span class="n">scalar_coefs</span> <span class="o">=</span> <span class="n">pycc</span><span class="o">.</span><span class="n">train</span><span class="p">(</span>
-    <span class="n">df</span><span class="o">=</span><span class="n">df</span><span class="p">,</span>
-    <span class="n">equations</span><span class="o">=</span><span class="n">eq_train</span><span class="p">,</span>
-    <span class="n">method</span><span class="o">=</span><span class="s1">&#39;SymbR&#39;</span><span class="p">,</span>
-    <span class="n">params</span><span class="o">=</span><span class="n">params_SymbR</span>
-<span class="p">)</span>
-
-<span class="n">x_f1_cc</span><span class="p">,</span> <span class="n">f1_cc</span><span class="p">,</span> <span class="n">x_f2_cc</span><span class="p">,</span> <span class="n">f2_cc</span> <span class="o">=</span> <span class="n">evals</span>
-
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_f1_cc</span><span class="p">,</span> <span class="n">f1_cc</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;f1_SR learned&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1_data</span><span class="p">,</span><span class="n">F1_th</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;f1 theory&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;f1(x)&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_f2_cc</span><span class="p">,</span> <span class="n">f2_cc</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;f2_SR learned&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x1_data</span><span class="p">,</span> <span class="n">F2_th</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;f2 theory&quot;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;x&#39;</span><span class="p">)</span>
-<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;f2(x)&#39;</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
 </pre></div>
@@ -356,7 +293,10 @@
 
            </div>
           </div>
-          <footer>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="Example4_1st_order_ODE_denominator.html" class="btn btn-neutral float-left" title="Example 4: 1st-order ODE with f in denominator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="practical_tips.html" class="btn btn-neutral float-right" title="Practical Tips" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
 
   <hr/>
 

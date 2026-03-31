@@ -35,7 +35,7 @@ In Google Colab or Jupyter notebook, add ! at the beginning of the line as follo
 
 Once installed, the pycc library can be imported with: 
 
-.. code-block:: bash
+.. code-block:: bash  
 
    import pycc
 

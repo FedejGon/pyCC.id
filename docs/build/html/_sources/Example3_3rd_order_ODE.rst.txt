@@ -1,10 +1,10 @@
 =====
 Example 3: 3rd-order ODE
 =====
- 
+  
 .. code-block:: python
 
-   import pycc
+   import pycc 
    import numpy as np
    import pandas as pd
    

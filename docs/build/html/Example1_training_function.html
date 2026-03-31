@@ -61,6 +61,7 @@
 <li class="toctree-l1"><a class="reference internal" href="Example2_2nd_order_ODE.html">Example 2: 2nd-order ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Example3_3rd_order_ODE.html">Example 3: 3rd-order ODE</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Example4_1st_order_ODE_denominator.html">Example 4: 1st-order ODE with f in denominator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Example5_automatic_outer_loop_fine_tuning_parametric.html">Example 5: 2nd-order ODE - Parametric method with post-fine-tuning</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Tips:</span></p>
 <ul>
@@ -133,7 +134,7 @@
 <span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
 
 <span class="c1">################################ training model stage #############################</span>
-<span class="c1"># Define equation to discover</span>
+<span class="c1"># Define the hypotesized equations to discover</span>
 <span class="n">equations</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;F1_th = f1(x1)&#39;</span><span class="p">]</span>
 
 <span class="c1">########################################</span>

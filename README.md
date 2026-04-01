@@ -1,18 +1,37 @@
 <div align="center">
 
+[![PyPI version](https://badge.fury.io/py/pyCC.id.svg)](https://badge.fury.io/py/pyCC.id)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 # PyCC.id: A Python package for equation discovery from time-dependent data inspired by the concept of characteristic curves
 
 
 [![GitHub repository](https://img.shields.io/badge/GitHub-FedejGon/pyCC.id-blue?style=flat-square&logo=github)](https://github.com/FedejGon/pyCC.id)
 
+**PyCC** is a user-friendly Python library for equation discovery. It is designed to discover the grounded ordinary differential equations (ODEs) from time-dependent data and is motivated by the concept of characteristic curves.
+
+Whether building models from scratch or refining existing ones, PyCC makes the process of discovering dynamics from data simple and accessible for researchers and engineers. 
 
 
-**PyCC** is a user-friendly Python library designed for equation discovery, specifically aiming to obtain ordinary differential equations (ODEs) from time-dependent data.
+Whether you are building models from scratch or refining existing ones, PyCC makes the process of discovering dynamics from data simple and accessible.
+
+## 💡 The PyCC Philosophy: Hypothesis-Driven Discovery
+
+Unlike black-box approaches, PyCC puts the user in control. The library is built to mirror the standard scientific workflow of **hypothesis testing**, allowing for the direct integration of prior domain knowledge into the discovery process.
+
+Users can explicitly propose a specific model—or a structural family of models—based on their expertise, and rigorously test whether that proposal is consistent with the observed data.
 
 
-The library is built to mirror the standard scientific workflow of hypothesis testing. Users can explicitly propose a specific model or a structural family of models based on their domain knowledge, and then test whether their proposal is consistent or not with the data.
+By centering the workflow around hypothesis testing, PyCC provides a structured framework to tackle several common challenges in equation discovery, significantly improving model **identifiability**, **interpretability**, **physical consistency**, **modularity**, **universality** and **transparency**, which are discussed in detail in the following section.
 
-By centering the workflow on hypothesis testing, this approach provides a structured path to address common challenges in equation discovery. Specifically, it improves model identifiability, interpretability, physical consistency, modularity , universality and transparency, which are discussed in detail in the following section.
+
+<!-- **PyCC** is a user-friendly Python library for data-driven equation discovery and system identification. Motivated by the concept of characteristic curves, PyCC is designed to discover grounded ordinary differential equations (ODEs) from time-dependent data.
+
+Whether you are working in system identification or data-driven equation discovery, PyCC is designed to make the process of discovering dynamics from data simple and accessible. Crucially, it puts the users in control by allowing them to integrate prior domain knowledge and hypotheses directly into the discovery process.
+
+Hence, the library is built to mirror the standard scientific workflow of hypothesis testing. Users can explicitly propose a specific model or a structural family of models based on their domain knowledge, and then test whether their proposal is consistent or not with the data.
+
+By centering the workflow on hypothesis testing, this approach provides a structured path to address common challenges in equation discovery. Specifically, it improves model identifiability, interpretability, physical consistency, modularity , universality and transparency, which are discussed in detail in the following section. -->
 
 
 **First time you see this library? We recommend starting with our Google Colab Notebook** [![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)!
@@ -100,13 +119,33 @@ Crucially, this approach preserves **transparency**. While NNs can be considered
 
 
 
+
+
+---
+
+## 💡 The pyCC Approach: A Schematic Workflow
+
+**pyCC** frames discovery as a hypothesis-testing loop. The practitioner proposes a structure (e.g., "Is this a friction-based oscillator?"), and the library determines the optimal shapes of the internal functions to decide if the hypothesized structure is coherent with the data.
+
+<div align="center">
+<img src="docs/source/_static/Fig1_schematic.png" width="80%" alt="Schematic workflow of the CC-based formalism">
+
+*Figure 1: The pyCC workflow. (a-c) A hypothesized model structure is proposed. (d-f) A representation for the CCs is selected (via NN, SymbReg, etc.), and optional constraints are defined. (g-j) The resulting curves are inspected for physical validity and forward simulations are performed. Edited from arXiv:2601.21720*
+</div>
+
+The workflow proceeds in three main stages:
+
+1.  **Hypothesis & Setup:** Select state variables and propose a **Structural Skeleton** (e.g., $\ddot{x} + f_1(\dot{x}) + f_2(x) = F_{ext}$).
+2.  **Physics-Informed Optimization:** The library constructs a loss function to fit the data, enforcing **prior physical knowledge** such as symmetries (for instance, forcing $$f_1$$ to be an odd function).
+3.  **Discovery & Validation:** The outputs are the **Characteristic Curves** themselves. These can be visually inspected for physical meaning, converted to analytic equations via Symbolic Regression, and validated via forward simulations. 
+
+
 ---
 
 
-## 🎯 Core Idea
+## 🎯 Mathematical formalism
 
-
-Equation discovery, which can be considered as a subfield of system identification, is the process of finding the underlying governing equations of a system from observational data.  For many physical systems, the dynamics can be described by a set of first-order ordinary differential equations (ODEs):
+For many physical systems, the dynamics can be described by a set of first-order ordinary differential equations (ODEs):
 
 $$
 \frac{d\mathbf{x}}{dt} = \mathbf{F}(\mathbf{x}, t)
@@ -139,27 +178,8 @@ where:
 The goal of **pyCC** is to discover the optimal functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$ that best fit the observed data based on a predefined model structure $\mathbf{G}$.
 
 
----
-
-## 💡 The pyCC Approach: A Schematic Workflow
-
-**pyCC** frames discovery as a hypothesis-testing loop. The practitioner proposes a structure (e.g., "Is this a friction-based oscillator?"), and the library determines the optimal shapes of the internal functions to decide if the hypothesized structure is coherent with the data.
-
-<div align="center">
-<img src="docs/source/_static/Fig1_schematic.png" width="80%" alt="Schematic workflow of the CC-based formalism">
-
-*Figure 1: The pyCC workflow. (a-c) A hypothesized model structure is proposed. (d-f) A representation for the CCs is selected (via NN, SymbReg, etc.), and optional constraints are defined. (g-j) The resulting curves are inspected for physical validity and forward simulations are performed. Edited from arXiv:2601.21720*
-</div>
-
-The workflow proceeds in three main stages:
-
-1.  **Hypothesis & Setup:** Select state variables and propose a **Structural Skeleton** (e.g., $\ddot{x} + f_1(\dot{x}) + f_2(x) = F_{ext}$).
-2.  **Physics-Informed Optimization:** The library constructs a loss function to fit the data, enforcing **prior physical knowledge** such as symmetries (for instance, forcing $$f_1$$ to be an odd function).
-3.  **Discovery & Validation:** The outputs are the **Characteristic Curves** themselves. These can be visually inspected for physical meaning, converted to analytic equations via Symbolic Regression, and validated via forward simulations. 
 
 ---
-
-
 
 ## 🔬 Why pyCC?
 

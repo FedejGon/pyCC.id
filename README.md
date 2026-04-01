@@ -13,11 +13,9 @@
 Whether building models from scratch or refining existing ones, PyCC makes the process of discovering dynamics from data simple and accessible for researchers and engineers. 
 
 
-Whether you are building models from scratch or refining existing ones, PyCC makes the process of discovering dynamics from data simple and accessible.
+## Hypothesis-Driven Discovery
 
-## 💡 The PyCC Philosophy: Hypothesis-Driven Discovery
-
-Unlike black-box approaches, PyCC puts the user in control. The library is built to mirror the standard scientific workflow of **hypothesis testing**, allowing for the direct integration of prior domain knowledge into the discovery process.
+PyCC library is built to mirror the standard scientific workflow of **hypothesis testing**, allowing for the direct integration of prior domain knowledge into the discovery process.
 
 Users can explicitly propose a specific model—or a structural family of models—based on their expertise, and rigorously test whether that proposal is consistent with the observed data.
 

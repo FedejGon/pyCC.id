@@ -123,9 +123,9 @@ Crucially, this approach preserves **transparency**. While NNs can be considered
 
 ---
 
-## 💡 The pyCC Approach: A Schematic Workflow
+## 💡 The PyCC Philosophy: Hypothesis-Driven Discovery
 
-**pyCC** frames discovery as a hypothesis-testing loop. The practitioner proposes a structure (e.g., "Is this a friction-based oscillator?"), and the library determines the optimal shapes of the internal functions to decide if the hypothesized structure is coherent with the data.
+**pyCC** frames discovery as a hypothesis-testing loop. The user proposes a structure (e.g., "a second-order system with velocity dependent friction"), and the library determines the optimal shapes of the internal functions to decide if the hypothesized structure is coherent with the data.
 
 <div align="center">
 <img src="docs/source/_static/Fig1_schematic.png" width="80%" alt="Schematic workflow of the CC-based formalism">

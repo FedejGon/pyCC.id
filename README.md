@@ -88,7 +88,7 @@ To illustrate this, consider how CCs map to the following physically consistent 
 * **First-order systems:**
 
 $$
-F_{ext}(t) = f_1(x) + f_2(x)\, \dot{x}
+F_{ext}(t) = f_1(x) + f_2(x)\ \dot{x}
 $$
 
 Here, $f_1$ and $f_2$ may correspond to a nonlinear resistor and inductor, respectively, but could also be related to viscoelastic materials and nonlinear mechanical damping (see, e.g., [Gonzalez2023] and [Gonzalez2024]).
@@ -96,7 +96,7 @@ Here, $f_1$ and $f_2$ may correspond to a nonlinear resistor and inductor, respe
 * **Second-order systems with position-dependent friction:**
 
 $$
-\ddot{x} + f_1(x) \, \dot{x} + f_2(x) = F_{ext}(t)
+\ddot{x} + f_1(x)\ \dot{x} + f_2(x) = F_{ext}(t)
 $$
 
 In this structure, $f_1$ represents a position-dependent friction element, and $f_2$ is an elastic component (see, e.g., [Gonzalez2025] and [Gonzalez2026]).

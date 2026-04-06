@@ -8,19 +8,27 @@
 
 [![GitHub repository](https://img.shields.io/badge/GitHub-FedejGon/pyCC.id-blue?style=flat-square&logo=github)](https://github.com/FedejGon/pyCC.id)
 
-**PyCC** is a user-friendly Python library for equation discovery. It is designed to discover the grounded ordinary differential equations (ODEs) from time-dependent data and is motivated by the concept of characteristic curves.
+<!-- comment
+##of discovering dynamics from data simple and accessible for researchers and engineers.
 
 Whether building models from scratch or refining existing ones, PyCC makes the process of discovering dynamics from data simple and accessible for researchers and engineers. 
+PyCC library is built to mirror the standard scientific workflow of **hypothesis testing**, allowing for the direct integration of prior domain knowledge into the discovery process.
+
+-->
+
+
+**PyCC** is a user-friendly Python library for equation discovery. It is designed to discover the grounded ordinary differential equations (ODEs) from time-dependent data and is motivated by the concept of characteristic curves.
+
+
+The library is built on a hypothesis-driven methodology, enabling users (such as researchers and engineers) to seamlessly incorporate prior domain knowledge into the discovery process. 
 
 
 ## Hypothesis-Driven Discovery
 
-PyCC library is built to mirror the standard scientific workflow of **hypothesis testing**, allowing for the direct integration of prior domain knowledge into the discovery process.
-
-Users can explicitly propose a specific model—or a structural family of models—based on their expertise, and rigorously test whether that proposal is consistent (or not) with the data.
+This approach empowers users to explicitly propose a specific model (or a structural family of models) based on their expertise, and rigorously test whether that proposal is consistent (or not) with the given data.
 
 
-By centering the workflow around hypothesis testing, PyCC provides a structured framework to tackle several common challenges in equation discovery, significantly improving model **identifiability**, **interpretability**, **physical consistency**, **modularity**, **universality** and **transparency**, which are discussed in detail in the following section.
+By centering the workflow around hypothesis testing, PyCC provides a structured framework to tackle several common challenges in equation discovery, significantly improving model **identifiability**, **interpretability**, **physical consistency**, **modularity**, **universality** and **transparency**, all of which are discussed in detail in the following section.
 
 
 <!-- **PyCC** is a user-friendly Python library for data-driven equation discovery and system identification. Motivated by the concept of characteristic curves, PyCC is designed to discover grounded ordinary differential equations (ODEs) from time-dependent data.

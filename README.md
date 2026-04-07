@@ -215,7 +215,10 @@ We can parameterize the CCs using **universal approximators**, such as Neural Ne
 ---
 
 
-## 🐍 Prerequisites: Miniconda (Recommended)
+
+## 📥  Installation with pip (Recommended)
+
+### 🐍 Installation prerequisites: Miniconda (Recommended)
 
 Before installing PyCC, it is highly recommended to use an isolated Python environment to manage dependencies and avoid system-wide conflicts. Miniconda provides a lightweight and efficient way to handle this.
 
@@ -230,7 +233,6 @@ To set up a Miniconda environment, the user should follow these steps:
    conda activate pycc_env  
 
 
-## 📥  Installation with pip (Recommended)
 Once the virtual environment is active, proceed with the installation based on the target hardware.
 
 ### Installation on CPU and Nvidia GPUs

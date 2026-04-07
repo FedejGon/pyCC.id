@@ -142,7 +142,7 @@ Crucially, this approach preserves **transparency**. While NNs can be considered
 The workflow proceeds in three main stages:
 
 1.  **Hypothesis & Setup:** Select state variables and propose a **Structural Skeleton** (e.g., $\ddot{x} + f_1(\dot{x}) + f_2(x) = F_{ext}$).
-2.  **Physics-Informed Optimization:** The library constructs a loss function to fit the data, enforcing **prior physical knowledge** such as symmetries (for instance, forcing $$f_1$$ to be an odd function).
+2.  **Physics-Informed Optimization:** The library automatically constructs a loss function to fit the data, enforcing **prior physical knowledge** such as symmetries (for instance, forcing $$f_1$$ to be an odd function).
 3.  **Discovery & Validation:** The outputs are the **Characteristic Curves** themselves. These can be visually inspected for physical meaning, converted to analytic equations via Symbolic Regression, and validated via forward simulations. 
 
 
@@ -174,9 +174,9 @@ where:
 
 * The semicolon **`;`** is used to separate the system variables from the components to be identified. The terms to the left are the inputs and states, while those to the right are the unknowns to be discovered, including both functional forms and scalar parameters.
 
-* **$\\{\mathbf{f}\\}$** is a set of **unknown functions**, referred to as the **Characteristic Curves** (CCs). In this framework, each function in the set depends on only a *single state variable* $x_i$, ensuring high interpretability. For instance, in the context of a 1D mechanical oscillator, the $$\mathbf{G}$$ structure could be expressed as $$\ddot{x}=\mathbf{G}(x,\dot{x},\\{ f_1,f_2\\} ,\\{m\\}) $$, where $$f_1(x)$$ represents the nonlinear stiffness (the spring), $$f_2(\dot{x})$$ represents the nonlinear damping or friction, and $$m$$ is the mass. 
+* **$\\{\mathbf{f}\\}$** is a set of **functions to be discovered**, referred to as the **Characteristic Curves** (CCs). In this framework, each function in the set depends on only a *single state variable* $x_i$, ensuring high interpretability. For instance, in the context of a 1D mechanical oscillator, the $$\mathbf{G}$$ structure could be expressed as $$\ddot{x}=\mathbf{G}(x,\dot{x},\\{ f_1,f_2\\} ,\\{m\\}) $$, where $$f_1(x)$$ represents the nonlinear stiffness (the spring), $$f_2(\dot{x})$$ represents the nonlinear damping or friction, and $$m$$ is the mass. 
 
-* **$\mathbf{a}$** is a vector of **unknown scalar parameters**, such as mass, damping coefficients, or other physical constants to be identified. Within the pyCC library, these paraemeters are reserved under the names $$a_1 , a_2, \ldots, a_n$$.
+* **$\mathbf{a}$** is a vector of **scalar parameters to be discovered**, such as mass, damping coefficients, or other physical constants to be identified. Within the pyCC library, these paraemeters are reserved under the names $$a_1 , a_2, \ldots, a_n$$.
 
 * **$\mathbf{G}$** represents a proposed **model structure**. It represents a formal hypothesis proposed by the practitioner, defining the template that dictates how the building blocks (the functions $\\{\mathbf{f}\\}$ and parameters $\mathbf{a}$) are combined with the state $\mathbf{x}$ to compute the system's evolution. 
 
@@ -187,6 +187,7 @@ The goal of **pyCC** is to discover the optimal functions $\\{\mathbf{f}\\}$ and
 
 ---
 
+<!--
 ## 🔬 Why pyCC?
 
 **i) Identifiability:**
@@ -207,12 +208,29 @@ Since **pyCC** prioritizes the **shape** of the constitutive relations over thei
 We can parameterize the CCs using **universal approximators**, such as Neural Networks (the **NN-CC** approach).
 * **Universality:** The model can adapt to any continuous shape regardless of complexity, provided sufficient model capacity.
 * **Transparency:** While NNs are often regarded as "black boxes," within **pyCC** they are restricted to learning **univariate** functions. A "black box" with a single input and single output is effectively transparent: it is simply a curve that can be plotted and visually inspected to interpret the underlying physics.
-
+-->
 
 
 ---
 
+
+## 🐍 Prerequisites: Miniconda (Recommended)
+
+Before installing PyCC, it is highly recommended to use an isolated Python environment to manage dependencies and avoid system-wide conflicts. Miniconda provides a lightweight and efficient way to handle this.
+
+To set up a Miniconda environment, the user should follow these steps:
+
+1. Download and install Miniconda from the [official website](https://docs.anaconda.com/miniconda/).
+2. Open a terminal (or Anaconda Prompt on Windows) and create a new environment named `pycc_env` (Python 3.10 or newer is recommended):
+   ```bash
+   conda create -n pycc_env python=3.10
+3. Activate the new environment
+   ```bash
+   conda activate pycc_env  
+
+
 ## 📥  Installation with pip (Recommended)
+Once the virtual environment is active, proceed with the installation based on the target hardware.
 
 ### Installation on CPU and Nvidia GPUs
 Some features in PyCC include using the Symbolic Regression (pySR) package. Thus we recommend installing this package first. To install both packages use:  

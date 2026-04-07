@@ -131,12 +131,13 @@ Crucially, this approach preserves **transparency**. While NNs can be considered
 
 ## 💡 The PyCC Philosophy: Hypothesis-testing loop
 
-**pyCC** frames discovery as a hypothesis-testing loop. The user proposes a structure (e.g., "a second-order system with velocity dependent friction"), and the library determines the optimal shapes of the internal functions to decide if the hypothesized structure is coherent with the data or not (for further details, refer to [Gonzalez2026]).
+**pyCC** frames discovery as a hypothesis-testing loop. The user proposes a structure (e.g., "a second-order system with velocity dependent friction"), and the library determines the optimal shapes of the internal functions to decide if the hypothesized structure is coherent with the data or not (see [Gonzalez2026] for further details).
 
 <div align="center">
 <img src="docs/source/_static/Fig1_schematic.png" width="80%" alt="Schematic workflow of the CC-based formalism">
 
-*Figure 1: The pyCC workflow. (a-c) A hypothesized model structure is proposed. (d-f) A representation for the CCs is selected (via NN, SymbReg, etc.), and optional constraints are defined. (g-j) The resulting curves are inspected for physical validity and forward simulations are performed. Edited from [Gonzalez2026] *
+*Figure 1: The pyCC workflow. (a-c) A hypothesized model structure is proposed. (d-f) A representation for the CCs is selected (via NN, SymbReg, etc.), and optional constraints are defined. (g-j) The resulting curves are inspected for physical validity and forward simulations are performed. Edited from* [Gonzalez2026]
+
 </div>
 
 The workflow proceeds in three main stages:

@@ -311,7 +311,7 @@ This equation implies two CCs: a **damping force** $f_1(\dot{x})$ and a **restor
 <div align="center">
 <img src="docs/source/_static/Fig2_model_veloc.png" width="70%" alt="Neural Network architecture for a second-order system">
 
-*Figure 2: The architecture for a second-order system with a velocity-dependent friction force. Two independent neural networks ($\text{NN}_1$ and NN$$_2$$) approximate the unknown CCs. NN$$_1$$ sees only velocity, and NN$$_2$$ sees only position.*
+*Figure 2: The architecture for a second-order system with a velocity-dependent friction force. Two independent neural networks (:math:`NN_1` and NN$$_2$$) approximate the unknown CCs. NN$$_1$$ sees only velocity, and NN$$_2$$ sees only position.*
 </div>
 
 **Why this architecture matters:**

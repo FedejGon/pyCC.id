@@ -28,7 +28,7 @@ The library is built on a hypothesis-driven methodology, enabling users (such as
 This approach empowers users to explicitly propose a specific model (or a structural family of models) based on their expertise, and rigorously test whether that proposal is consistent (or not) with the given data.
 
 
-By centering the workflow around hypothesis testing, PyCC provides a structured framework to tackle several common challenges in equation discovery, significantly improving model **identifiability**, **interpretability**, **physical consistency**, **modularity**, **universality** and **transparency**, all of which are discussed in detail in the following section.
+By centering the workflow around hypothesis testing, PyCC provides a structured framework to tackle several common challenges in equation discovery, significantly improving model **identifiability**, **interpretability**, **physical consistency**, **modularity**, **universality** and **transparency**, all of which are discussed in the following section.
 
 
 <!-- **PyCC** is a user-friendly Python library for data-driven equation discovery and system identification. Motivated by the concept of characteristic curves, PyCC is designed to discover grounded ordinary differential equations (ODEs) from time-dependent data.
@@ -58,32 +58,61 @@ By centering the workflow on hypothesis testing, this approach provides a struct
 
 ### i) Identifiability
   
-When inferring dynamical equations from real experiments (often with finite sampling or noisy data) multiple distinct mathematical models can fit the observations with comparable accuracy. This leads to **ambiguity in model selection**, also referred to as the **identifiability challenge**. This issue is intrinsically connected to the **ill-posed nature of the inverse problem**.
+When inferring dynamical equations from experimental data (which is often noisy and sampled) multiple distinct mathematical models routinely fit the observations with comparable accuracy. This leads to **ambiguities in model selection**, a core issue known as the **identifiability challenge**. This ambiguity is intrinsically connected to the **ill-posed nature of the inverse problem**. Attempting to reconstruct the true physical laws from a specific data realization (constrained by sampling rate, observation window, and specific initial conditions) often results in practically unidentifiable underlying equations using generic, structure-agnostic methods.  
 
-**PyCC** addresses this issue by injecting **prior physical knowledge** or **hypotheses** into the discovery process by defining a structural 'skeleton'.
+**PyCC** circumvents this identifiability challenge by empowering the user to guide the search with **prior physical knowledge** or specific **hypotheses**. Specifically, the library allows the user to force a structural 'skeleton' and to easily impose additional properties or constraints to ensure the discovered models are physically sound.
 
-The choice of the structural skeleton directly affects identifiability: while certain skeletons admit unique decompositions, others can result in non-identifiable or ambiguous representations. When the hypothesized model structure exhibits uniqueness properties (see, e.g., [Gonzalez2026]), **PyCC** offers a formal framework to determine if the proposed equation is consistent with the data or should be discarded and reformulated. Consequently, it enables the rigorous validation or elimination of hypothesized models, providing a clear pathway through the challenge of identifiability. 
+The choice of the structural skeleton directly affects identifiability: while certain skeletons posses structural identifiability, others can result in non-identifiable or ambiguous representations. When the skeleton is shown to be theoretically identifiable in phase space (see, e.g., [Gonzalez2026]), **PyCC** offers a formal framework to analyze if the proposed equation is consistent with the data or should be discarded and reformulated. Consequently, it enables the validation or elimination of hypothesized models, providing a clear pathway through the challenge of identifiability. 
+
+
+<!--
+..
+        (by decomposing complex dynamics into separable, one-dimensional functions)
+        The choice of the structural skeleton directly affects identifiability: while certain skeletons admit unique decompositions in phase space, others can result in non-identifiable or ambiguous representations. When the hypothesized model structure is identifiable (see, e.g., [Gonzalez2026]), **PyCC** offers a way to determine if the proposed equation is consistent with the data or should be discarded and reformulated. Consequently, it enables the rigorous validation or elimination of hypothesized models, providing a clear pathway through the challenge of identifiability.
+        **PyCC** addresses (instead of address here maybe some other expression because i am not solving it completelly, i only give to the user the possibility of helping the algorithm to reduce the possibilities to the expected ones ) this issue by injecting **prior physical knowledge** or **hypotheses** into the discovery process by defining a structural 'skeleton'.
+**black-box** nature
+-->
 
 
 ### ii) Interpretability
 
-Beyond identifiability, a major challenge in data-driven modeling is the **black-box** nature of many algorithms. Even if a complex mathematical formulation fits the data perfectly, its structure is often too opaque to extract meaningful mechanical insights. This lack of interpretability obscures the underlying physics, leaving practitioners with accurate predictions but no understanding of how the system actually operates.
+Beyond identifiability, a major challenge in data-driven modeling is the interpretability of the obtained models. Even if a complex mathematical formulation fits the data perfectly, its structure can be too opaque to extract meaningful physical insights. This lack of interpretability obscures the underlying physics, leaving practitioners (at best) with accurate predictions but no understanding of the system structure.
 
-To explicitly address this issue, PyCC relies on the formalism of **characteristic curves** (CCs). This formalism decomposes high-dimensional, multivalued dynamics into modular, univariate functions (the CCs). Because they are univariate, CCs allow the user to *visualize* the model simply by plotting these 1D curves. This transforms an abstract mathematical representation into a direct visual tool, significantly enhancing interpretability.
+To explicitly address this issue, PyCC relies on the concept of **characteristic curves** (CCs). This concept is ground in the concept of the constitutive relation of an element. The constitutive relation  vinculates two variables and (in the scalar case) can be parametrized by a one dimensional (1D) curve known as the CC of the corresponding element. Thus the CC defines the element. PyCC offers all the tools to the user to easily define the equation skeletons that incorporate unkown 1D functions to be discovered. If the user defines skeletons where the unknown functions correspond to the CCs of the system, the function themselves have a physical meaning.  
 
+Additionally, this approach allow the user to *visualize* the CCs to verify their hypotheses or define new ones. This transforms an abstract mathematical representation into a direct visual tool, significantly enhancing interpretability.
+
+
+<!--
+is inspirated in finding the CC themselves, and it
+ knowing the CC of a given element, the user can know
+ that a given element  the constituve relations of the elements that are modeled using 1D functions (the CCs). 
+ defining skeletons where there are unknown functions to be discovered 
+ decomposes high-dimensional, multivalued dynamics into modular, univariate functions (the CCs). Because they are univariate, CCs allow the user to *visualize* the model simply by plotting these curves. This transforms an abstract mathematical representation into a direct visual tool, significantly enhancing interpretability.
+If the user Certain skeletons have identifia
+By enforcing this modular decomposition, PyCC defines model structures that, apart from having uniqueness properties, yield functions with inherent physical meaning. This assures physical consistency: the learned model is not just a statistical curve fit, but a verifiable collection of distinct physical mechanisms.
+Thus, if the obtained CCs corresponds
+As a consequence, in this functional point of view, the curves themselves are the focus to be discovered 
+In this view, as each CC represents a constitutive relation of an independent physical element (e.g., a specific spring or a specific damper) the focus is put to finding  proper parametrization is not the important issue, rather the  CCs is the important point a.
+This abstraction changing the focus from finding specific parameter values to find the CC themselves allows us to use complex parameterizations for the CCs that have an 
+-->
 
 ### iii) Physical consistency
 
-This transparent, visual approach has a simple but profound implication: the objective shifts from finding precise parameter values for a pre-assumed equation to finding the shape of the functions themselves. In this view, each CC represents a constitutive relation of an independent physical element (e.g., a specific spring or a specific damper).
+This transparent approach based on CCs has a simple but profound implication: the objective shifts from finding precise parameter values for the CCs expanded in some basis functions to finding the functional form of the CCs themselves. 
 
-By enforcing this modular decomposition, PyCC defines model structures that, apart from having uniqueness properties, yield functions with inherent physical meaning. This assures physical consistency: the learned model is not just a statistical curve fit, but a verifiable collection of distinct physical mechanisms.
+In consequence, it allows us to use fitting methods with thousands of parameters such as neural networks (NNs) but maintaining physical consistency and interpretability.
 
+
+Summary: 
 * **Traditional approach:** "Find the coefficients $k$ and $c$ assuming linear dynamics."
 * **PyCC approach:** "Find the *shapes* of the stiffness and damping curves."
 
-If the stiffness curve comes out looking like a straight line, we know the system is linear. If it looks like a parabola, we know it is nonlinear. This structural insight allows qualitative physical discovery to guide quantitative fitting, ensuring the final model maintains physical consistency.
 
-To illustrate this, consider how CCs map to the following physically consistent skeleton structures:
+
+Consider for instance a system where we can associate some elastic elment to a stiffness CC. Suppose that after the training method, the obtained stiffness curve results in a straight line, thus, we have an indication that the elastic elment is linear (and for instance, we can add this as an additional hypothesis and train again the model). If instead results in a parabola, we have an indication that the elastic element is nonlinear. This matching between the functions of the models with an individual element of the system ensures the final model maintains physical consistency and allows the user to incorporate prior insights easily.
+
+To illustrate this, we consider three skeleton structures in the following (which are also structurally identifiable, as shown in [Gonzalez2026]):
 
 * **First-order systems:**
 
@@ -114,14 +143,14 @@ This structural insight allows qualitative physical discovery to guide quantitat
 
 ### iv) Modularity, Universality and Transparency
 
-Because **PyCC** prioritizes discovering the **shape** of these constitutive relations rather than fitting predefined coefficients, the specific parametric form of the curves (e.g., whether they are polynomial, exponential, or trigonometric) does not need to be postulated *a priori*. This flexibility unlocks a highly **modular** framework that can use different data-driven modeling paradigms.
+Because **PyCC** prioritizes discovering the **shape** of these CCs rather than fitting predefined coefficients, the specific parametric form of the curves (e.g., whether they are polynomial, exponential, or trigonometric) does not need to be postulated *a priori*. This flexibility unlocks a highly **modular** framework that is ideal to compare different paradigms in data-driven modeling.
 
-For instance, these univariate functions can be parameterized using universal approximators, such as Neural Networks (NNs). This specific implementation (referred to as the NN method) is particularly powerful for discovering complex physical laws. Backed by **universal approximation theorems**, the model can adapt to any continuous shape, being able to capture intricate dynamics such as sharp transitions and non-smooth behaviors without requiring prior mathematical intuition about the functional form.
+For instance, the CCs can be parameterized using universal approximators, such as Neural Networks (NNs). This specific implementation (referred to as the NN method) is particularly powerful for discovering complex physical laws. Backed by **universal approximation theorems**, the model can adapt to any continuous shape, being able to capture intricate dynamics such as sharp transitions and non-smooth behaviors without requiring prior mathematical intuition about the functional form.
 
-Crucially, this approach preserves **transparency**. While NNs can be considered as opaque "black boxes" in high-dimensional settings, PyCC restricts them to learning strictly 1D functions. A "black box" with a single input and a single output is effectively a "glass box": it is simply a curve that can be plotted, visually inspected, and physically understood.
+Crucially, this approach preserves **transparency**. While NNs can be considered as opaque "black boxes" in high-dimensional settings, PyCC restricts them to learning strictly 1D functions. A "black box" with a single input and a single output is effectively a simply a curve that can be plotted, visually inspected, and physically understood.
 
 > [!NOTE]
-> **The Core Philosophy:** Instead of asking "What is the global equation?", PyCC asks "Given this physical structure (e.g., a damped oscillator), what are the specific shapes of the stiffness and damping curves?" These curves are the constitutive relations of the system; once they are identified, the identification problem is effectively solved.
+> **The Core Philosophy:** Instead of asking "What is the global equation?", PyCC asks "Given this physical structure (skeleton), what are the specific shapes of the CCs?" These curves are the constitutive relations of the system; once they are identified, the identification problem is effectively solved.
 
 
 
@@ -311,7 +340,7 @@ This equation implies two CCs: a **damping force** $f_1(\dot{x})$ and a **restor
 <div align="center">
 <img src="docs/source/_static/Fig2_model_veloc.png" width="70%" alt="Neural Network architecture for a second-order system">
 
-*Figure 2: The architecture for a second-order system with a velocity-dependent friction force. Two independent neural networks (NN₁ and NN₂) approximate the unknown CCs. NN₁ depends only on the velocity, and NN₂ on the position.*
+*Figure 2: The architecture for a second-order system with a velocity-dependent friction force. Two independent neural networks (NN₁ and NN₂) approximate the CCs to be discovered.*
 </div>
 
 **Why this architecture matters:**

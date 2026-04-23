@@ -253,7 +253,7 @@ We can parameterize the CCs using **universal approximators**, such as Neural Ne
 
 ## 📥  Installation with pip (Recommended)
 
-### 🐍 Installation prerequisites: Miniconda (Recommended)
+#### 🐍 Installation prerequisites: Miniconda (Recommended)
 
 Before installing PyCC, it is highly recommended to use an isolated Python environment to manage dependencies and avoid system-wide conflicts. Miniconda provides a lightweight and efficient way to handle this.
 
@@ -267,16 +267,15 @@ To set up a Miniconda environment, the user should follow these steps:
    ```bash
    conda activate pycc_env  
 
-
 Once the virtual environment is active, proceed with the installation based on the target hardware.
 
-### Installation on CPU and Nvidia GPUs
-Some features in PyCC include using the Symbolic Regression (pySR) package. Thus we recommend installing this package first. To install both packages use:  
+### Option 1. Installation on CPU and Nvidia GPUs
+Some features in PyCC include using the Symbolic Regression (pySR) package. To install both packages use:  
 ```bash
 pip install pycc.id
 ```
 
-### Installation on Intel XPUs
+### Option 2. Installation on Intel XPUs
 To run pyCC library on Intel XPUs, the user must first install the *intel-extension-for-pytorch* package compatible with their operative system. Please refer to the official instructions at https://pytorch-extension.intel.com/installation. 
 
 Below are examples for installing version v2.8.10+xpu. 
@@ -299,7 +298,7 @@ pip install pycc.id
 ```
 
 
-### Installation for developers (from source)
+### Option 3. Installation for developers (from source)
 Download or clone the repository and install with:
 ```bash
 pip install -e .

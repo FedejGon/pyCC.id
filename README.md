@@ -3,24 +3,24 @@
 [![PyPI version](https://badge.fury.io/py/pyCC.id.svg)](https://badge.fury.io/py/pyCC.id)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-# PyCC.id: A Python package for equation discovery from time-dependent data inspired by the concept of characteristic curves
+
+# PyCC.id: A package for equation discovery from time-dependent data based on hypotheses testing and characteristic curves
 
 
 [![GitHub repository](https://img.shields.io/badge/GitHub-FedejGon/pyCC.id-blue?style=flat-square&logo=github)](https://github.com/FedejGon/pyCC.id)
 
 <!-- comment
+# PyCC.id: A package for data-driven equation discovery via structural hypotheses and characteristic curves
+via structural hypotheses and characteristic curves
 ##of discovering dynamics from data simple and accessible for researchers and engineers.
-
+ # PyCC.id: A Python package for equation discovery from time-dependent data inspired by the concept of characteristic curves
 Whether building models from scratch or refining existing ones, PyCC makes the process of discovering dynamics from data simple and accessible for researchers and engineers. 
 PyCC library is built to mirror the standard scientific workflow of **hypothesis testing**, allowing for the direct integration of prior domain knowledge into the discovery process.
-
 -->
 
 
-**PyCC** is a user-friendly Python library for equation discovery. It is designed to discover the grounded ordinary differential equations (ODEs) from time-dependent data and is motivated by the concept of characteristic curves.
-
-
-The library is built on a hypothesis-driven methodology, enabling users (such as researchers and engineers) to seamlessly incorporate prior domain knowledge into the discovery process. 
+**PyCC** is a user-friendly Python library for equation discovery. Specifically, it is designed to discover the grounded ordinary differential equations (ODEs) from time-dependent data and is motivated by the concept of characteristic curves. 
+Additionally, the library is built on a hypothesis-driven methodology, enabling users (such as researchers and engineers) to seamlessly incorporate prior domain knowledge into the discovery process. 
 
 
 ## Hypothesis-Driven Discovery

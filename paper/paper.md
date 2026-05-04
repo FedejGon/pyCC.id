@@ -1,7 +1,7 @@
 ---
-title: "PyCC.id: A Python package for nonlinear equation discovery based on characteristic curves"
+title: "PyCC.id: A package for equation discovery from time-dependent data based on hypotheses testing and characteristic curves"
 tags:
-  - Python
+  - hypotheses-driven
   - nonlinear dynamics
   - equation discovery
   - system identification
@@ -20,10 +20,18 @@ bibliography: paper.bib
 
 # Summary
 
+Data-driven equation discovery (which can be considered as a subfield of system identification), is an inverse problem that consists on discovering the grounded equations from a given data. The data normally consist on  the state variables or the solution of a differential equation measured on a range of time.  
+An important issue to be considered is the ill-conditioned of this inverse problem, which typically yields to multiple candidate discovered equations that are equally valid. A path to address this issue in practice is that the practitioners uses their experience and knowledge to analyze the obtained candidate models to discart the models that are not consistent with the physics of the problem.  
+One alternative to address this issue consists on incorporating the known hypotheses beforehand during the training method, which yield to discovering only the models that are solely compatible. However, even with this approach there may be multiple obtained modesl
+
+ in principle, and the user or practitioner 
+
+In this field, a primary challenge is identifiability, which can be defined by the capability to distinguish the correct physical model from a set of mathematically equivalent but physically incorrect candidates. 
 
 
 
-A primary challenge in data-driven equation discovery is identifiability (the ability to distinguish the true physical model from a set of mathematically equivalent but physically incorrect candidates). Standard regression methods often struggle with this, producing models that fit the data well but lack physical validity. `PyCC.id` (or `PyCC`) addresses this critical issue by allowing the practitioner to incorporate domain-specific prior information directly into the modeling process. By enforcing user-defined structural families, `PyCC` restricts the search space to forms that are structurally identifiable, ensuring that the discovered model is not just a statistical approximation, but a unique representation of the underlying physics of the system.
+
+A primary challenge in data-driven equation discovery is identifiability (the ability to distinguish the true physical model from a set of mathematically equivalent but physically incorrect candidates). Standard regression methods often struggle with this, producing models that fit the data well but lack physical validity. `PyCC.id` (or, simply, `PyCC`) addresses this critical issue by allowing the practitioner to easily incorporate domain-specific prior information directly into the modeling process. By enforcing user-defined structural families, `PyCC` restricts the search space to forms that are structurally identifiable, ensuring that the discovered model is not just a statistical approximation, but a unique representation of the underlying physics of the system.
 
 Beyond uniqueness, `PyCC` prioritizes interpretability and transparency. Instead of treating the system dynamics as a black-box function, the framework allows the practitioner to decomposes the governing equations into characteristic curves (CCs). These are one-dimensional functions that hold direct physical meaning (for example, one curve might represent a nonlinear elastic restoring force, while another represents a dissipative damping force). This decomposition ensures that the resulting model is composed of distinct, interpretable elements that can be individually verified and linked to specific constitutive relations.
 
@@ -503,9 +511,8 @@ sol,_  = pycc.simulate(equations, method='SymbR', params=params_SR_simul)
 
 # Mentions of scholarly publications
 
-The `pyCC` package provides a generalized software implementation of the CC-based approaches for system identification. This core methodology was central to methods first introduced for first-order systems [@Gonzalez2023; @Gonzalez2024] and later extended to second-order systems [@Gonzalez2025; @Gonzalez2026]. `PyCC` unifies and extends this approach into a single framework capable of handling higher-order dynamical systems.
-
-
+The `pyCC` package provides a generalized software implementation of the CC-based approaches for system identification. This core methodology was central to methods first introduced for first-order systems [@Gonzalez2023; @Gonzalez2024] and later extended to second-order systems [@Gonzalez2025; @Gonzalez2026].  
+`PyCC` synthesizes these works into a modular codebase, offering a structured implementation that allows users to easily deploy these techniques and adapt them for complex higher-order systems.
 
 # Key References
 
@@ -513,7 +520,6 @@ The software package is available at: [https://github.com/FedejGon/pyCC.id](http
 
 # Acknowledgements
 
-This work was partially supported by CONICET (Consejo Nacional de Investigaciones Científicas y Técnicas, Argentina).
-We acknowledge the computational resources from the Clementina XXI supercomputer and CCT-Rosario Computational Center, both managed by the High Performance Computing National System (SNCAD, ME-Argentina), with the support of the Undersecretariat of Science and Technology of Argentina.
+The author acknowledges fuitfuil discussions with Luis P. Lara, Quique Repetto, Bernardo J. Gómez, Rodolfo Id Betán, Ignacio Pomponio, and Luis Manuel. This work was partially supported by CONICET (Consejo Nacional de Investigaciones Científicas y Técnicas, Argentina). We acknowledge the computational resources from the Clementina XXI supercomputer and CCT-Rosario Computational Center, both managed by the High Performance Computing National System (SNCAD, ME-Argentina), with the support of the Undersecretariat of Science and Technology of Argentina.
 
 # References

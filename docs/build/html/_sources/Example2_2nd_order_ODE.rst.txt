@@ -2,9 +2,9 @@
 Example 2: 2nd-order ODE
 =====
 
-This example presents the application of pyCC to a family of second order systems called as `velocity-dependent friction models with external force` (which is a generalized Rayleigh-type nonlinear oscillation with velocity-dependent friction and external forcing)
+This example presents the application of PyCC to a family of second order systems called as `velocity-dependent friction models with external force` (which is a generalized Rayleigh-type nonlinear oscillation with velocity-dependent friction and external forcing).
 
-second order stick-slip system. 
+The code follows these steps: 1) it uses the PyCC library to generate the data, 2) it defines a skeleton and uses NN method to train a model, 3) it simulates the model and compares it to the data, 4) it uses the post-processing tool to generate symbolic expressions for the 1D functions obtained with the NN method, 5) it simulates the analytical model by using interpolations of the discovered symbolic expressions.
  
 .. code-block:: python 
 

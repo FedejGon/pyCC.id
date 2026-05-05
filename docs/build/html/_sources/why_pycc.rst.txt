@@ -10,12 +10,12 @@
        **PyCC** is designed to mirror the standard scientific workflow of **hypothesis testing**, where the user explicitly hypothesizes a model or a **structural family** of models based on their domain knowledge, and they desire to test if the proposal is consistent or not with the reference data. 
        This approach offers a path to addresss common issues in equation discovery such as **identifiability**, **interpretability**, **physical consistency**, **modularity** , **universality** and **transparency**. These issues are discussed in more details in the next section. 
        The library is built to mirror the standard scientific workflow of hypothesis testing. Rather than relying purely on automated algorithms, users can explicitly propose a specific model or a structural family of models based on their domain knowledge, and then test whether their proposal is consistent or not with the reference data. 
+       
+**PyCC.id: A package for hypothesis-driven equation discovery with structural identifiability**
 
+**PyCC.id** (or simply **PyCC**) is a Python library designed for equation discovery, specifically aiming to obtain ordinary differential equations (ODEs) from time-dependent data.  
+The library is built on a hypothesis-driven methodology, enabling users (such as researchers and engineers) to easily incorporate prior domain knowledge into the discovery process.  This hypothesis-driven approach empowers users to explicitly propose a specific **skeleton** (or a structural family of models) based on their expertise, and rigorously test whether that proposal is consistent (or not) with the given data.
 
-**PyCC** is a user-friendly Python library designed for equation discovery, specifically aiming to obtain ordinary differential equations (ODEs) from time-dependent data. 
-
-The library is built on a hypothesis-driven methodology, enabling users (such as researchers and engineers) to seamlessly incorporate prior domain knowledge into the discovery process.  
-This hypothesis-driven approach empowers users to explicitly propose a specific model (or a structural family of models) based on their expertise, and rigorously test whether that proposal is consistent (or not) with the given data.
 
 By centering the workflow around hypothesis testing, PyCC provides a structured framework to help tackle several common challenges in equation discovery, such as **identifiability**, **interpretability**, and **physical consistency**. It also enables a **modular** approach that allows the use of complex functional representations by taking advantage of **universality theorems** from neural networks while maintaining **transparency**. These topics are briefly discussed below:
 
@@ -214,7 +214,7 @@ Crucially, this approach preserves **transparency**. While NNs can be considered
    :scale: 150%
    :align: center
 
-*Figure 1: The PyCC workflow. (a-c) A hypothesized model structure is proposed. (d-f) A representation for the CCs is selected (via NN, SymbReg, etc.), and optional constraints are defined to be minimized jointly with the data loss term. (g-j) The resulting curves are inspected for physical validity and forward simulations are performed with the obtained models. Adapted from arXiv:2601.21720*
+*Figure 1: The PyCC workflow. (a-c) A hypothesized model structure is proposed. (d-f) A representation for the CCs is selected (via NN, SymbReg, etc.), and optional constraints are defined to be minimized jointly with the data loss term. (g-j) The resulting curves are inspected for physical validity and forward simulations are performed with the obtained models. Adapted from arXiv:2601.21720 [Gon26]*
 
 The workflow proceeds in three main stages:
 

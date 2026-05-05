@@ -44,7 +44,7 @@
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <p class="caption" role="heading"><span class="caption-text">User guide:</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="why_pycc.html">✏️ PyCC</a></li>
+<li class="toctree-l1"><a class="reference internal" href="why_pycc.html">👋 PyCC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="why_pycc.html#why-pycc">🎯 Why PyCC</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
@@ -68,6 +68,7 @@
 <li class="toctree-l1"><a class="reference internal" href="practical_tips.html">Practical Tips</a></li>
 <li class="toctree-l1"><a class="reference internal" href="practical_tips.html#workflow-1">Workflow 1</a></li>
 <li class="toctree-l1"><a class="reference internal" href="practical_tips.html#workflow-2">Workflow 2</a></li>
+<li class="toctree-l1"><a class="reference internal" href="practical_tips.html#workflow-3">Workflow 3</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Links:</span></p>
 <ul>
@@ -104,8 +105,8 @@
              
   <section id="example-2-2nd-order-ode">
 <h1>Example 2: 2nd-order ODE<a class="headerlink" href="#example-2-2nd-order-ode" title="Link to this heading"></a></h1>
-<p>This example presents the application of pyCC to a family of second order systems called as <cite>velocity-dependent friction models with external force</cite> (which is a generalized Rayleigh-type nonlinear oscillation with velocity-dependent friction and external forcing)</p>
-<p>second order stick-slip system.</p>
+<p>This example presents the application of PyCC to a family of second order systems called as <cite>velocity-dependent friction models with external force</cite> (which is a generalized Rayleigh-type nonlinear oscillation with velocity-dependent friction and external forcing).</p>
+<p>The code follows these steps: 1) it uses the PyCC library to generate the data, 2) it defines a skeleton and uses NN method to train a model, 3) it simulates the model and compares it to the data, 4) it uses the post-processing tool to generate symbolic expressions for the 1D functions obtained with the NN method, 5) it simulates the analytical model by using interpolations of the discovered symbolic expressions.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">pycc</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>

@@ -2,6 +2,8 @@
 Example 3: 3rd-order ODE
 =====
   
+This example uses the **PyCC** library to simulate a Lorenz system (a set of three coupled, nonlinear ODEs). It then uses three different methods (neural networks, polynomials, and symbolic regression) to discover the equations.  
+  
 .. code-block:: python
 
    import pycc 

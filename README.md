@@ -4,12 +4,12 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
-# PyCC.id: A package for equation discovery from time-dependent data based on hypotheses testing and characteristic curves
-
+# PyCC.id: A package for hypothesis-driven equation discovery with structural identifiability 
 
 [![GitHub repository](https://img.shields.io/badge/GitHub-FedejGon/pyCC.id-blue?style=flat-square&logo=github)](https://github.com/FedejGon/pyCC.id)
 
 <!-- comment
+# PyCC.id: A package for equation discovery from time-dependent data based on hypotheses testing and characteristic curves
 # PyCC.id: A package for data-driven equation discovery via structural hypotheses and characteristic curves
 via structural hypotheses and characteristic curves
 ##of discovering dynamics from data simple and accessible for researchers and engineers.
@@ -19,8 +19,8 @@ PyCC library is built to mirror the standard scientific workflow of **hypothesis
 -->
 
 
-**PyCC** is a user-friendly Python library for equation discovery. Specifically, it is designed to discover the grounded ordinary differential equations (ODEs) from time-dependent data and is motivated by the concept of characteristic curves. 
-Additionally, the library is built on a hypothesis-driven methodology, enabling users (such as researchers and engineers) to seamlessly incorporate prior domain knowledge into the discovery process. 
+**PyCC.id** (or simply **PyCC**) is a flexible Python library for equation discovery. It is designed to discover the grounded ordinary differential equations (ODEs) from time-dependent data and is built on a hypothesis-driven methodology, enabling users (such as researchers and engineers) to easily incorporate prior domain knowledge into the discovery process. 
+This approach utilizes structural **skeletons** that are structurally identifiable, drawing motivation from the definition and physical interpretation of characteristic curves. 
 
 
 ## Hypothesis-Driven Discovery
@@ -46,6 +46,12 @@ By centering the workflow on hypothesis testing, this approach provides a struct
 | **colab demo** | **Forums** | **Paper** |
 |:---:|:---:|:---:|
 |[![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)|[![Discussions](https://img.shields.io/badge/discussions-github-informational)](https://github.com/FedejGon/pyCC.id/discussions)|[![Paper](https://img.shields.io/badge/arXiv-2305.01582-b31b1b)](https://arxiv.org/)||
+
+
+| **Colab & Tutorial** | **Forums** | **Paper** |
+|:---:|:---:|:---:|
+| [![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s) <br> [![YouTube](https://img.shields.io/badge/youtube-tutorial-red)](https://www.youtube.com/watch?v=DDSGAUjyz2w) | [![Discussions](https://img.shields.io/badge/discussions-github-informational)](https://github.com/FedejGon/pyCC.id/discussions) | [![Paper](https://img.shields.io/badge/arXiv-2305.01582-b31b1b)](https://arxiv.org/abs/2305.01582) |
+
 
 </div>
 
@@ -565,6 +571,7 @@ python Tutorial1.py
 * **Physics-Informed Discovery**: Incorporate known physical constraints, such as symmetries (e.g., even and odd functions) or conservation laws, to guide the discovery process and ensure robust, physically consistent models.
 * **Built-in Simulator**: Includes a module for simulating higher-order and coupled ODEs, fully compatible with all identification methodologies.
 * **User-Focused Design**: Offers an API that is both easy to use for standard problems and highly customizable for advanced research.
+* **Documentation and tutorials**: Provides a quick-start Google Colab tutorial with an accompanying YouTube video, along with a complete documentation, examples, and recommended workflows. 
 
 ---
 

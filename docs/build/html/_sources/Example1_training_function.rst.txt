@@ -2,6 +2,9 @@
 Example 1: Function y=f(x)
 =====
 
+This example defines a 1D function f(x) and uses three different methods (polynomials, neural networks, and symbolic regression) to fit the function using the **PyCC** library.
+
+
 .. code-block:: python
 
 

@@ -37,15 +37,17 @@ Whether you are working in system identification or data-driven equation discove
 
 Hence, the library is built to mirror the standard scientific workflow of hypothesis testing. Users can explicitly propose a specific model or a structural family of models based on their domain knowledge, and then test whether their proposal is consistent or not with the data.
 
-By centering the workflow on hypothesis testing, this approach provides a structured path to address common challenges in equation discovery. Specifically, it improves model identifiability, interpretability, physical consistency, modularity , universality and transparency, which are discussed in detail in the following section. -->
+By centering the workflow on hypothesis testing, this approach provides a structured path to address common challenges in equation discovery. Specifically, it improves model identifiability, interpretability, physical consistency, modularity , universality and transparency, which are discussed in detail in the following section. 
+| **colab demo** | **Forums** | **Paper** |
+|:---:|:---:|:---:|
+|[![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)|[![Discussions](https://img.shields.io/badge/discussions-github-informational)](https://github.com/FedejGon/pyCC.id/discussions)|[![Paper](https://img.shields.io/badge/arXiv-2305.01582-b31b1b)](https://arxiv.org/)||
+-->
 
 
 **First time you see this library? We recommend starting with our Google Colab Notebook** [![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)!
 
 
-| **colab demo** | **Forums** | **Paper** |
-|:---:|:---:|:---:|
-|[![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s)|[![Discussions](https://img.shields.io/badge/discussions-github-informational)](https://github.com/FedejGon/pyCC.id/discussions)|[![Paper](https://img.shields.io/badge/arXiv-2305.01582-b31b1b)](https://arxiv.org/)||
+
 
 
 | **Colab & Tutorial** | **Forums** | **Paper** |

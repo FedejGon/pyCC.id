@@ -556,12 +556,12 @@ def train_polynomial(df, equation, params=None):
                 args=(df, equations, models, final_scalars, state_vars, params_simul_dict, param_names, tracker),
                 method='trf',             
                 x_scale='jac',            
-                diff_step=diff_step*1e-3, # Small step to find the exact minimum
+                diff_step=diff_step*1e-4, # Small step to find the exact minimum
                 loss='linear',            # Standard least squares
                 max_nfev=n_iter_outer,
-                ftol=outer_tol,           # Normal tolerances
-                xtol=outer_tol,
-                gtol=outer_tol,
+                ftol=outer_tol* 1e-4,           
+                xtol=outer_tol* 1e-4,
+                gtol=outer_tol* 1e-4,
                 verbose=0
             )
             

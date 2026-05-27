@@ -1,7 +1,6 @@
 import numpy as np
 import re
 import sympy as sp
-import math
 from collections import OrderedDict
 import copy
 from scipy.optimize import least_squares
@@ -143,13 +142,11 @@ def train_polynomial(df, equation, params=None):
     learning_rate = float(params.get('learning_rate', 0.01))
     error_threshold = float(params.get('error_threshold', 1e-10))
     n_eval = int(params.get('n_eval', 200))
-    print_poly_coeffs = bool(params.get('print_poly_coeffs', True))
     initial_param_guess = params.get('initial_param_guess', [])
     init_guesses = {}
     for d in initial_param_guess:
         init_guesses.update(d)
     fitting_forw_sim = bool(params.get('fitting_forw_sim', False))
-    run_sniper = bool(params.get('run_sniper', False))
     n_iter_outer = params.get('n_iter_outer', None)   # Defaults to None (letting scipy decide)
     outer_tol = float(params.get('outer_tol', 1e-8))  # Default tolerance outer loop
     params_simul_list = params.get('params_simul', [])
@@ -517,89 +514,24 @@ def train_polynomial(df, equation, params=None):
         
         tracker = {'count': 0, 'max_iter': n_iter_outer}
 
-        # ==========================================
-        # PHASE 1: The Brawler (Your original aggressive settings)
-        # ==========================================
-        if run_sniper:
-            print("\nPhase 1: Global search with large diff_step and soft_l1 loss...")
-            
+
+        # Run Trust Region Reflective optimizer with aggressive settings
         res = least_squares(
             simulation_residuals, 
             x0=p0, 
             args=(df, equations, models, final_scalars, state_vars, params_simul_dict, param_names, tracker),
-            method='trf',            
-            x_scale='jac',          
-            diff_step=1e-2,         
-            loss='soft_l1',         
+            method='trf',           # Switch to Trust Region Reflective
+            x_scale='jac',          # Crucial: Auto-scales parameters based on the Jacobian so a1 and a2 are treated fairly
+            diff_step=1e-2,         # Violent step: Forces the gradient calculation to look much wider (default is ~1e-8)
+            loss='soft_l1',         # Makes it more robust to sudden large errors during simulation
             max_nfev=n_iter_outer,
-            ftol=outer_tol * 1e-4,  
+            ftol=outer_tol * 1e-4,  # Crush the tolerances to force it to keep trying
             xtol=outer_tol * 1e-4,
             gtol=outer_tol * 1e-4,
             verbose=0
         )
         
-        if run_sniper:
-            print(f"Phase 1 Finished. Success: {res.success}, Evals: {res.nfev}")
 
-            # ==========================================
-            # PHASE 2: The Sniper (Local Refinement)
-            # ==========================================
-            print("\nPhase 2: Local refinement dropping into the basin...")
-            tracker['count'] = 0 
-            
-            p0_phase2 = res.x
-
-            res_phase2 = least_squares(
-                simulation_residuals, 
-                x0=p0_phase2, 
-                args=(df, equations, models, final_scalars, state_vars, params_simul_dict, param_names, tracker),
-                method='trf',             
-                x_scale='jac',            
-                diff_step=1e-5,           # Small step to find the exact minimum
-                loss='linear',            # Standard least squares
-                max_nfev=n_iter_outer,
-                ftol=outer_tol,           # Normal tolerances
-                xtol=outer_tol,
-                gtol=outer_tol,
-                verbose=0
-            )
-            
-            print(f"\nPhase 2 Fine-Tuning Finished. Success: {res_phase2.success}, Evals: {res_phase2.nfev}")
-            res = res_phase2 # Overwrite res so the unpacking below works seamlessly
-            
-        else:
-            print(f"\nSimulation Fine-Tuning Finished. Success: {res.success}")
-
-        # ==========================================
-        # Unpack Results (Applies to whichever phase finished last)
-        # ==========================================
-        idx = 0
-        for f_name, _ in func_order:
-            n_coeffs = len(models[f_name]['coeffs'])
-            models[f_name]['coeffs'] = res.x[idx : idx + n_coeffs]
-            idx += n_coeffs
-            
-        for a_name in param_names:
-            final_scalars[a_name] = res.x[idx]
-            idx += 1
-
-#        # Run Trust Region Reflective optimizer with aggressive settings
-#        res = least_squares(
-#            simulation_residuals, 
-#            x0=p0, 
-#            args=(df, equations, models, final_scalars, state_vars, params_simul_dict, param_names, tracker),
-#            method='trf',           # Switch to Trust Region Reflective
-#            x_scale='jac',          # Crucial: Auto-scales parameters based on the Jacobian so a1 and a2 are treated fairly
-#            diff_step=1e-2,         # Violent step: Forces the gradient calculation to look much wider (default is ~1e-8)
-#            loss='soft_l1',         # Makes it more robust to sudden large errors during simulation
-#            max_nfev=n_iter_outer,
-#            ftol=outer_tol * 1e-4,  # Crush the tolerances to force it to keep trying
-#            xtol=outer_tol * 1e-4,
-#            gtol=outer_tol * 1e-4,
-#            verbose=0
-#        )
-#        
-#
 #        # Run Levenberg-Marquardt optimizer
 #        res = least_squares(
 #            simulation_residuals, 
@@ -613,19 +545,19 @@ def train_polynomial(df, equation, params=None):
 #            gtol=outer_tol,          # Gradient tolerance
 #            verbose=2
 #        )        
-#        
-#        print("\nSimulation Fine-Tuning Finished. Success:", res.success)
-#        
-#        # Overwrite models and final_scalars with the newly optimized values
-#        idx = 0
-#        for f_name, _ in func_order:
-#            n_coeffs = len(models[f_name]['coeffs'])
-#            models[f_name]['coeffs'] = res.x[idx : idx + n_coeffs]
-#            idx += n_coeffs
-#            
-#        for a_name in param_names:
-#            final_scalars[a_name] = res.x[idx]
-#            idx += 1    
+        
+        print("\nSimulation Fine-Tuning Finished. Success:", res.success)
+        
+        # Overwrite models and final_scalars with the newly optimized values
+        idx = 0
+        for f_name, _ in func_order:
+            n_coeffs = len(models[f_name]['coeffs'])
+            models[f_name]['coeffs'] = res.x[idx : idx + n_coeffs]
+            idx += n_coeffs
+            
+        for a_name in param_names:
+            final_scalars[a_name] = res.x[idx]
+            idx += 1    
 
 
 
@@ -643,39 +575,6 @@ def train_polynomial(df, equation, params=None):
     print("\n--- Final Learned Parameters ---")
     for name, val in final_scalars.items():
         print(f"Learned {name}: {val:.6e}")
-
-
-    # Print scaled and unscaled polynomial coefficients
-    if print_poly_coeffs:
-        print("\n--- Final Polynomial Coefficients ---")
-        for f_name, var_name in func_order:
-            model = models[f_name]
-            coeffs = model['coeffs']
-            A0 = model['A0']
-            A1 = model['A1']
-            
-            print(f"Function {f_name}({var_name}):")
-            print(f"  Scaled Coeffs (w.r.t z = (x - {A0:.4e}) / {A1:.4e}):")
-            for i, c in enumerate(coeffs):
-                # Optionally hide very small terms to keep the console clean
-                if abs(c) > 1e-12: 
-                    print(f"    z^{i}: {c:.6e}")
-            
-            # Unscale the coefficients
-            unscaled_coeffs = np.zeros_like(coeffs)
-            N_len = len(coeffs) - 1
-            for i in range(N_len + 1):
-                Ci = coeffs[i] / (A1**i)
-                for k in range(i + 1):
-                    # Uses the binomial theorem to expand the shifted term
-                    unscaled_coeffs[k] += Ci * math.comb(i, k) * ((-A0)**(i - k))
-                    
-            print(f"  Unscaled Coeffs (w.r.t original {var_name}):")
-            for k, c in enumerate(unscaled_coeffs):
-                if abs(c) > 1e-12:
-                    print(f"    {var_name}^{k}: {c:.6e}")
-            print()
-    
 
     return models, evals, final_scalars
 

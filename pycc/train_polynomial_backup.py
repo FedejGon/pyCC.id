@@ -1,6 +1,7 @@
 import numpy as np
 import re
 import sympy as sp
+import math
 from collections import OrderedDict
 import copy
 from scipy.optimize import least_squares
@@ -142,6 +143,7 @@ def train_polynomial(df, equation, params=None):
     learning_rate = float(params.get('learning_rate', 0.01))
     error_threshold = float(params.get('error_threshold', 1e-10))
     n_eval = int(params.get('n_eval', 200))
+    print_poly_coeffs = bool(params.get('print_poly_coeffs', True))
     initial_param_guess = params.get('initial_param_guess', [])
     init_guesses = {}
     for d in initial_param_guess:
@@ -575,6 +577,39 @@ def train_polynomial(df, equation, params=None):
     print("\n--- Final Learned Parameters ---")
     for name, val in final_scalars.items():
         print(f"Learned {name}: {val:.6e}")
+
+
+    # Print scaled and unscaled polynomial coefficients
+    if print_poly_coeffs:
+        print("\n--- Final Polynomial Coefficients ---")
+        for f_name, var_name in func_order:
+            model = models[f_name]
+            coeffs = model['coeffs']
+            A0 = model['A0']
+            A1 = model['A1']
+            
+            print(f"Function {f_name}({var_name}):")
+            print(f"  Scaled Coeffs (w.r.t z = (x - {A0:.4e}) / {A1:.4e}):")
+            for i, c in enumerate(coeffs):
+                # Optionally hide very small terms to keep the console clean
+                if abs(c) > 1e-12: 
+                    print(f"    z^{i}: {c:.6e}")
+            
+            # Unscale the coefficients
+            unscaled_coeffs = np.zeros_like(coeffs)
+            N_len = len(coeffs) - 1
+            for i in range(N_len + 1):
+                Ci = coeffs[i] / (A1**i)
+                for k in range(i + 1):
+                    # Uses the binomial theorem to expand the shifted term
+                    unscaled_coeffs[k] += Ci * math.comb(i, k) * ((-A0)**(i - k))
+                    
+            print(f"  Unscaled Coeffs (w.r.t original {var_name}):")
+            for k, c in enumerate(unscaled_coeffs):
+                if abs(c) > 1e-12:
+                    print(f"    {var_name}^{k}: {c:.6e}")
+            print()
+    
 
     return models, evals, final_scalars
 

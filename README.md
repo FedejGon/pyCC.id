@@ -1,6 +1,7 @@
 <div align="center">
 
 [![PyPI version](https://badge.fury.io/py/pyCC.id.svg)](https://badge.fury.io/py/pyCC.id)
+[![DOI](https://zenodo.org/badge/1050130795.svg)](https://doi.org/10.5281/zenodo.20490301)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 

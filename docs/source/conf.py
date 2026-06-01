@@ -9,7 +9,7 @@
 project = 'pyCC.id'
 copyright = '2025, Federico J. Gonzalez'
 author = 'Federico J. Gonzalez'
-release = '0.1.0'
+release = '0.9.0'
 
 
 import os

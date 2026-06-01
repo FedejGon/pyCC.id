@@ -2,3 +2,5 @@ sphinx
 sphinx-rtd-theme
 sphinx-autobuild
 sphinx-autodoc-typehints
+sphinx-autosummary
+sphinxcontrib-napoleon

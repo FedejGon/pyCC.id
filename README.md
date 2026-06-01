@@ -20,7 +20,7 @@ PyCC library is built to mirror the standard scientific workflow of **hypothesis
 -->
 
 
-**PyCC.id** (or simply **PyCC**) is a flexible Python library for equation discovery. It is designed to discover the grounded ordinary differential equations (ODEs) from time-dependent data and is built on a hypothesis-driven methodology, enabling users (such as researchers and engineers) to easily incorporate prior domain knowledge into the discovery process. 
+**PyCC.id** (or simply **PyCC**) is a flexible Python library for equation discovery. It is designed to discover the grounded ordinary differential equations (ODEs) from time-dependent data and is built on a hypothesis-driven methodology, enabling users (such as researchers and engineers) to easily incorporate prior domain knowledge into the discovery process.  
 This approach utilizes structural **skeletons** that are structurally identifiable, drawing motivation from the definition and physical interpretation of characteristic curves. 
 
 

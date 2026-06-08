@@ -53,7 +53,8 @@ By centering the workflow on hypothesis testing, this approach provides a struct
 
 | **Documentation** | **Colab & Tutorial** | **Forums** | **Paper** |
 |:---:|:---:|:---:|:---:|
-[![Documentation](https://img.shields.io/readthedocs/pyccid)](https://pyccid.readthedocs.io/en/latest/) | [![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s) <br> [![YouTube](https://img.shields.io/badge/youtube-tutorial-red)](https://www.youtube.com/watch?v=DDSGAUjyz2w) | [![Discussions](https://img.shields.io/badge/discussions-github-informational)](https://github.com/FedejGon/pyCC.id/discussions) | [![Paper](https://img.shields.io/badge/arXiv-Pending-b31b1b)](Not-yet) |
+[![Documentation](https://img.shields.io/readthedocs/pyccid)](https://pyccid.readthedocs.io/en/latest/) | [![Colab](https://img.shields.io/badge/colab-notebook-yellow)](https://colab.research.google.com/drive/136FvEwMsxLayhimgtI4Jx_IWR8l-dy-s) <br> [![YouTube](https://img.shields.io/badge/youtube-tutorial-red)](https://www.youtube.com/watch?v=DDSGAUjyz2w) | [![Discussions](https://img.shields.io/badge/discussions-github-informational)](https://github.com/FedejGon/pyCC.id/discussions) | [![Paper](https://img.shields.io/badge/arXiv-2606.05191-b31b1b)]( 	
+https://doi.org/10.48550/arXiv.2606.05191) |
 
 
 </div>

@@ -32,3 +32,15 @@ jobs:
         message: '(auto) Paper PDF Draft'
         # This should be the path to the paper within your repo.
         add: 'paper/paper.pdf' # 'paper/*.pdf' to commit all PDFs in the paper directory
+
+    - name: Build draft PDF
+        uses: openjournals/openjournals-draft-action@master
+        with:
+          journal: joss
+          paper-path: paper/paper.md
+          # Pass the same arguments you use for your local command here
+          extra-arguments: >-
+            --pdf-engine=latexmk
+            --include-in-header=biblatex-config.tex
+            -V geometry:margin=1.5cm
+

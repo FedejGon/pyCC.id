@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'paper/**'
+      - '.github/workflows/draft-pdf.yml'
 jobs:
   paper:
     runs-on: ubuntu-latest
@@ -25,14 +26,14 @@ jobs:
           # paper.md
           path: paper/paper.pdf
 
-    - name: Commit PDF to repository
-      uses: EndBug/add-and-commit@v9
-      with:
-        message: '(auto) Paper PDF Draft'
-        # This should be the path to the paper within your repo.
-        add: 'paper/paper.pdf' # 'paper/*.pdf' to commit all PDFs in the paper directory
+      - name: Commit PDF to repository
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: '(auto) Paper PDF Draft'
+          # This should be the path to the paper within your repo.
+          add: 'paper/paper.pdf' # 'paper/*.pdf' to commit all PDFs in the paper directory
 
-    - name: Build draft PDF
+      - name: Build draft PDF
         uses: openjournals/openjournals-draft-action@master
         with:
           journal: joss

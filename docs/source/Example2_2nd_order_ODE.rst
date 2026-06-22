@@ -127,7 +127,7 @@ The code follows these steps: 1) it uses the PyCC library to generate the data, 
    x2_sim=sol.y[1]
    # Identified vs theoretical solution
    plt.figure()
-   plt.plot(time_sim, x1_sim, label="x(t) simulated NN(sym+SR)")
+   plt.plot(time_sim, x1_sim, label="x(t) simulated NN(sym)")
    plt.plot(time_data, x1_data, label="x(t) th")
    plt.xlabel('t')
    plt.ylabel('x(t)')
@@ -179,10 +179,25 @@ The code follows these steps: 1) it uses the PyCC library to generate the data, 
    x2_sim=sol.y[1]
    # Identified vs theoretical solution
    plt.figure()
-   plt.plot(time_sim, x1_sim, label="x(t) simulated NN(sym+SR)")
+   plt.plot(time_sim, x1_sim, label="x(t) simulated NN(sym+postSR)")
    plt.plot(time_data, x1_data, label="x(t) th")
    plt.xlabel('t')
    plt.ylabel('x(t)')
    plt.legend()
    plt.show()   
+      
+.. image:: _static/fig_ex2_1.png
+   :alt: Theoretical characterictic curve (CC) vs model with NN method
+   :width: 75%
+   :align: center   
+      
+.. image:: _static/fig_ex2_2.png
+   :alt: Theoretical characterictic curve (CC)
+   :width: 75%
+   :align: center   
+      
+.. image:: _static/fig_ex1_3.png
+   :alt: Theoretical characterictic curve (CC)
+   :width: 75%
+   :align: center   
       

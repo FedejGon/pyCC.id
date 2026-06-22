@@ -192,4 +192,24 @@ The pyCC library also supports an advanced optimization workflow referred to as 
    plt.show()
    
 
+.. image:: _static/fig_ex5_1.png
+   :alt: fig1
+   :width: 75%
+   :align: center  
+
+.. image:: _static/fig_ex5_2.png
+   :alt: fig2
+   :width: 75%
+   :align: center  
+
+.. image:: _static/fig_ex5_3.png
+   :alt: fig3
+   :width: 75%
+   :align: center  
+
+.. image:: _static/fig_ex5_4.png
+   :alt: fig4
+   :width: 75%
+   :align: center  
+
 

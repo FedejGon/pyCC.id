@@ -268,3 +268,15 @@ This example uses the **PyCC** library to simulate a Lorenz system (a set of thr
        plt.legend()
        plt.show() 
          
+         
+         
+.. image:: _static/fig_ex3_1.png
+   :alt: Trajectory
+   :width: 75%
+   :align: center            
+   
+.. image:: _static/fig_ex3_3.png
+   :alt: Identified CC
+   :width: 75%
+   :align: center      
+   

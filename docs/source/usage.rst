@@ -134,9 +134,26 @@ The following example shows:
    
    # Identified vs theoretical solution
    plt.figure()
-   plt.plot(time_sim, x1_sim, label="x(t) simulated NN(sym+SR)")
+   plt.plot(time_sim, x1_sim, label="x(t) simulated NN")
    plt.plot(time_data, x1_data, label="x(t) th")
    plt.xlabel('t')
    plt.ylabel('x(t)')
    plt.legend()
    plt.show()
+   
+   
+   
+.. image:: _static/fig_usage_1.png
+   :alt: Comparison of theoretical and obtained characteristic curves.
+   :width: 80%
+   :align: center
+   
+   
+   
+   
+.. image:: _static/fig_usage_2.png
+   :alt: Integration of the obtained model vs theoretical data. 
+   :width: 80%
+   :align: center
+   
+   

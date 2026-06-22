@@ -5,7 +5,7 @@ How to cite this package
 References
 -----------
 
-In case of using this pycc package, please cite :cite:`Gonzalez2026b`  (Gonzalez2026pycc). 
+In case of using this pycc package, please cite :cite:`Gonzalez2026pycc`
 
 Furthermore: 
   * If using the **NN-CC** method, please cite :cite:`Gonzalez2024` and :cite:`Gonzalez2025` 
@@ -35,6 +35,16 @@ BibTeX
 ------
 
 .. code-block:: bibtex
+
+   @article{Gonzalez2026pycc,
+      title={PyCC.id: A package for hypothesis-driven equation discovery with structural identifiability}, 
+      author={Federico J. Gonzalez},
+      journal={arXiv preprint arXiv:2606.05191}, 
+      year={2026},
+      eprint={2606.05191},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2606.05191}, 
+   }
 
    @article{Gonzalez2026,
      title={Integrating prior knowledge in equation discovery: Interpretable symmetry-informed neural networks and symbolic regression via characteristic curves},  

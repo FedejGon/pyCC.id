@@ -255,5 +255,53 @@ This example presents the application of pyCC to a family of first-order systems
    plt.legend() 
    plt.show()
 
+.. image:: _static/fig_ex4_1.png
+   :alt: fig1
+   :width: 75%
+   :align: center  
 
+.. image:: _static/fig_ex4_2.png
+   :alt: fig2
+   :width: 75%
+   :align: center  
+
+.. image:: _static/fig_ex4_3.png
+   :alt: fig3
+   :width: 75%
+   :align: center  
+
+.. image:: _static/fig_ex4_4.png
+   :alt: fig4
+   :width: 75%
+   :align: center  
+
+.. image:: _static/fig_ex4_5.png
+   :alt: fig5
+   :width: 75%
+   :align: center  
+
+.. image:: _static/fig_ex4_6.png
+   :alt: fig6
+   :width: 75%
+   :align: center  
+
+.. image:: _static/fig_ex4_7.png
+   :alt: fig7
+   :width: 75%
+   :align: center  
+
+.. image:: _static/fig_ex4_8.png
+   :alt: fig8
+   :width: 75%
+   :align: center  
+
+.. image:: _static/fig_ex4_9.png
+   :alt: fig9
+   :width: 75%
+   :align: center  
+
+.. image:: _static/fig_ex4_10.png
+   :alt: fig10
+   :width: 75%
+   :align: center  
 

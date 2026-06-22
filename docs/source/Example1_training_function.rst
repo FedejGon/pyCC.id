@@ -191,22 +191,27 @@ This example defines a 1D function f(x) and uses three different methods (polyno
    
    
 .. image:: _static/fig_ex1_1.png
+   :alt: Theoretical characterictic curve (CC)
    :width: 75%
    :align: center   
 
 .. image:: _static/fig_ex1_2.png
+   :alt: Theoretical CC vs model with Poly method
    :width: 75%
    :align: center   
 
 .. image:: _static/fig_ex1_3.png
+   :alt: Theoretical CC vs model with Symbolic regression method
    :width: 75%
    :align: center   
 
 .. image:: _static/fig_ex1_4.png
+   :alt: Theoretical CC vs model with NN method
    :width: 75%
    :align: center   
 
 .. image:: _static/fig_ex1_5.png
+   :alt: Theoretical CC vs model with NN method and post-SR
    :width: 75%
    :align: center   
    

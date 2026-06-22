@@ -145,7 +145,7 @@ The following example shows:
    
 .. image:: _static/fig_usage_1.png
    :alt: Comparison of theoretical and obtained characteristic curves.
-   :width: 80%
+   :width: 90%
    :align: center
    
    

@@ -188,3 +188,25 @@ This example defines a 1D function f(x) and uses three different methods (polyno
    plt.legend()
    plt.show()
    
+   
+   
+.. image:: _static/fig_ex1_1.png
+   :width: 75%
+   :align: center   
+
+.. image:: _static/fig_ex1_2.png
+   :width: 75%
+   :align: center   
+
+.. image:: _static/fig_ex1_3.png
+   :width: 75%
+   :align: center   
+
+.. image:: _static/fig_ex1_4.png
+   :width: 75%
+   :align: center   
+
+.. image:: _static/fig_ex1_5.png
+   :width: 75%
+   :align: center   
+   

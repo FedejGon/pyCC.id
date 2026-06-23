@@ -586,9 +586,7 @@ python Tutorial1.py
 ## 🏛️ How to cite this package
 
 General reference to this package:
-**Gonzalez2026code**
-
-
+  - Gonzalez, F. J. "[PyCC.id: A package for hypothesis-driven equation discovery with structural identifiability](https://doi.org/10.48550/arXiv.2606.05191)." arXiv preprint arXiv:2606.05191 (2026).
 
 In case of using NN-CC method, please cite:
   - Gonzalez, F. J. "[Integrating prior knowledge in equation discovery: Interpretable symmetry-informed neural networks and symbolic regression via characteristic curves]( 	
@@ -608,6 +606,16 @@ https://doi.org/10.48550/arXiv.2601.21720)." arXiv preprint arXiv:2601.21720 (20
 
 
 ```bibtex
+@article{Gonzalez2026pycc,
+      title={PyCC.id: A package for hypothesis-driven equation discovery with structural identifiability}, 
+      author={Federico J. Gonzalez},
+      year={2026},
+      eprint={2606.05191},
+      archivePrefix={arXiv},
+      primaryClass={cs.LG},
+      url={https://arxiv.org/abs/2606.05191}, 
+}
+
 @article{Gonzalez2026,
   title={Integrating prior knowledge in equation discovery: Interpretable symmetry-informed neural networks and symbolic regression via characteristic curves}, 
   author={Federico J. Gonzalez},

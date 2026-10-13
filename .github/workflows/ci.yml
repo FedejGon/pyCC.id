@@ -1,4 +1,4 @@
-# .github/workflows/ci.yml
+# .github/workflows/tests.yml
 name: Run Python Tests
 
 # Controls when the workflow will run

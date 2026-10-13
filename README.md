@@ -1,5 +1,6 @@
 <div align="center">
 
+[![Tests](https://github.com/FedejGon/pyCC.id/actions/workflows/ci.yml/badge.svg)](https://github.com/FedejGon/pyCC.id/actions)
 [![DOI](https://img.shields.io/badge/DOI-10.5281/zenodo.20490301-blue)](https://doi.org/10.5281/zenodo.20490301)
 [![PyPI version](https://badge.fury.io/py/pyCC.id.svg)](https://badge.fury.io/py/pyCC.id)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
